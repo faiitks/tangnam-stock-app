@@ -133,18 +133,49 @@
     .w-col-note    { width: 150px; min-width: 150px; max-width: 150px; }
     .w-col-action  { width: 65px;  min-width: 65px;  max-width: 65px;  }
 
+    /* ================= สไตล์สำหรับพิมพ์และส่งออกเป็น PDF (หน้าตาเหมือนเว็บ 100%) ================= */
+    @page {
+      size: A4 landscape;
+      margin: 8mm 6mm 8mm 6mm;
+    }
+
     @media print {
-      body { background-color: white !important; }
-      .no-print { display: none !important; }
-      .print-full { width: 100% !important; overflow: visible !important; }
-      .sticky-col-1 { position: static !important; }
+      body {
+        background-color: white !important;
+        color: black !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .table-scroll-container {
+        overflow: visible !important;
+        max-height: none !important;
+      }
+      .grid-table {
+        width: 100% !important;
+        table-layout: auto !important;
+      }
+      .sticky-col-1, .sticky-header, .sticky-header-top, .sticky-corner-1 {
+        position: static !important;
+      }
+      .grid-table th, .grid-table td {
+        border: 1px solid #D5CDBF !important;
+        font-size: 9.5px !important;
+        padding: 2px 4px !important;
+      }
+      header {
+        border-bottom: 2px solid #4A3B32 !important;
+        margin-bottom: 8px !important;
+      }
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col text-sm">
 
   <!-- ================= TOP HEADER ================= -->
-  <header class="bg-white border-b border-cream-300 shadow-sm sticky top-0 z-50 no-print">
+  <header class="bg-white border-b border-cream-300 shadow-sm sticky top-0 z-50">
     <div class="max-w-[1920px] mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-4">
       
       <!-- โลโก้บริษัท ตังนำเกษตร -->
@@ -167,14 +198,14 @@
           </div>
         </div>
 
-        <div id="syncBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-700 border border-leaf-200">
+        <div id="syncBadge" class="no-print flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-700 border border-leaf-200">
           <span class="w-2 h-2 rounded-full bg-leaf-500 animate-pulse"></span>
           <span id="syncStatusText">กำลังเชื่อมต่อ Google Sheets...</span>
         </div>
       </div>
 
-      <!-- ปุ่มควบคุมมุมมองและการส่งออก -->
-      <div class="flex flex-wrap items-center gap-2">
+      <!-- ปุ่มควบคุมมุมมองและการส่งออก (เพิ่มปุ่ม พิมพ์ / PDF กลับมา) -->
+      <div class="flex flex-wrap items-center gap-2 no-print">
         <div class="bg-cream-200 p-1 rounded-lg flex items-center border border-cream-300">
           <button id="btnModeStock" onclick="setViewMode('stock')" class="px-3 py-1.5 rounded-md text-xs font-semibold shadow-sm bg-white text-earth-900">
             ดูสต็อคอย่างเดียว
@@ -184,16 +215,25 @@
           </button>
         </div>
 
-        <button onclick="fetchGoogleSheetData()" title="รีเฟรชข้อมูลจากระบบ" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 hover:bg-cream-100 text-xs font-semibold">
+        <!-- ปุ่มพิมพ์ / ส่งออกเป็น PDF -->
+        <button onclick="handlePrintPDF()" title="พิมพ์หรือบันทึกเป็น PDF หน้านี้ทันที" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-earth-600 bg-earth-800 text-white hover:bg-earth-900 text-xs font-semibold shadow-sm transition-all">
+          <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          <span>พิมพ์ / PDF</span>
+        </button>
+
+        <!-- ปุ่มรีเฟรช -->
+        <button onclick="fetchGoogleSheetData()" title="รีเฟรชข้อมูลจากระบบ" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 hover:bg-cream-100 text-xs font-semibold shadow-xs">
           <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
           <span class="hidden sm:inline">รีเฟรช</span>
         </button>
 
+        <!-- ปุ่ม Excel -->
         <button onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-leaf-600 bg-leaf-700 text-white hover:bg-leaf-800 text-xs font-semibold shadow-sm">
           <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
           <span>Excel</span>
         </button>
 
+        <!-- ปุ่มใบ APO -->
         <button id="btnOpenAPO" onclick="openAPOModal()" class="hidden items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-earth-700 bg-earth-900 text-cream-50 hover:bg-black text-xs font-semibold shadow-sm">
           <span>ใบ APO</span>
           <span id="badgeAPOCount" class="px-1.5 py-0.2 rounded-full bg-leaf-500 text-white text-[10px]">0</span>
@@ -202,8 +242,8 @@
     </div>
   </header>
 
-  <!-- ================= TOP FINANCIAL KPI CARDS (คำนวณตามบริษัทที่เลือก) ================= -->
-  <section class="max-w-[1920px] w-full mx-auto px-4 pt-3 no-print">
+  <!-- ================= TOP FINANCIAL KPI CARDS ================= -->
+  <section class="max-w-[1920px] w-full mx-auto px-4 pt-3">
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2.5">
       
       <!-- 1. มูลค่ารวมยอดขายปี 2568 -->
@@ -219,7 +259,7 @@
         <div class="text-[10px] text-amber-700/80 mt-0.5">ยอดขายเต็มปี 2568</div>
       </div>
 
-      <!-- 2. มูลค่ารวมยอดขายปี 2569 (พร้อมแสดงอัตราเติบโต YOY ด้านล่าง) -->
+      <!-- 2. มูลค่ารวมยอดขายปี 2569 (พร้อมอัตราเติบโต YOY ในกรอบเดียวกัน) -->
       <div class="col-span-1 md:col-span-2 bg-leaf-50 p-3 rounded-xl border border-leaf-300 shadow-xs flex flex-col justify-between">
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold text-leaf-900">ยอดขายปี 2569</span>
@@ -229,7 +269,6 @@
           <span id="kpiSales69TotalVal" class="text-xl lg:text-2xl font-bold font-prompt text-leaf-800">0</span>
           <span class="text-xs text-leaf-800">บาท</span>
         </div>
-        <!-- จุดแสดงการเติบโต YOY ในกรอบเดียวกัน -->
         <div class="flex items-center gap-1.5 mt-0.5 text-[11px] font-semibold" id="kpiYOYContainer">
           <span id="kpiYOYBadge" class="px-1.5 py-0.2 rounded text-[10px] bg-leaf-100 text-leaf-800 font-bold">▲ +0%</span>
           <span id="kpiYOYDiffText" class="text-[10.5px] text-earth-700 font-normal font-mono">เทียบปี 68 (+0 บาท)</span>
@@ -407,7 +446,7 @@
               <th class="col-tn w-col-num px-2 py-1 text-right border-r border-earth-700">TN (6)</th>
               <th class="col-cks w-col-num px-2 py-1 text-right border-r border-earth-700">
                 <div>ชาวเกษตร</div>
-                <div class="text-[9px] text-cream-300 font-normal">(42 สาขา)</div>
+                <div class="text-[9px] text-cream-300 font-normal">(37 สาขา)</div>
               </th>
               <th class="w-col-total px-2 py-1 text-right font-bold border-r border-earth-700">รวม (ย่อย)</th>
 
@@ -417,7 +456,7 @@
               <th class="col-tn w-col-num px-2 py-1 text-right border-r border-earth-700">ชัยภูมิ</th>
               <th class="col-cks w-col-num px-2 py-1 text-right border-r border-earth-700">
                 <div>ชาวเกษตร</div>
-                <div class="text-[9px] text-cream-300 font-normal">(42 สาขา)</div>
+                <div class="text-[9px] text-cream-300 font-normal">(41 สาขา)</div>
               </th>
               <th class="w-col-total px-2 py-1 text-right font-bold border-r border-earth-700">รวม (ย่อย)</th>
 
@@ -447,7 +486,7 @@
       </div>
       
       <!-- Footer & ปุ่มโหลดเพิ่มเติม -->
-      <div class="px-4 py-2 border-t border-cream-300 bg-cream-100 flex flex-wrap items-center justify-between gap-2 text-xs text-earth-700">
+      <div class="px-4 py-2 border-t border-cream-300 bg-cream-100 flex flex-wrap items-center justify-between gap-2 text-xs text-earth-700 no-print">
         <div>แสดงผล <span id="filteredRowCount" class="font-bold text-earth-900">0</span> รายการ</div>
         <div id="loadMoreContainer" class="flex items-center gap-2">
           <button id="btnLoadMore" onclick="loadMoreRows()" class="hidden px-3.5 py-1.5 rounded-lg bg-leaf-700 hover:bg-leaf-800 text-white font-semibold shadow-xs">
@@ -485,7 +524,7 @@
         </div>
       </div>
 
-      <!-- Table Body Container (เลื่อนได้และพอดีจอ) -->
+      <!-- Table Body Container -->
       <div class="p-3 sm:p-5 overflow-y-auto flex-1">
         <div class="border border-cream-300 rounded-xl overflow-hidden shadow-xs">
           <table class="w-full text-xs text-left border-collapse">
@@ -585,7 +624,7 @@
     let rawProducts = [];
     let currentFiltered = [];
     let activeViewMode = 'stock';
-    let activeCompanyFilter = 'ALL'; // 'ALL', 'TN', 'CKS'
+    let activeCompanyFilter = 'ALL';
     let activeForecastMonths = ['1', '2'];
 
     let visibleLimit = 80;
@@ -604,6 +643,16 @@
     function getCleanUnitName(unit) {
       if (!unit) return '';
       return String(unit).replace(/\s*\([^)]*\)/g, '').trim();
+    }
+
+    // ฟังก์ชันสั่งพิมพ์ออกทางเครื่องพิมพ์ หรือบันทึกเป็น PDF (หน้าตาเหมือนเว็บ)
+    function handlePrintPDF() {
+      // ปรับให้โหลดครบทุกแถวที่กำลังกรองอยู่ก่อนพิมพ์ เพื่อไม่ให้รายการขาดหาย
+      visibleLimit = currentFiltered.length;
+      renderTable();
+      setTimeout(() => {
+        window.print();
+      }, 300);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -707,7 +756,6 @@
       renderTable();
     }
 
-    // สลับมุมมองบริษัท (ตังนำ TN หรือ ชาวเกษตร CKS หรือ รวม)
     function setCompanyFilter(comp) {
       activeCompanyFilter = comp;
       ['ALL', 'TN', 'CKS'].forEach(c => {
@@ -818,9 +866,6 @@
       return { label: raw, badge: 'bg-cream-200 text-earth-800 border border-cream-300', code: 'OPTIMAL' };
     }
 
-    /**
-     * คำนวณสรุปการ์ดด้านบน KPI Cards และ YOY ตามบริษัทที่เลือก (TN, CKS หรือ ALL)
-     */
     function updateKPICards() {
       let sales68Total = 0;
       let sales69Total = 0;
@@ -832,7 +877,6 @@
       let orderItemsCount = 0;
 
       currentFiltered.forEach(p => {
-        // คำนวณตาม activeCompanyFilter
         if (activeCompanyFilter === 'TN') {
           sales68Total += p.sales68_val_tn || 0;
           sales69Total += p.sales69_val_tn || 0;
@@ -842,7 +886,6 @@
           sales69Total += p.sales69_val_cks || 0;
           stockTotal   += p.stock_val_cks || 0;
         } else {
-          // รวมทั้งหมด TN+CKS
           sales68Total += p.sales68_val || 0;
           sales69Total += p.sales69_val || 0;
           stockTotal   += p.stock_val || 0;
@@ -857,7 +900,6 @@
         if ((p.orderBigQty || 0) > 0 || (p.orderValManual || 0) > 0) orderItemsCount++;
       });
 
-      // อัปเดตข้อความ Badge หัวการ์ด
       const badgeText = activeCompanyFilter === 'TN' ? 'ตังนำ (TN)' : (activeCompanyFilter === 'CKS' ? 'ชาวเกษตร (CKS)' : 'TN+CKS');
       const stockBadgeText = activeCompanyFilter === 'TN' ? '3 คลัง (TN)' : (activeCompanyFilter === 'CKS' ? '41 สาขา (CKS)' : '4 คลังสินค้า');
       const stockDescText = activeCompanyFilter === 'TN' ? 'ปากช่อง + โคราช + ชัยภูมิ' : (activeCompanyFilter === 'CKS' ? 'ชาวเกษตร 41 สาขา' : 'รวมทุกคลังสินค้า');
@@ -871,9 +913,6 @@
       document.getElementById('kpiSales69TotalVal').innerText = Math.round(sales69Total).toLocaleString();
       document.getElementById('kpiTotalStockValue').innerText = Math.round(stockTotal).toLocaleString();
 
-      // ==========================================
-      // คำนวณการเติบโต YOY ในการ์ดยอดขายปี 69
-      // ==========================================
       const diffSales = sales69Total - sales68Total;
       let pctYOY = 0;
       let yoySign = '+';
@@ -897,7 +936,6 @@
       const diffFormatted = diffSales >= 0 ? `+${Math.round(diffSales).toLocaleString()}` : Math.round(diffSales).toLocaleString();
       document.getElementById('kpiYOYDiffText').innerText = `เทียบปี 68 (${diffFormatted} บ.)`;
 
-      // สถานะสต็อค
       document.getElementById('kpiCriticalCount').innerText = critCount.toLocaleString();
       document.getElementById('kpiReorderCount').innerText = reorderCount.toLocaleString();
       document.getElementById('kpiOptimalCount').innerText = optimalCount.toLocaleString();
@@ -905,9 +943,6 @@
       document.getElementById('badgeAPOCount').innerText = orderItemsCount;
     }
 
-    /**
-     * เรนเดอร์ตาราง: คำนวณคอลัมน์รวมขาย 68, 69 และคงเหลือ ตามบริษัทที่เลือก (TN, CKS หรือ ALL)
-     */
     function renderTable() {
       const tbody = document.getElementById('tableBody');
       const totalLen = currentFiltered.length;
@@ -927,7 +962,6 @@
         const mul = p.unitMultiplier || 1;
         const cleanSubUnit = getCleanUnitName(p.unitSub);
 
-        // คำนวณจำนวนย่อย และมูลค่า ตาม activeCompanyFilter
         let tot68Sub = 0;
         let tot68Val = 0;
         let tot69Sub = 0;
@@ -954,7 +988,6 @@
           totStockSub = p.stock_cks;
           totStockVal = p.stock_val_cks || 0;
         } else {
-          // ALL (TN+CKS)
           tot68Sub = p.sales68_tn_1_5 + p.sales68_tn_6 + p.sales68_cks;
           tot68Val = p.sales68_val || 0;
 
@@ -989,13 +1022,11 @@
               </div>
             </td>
 
-            <!-- 2. ขายปี 68 -->
             <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.sales68_tn_1_5)}</td>
             <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.sales68_tn_6)}</td>
             <td class="col-cks w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'TN' ? 'hidden' : ''}">${fmtZero(p.sales68_cks)}</td>
             <td class="w-col-total px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(tot68Sub)}</td>
             
-            <!-- รวมขาย 68 (ตามบริษัทที่เลือก) -->
             <td class="w-col-summary px-2.5 py-1 text-right bg-amber-50/80 border-r-2 border-cream-400">
               <div class="font-extrabold text-earth-900 text-xs">
                 ${tot68Big > 0 ? `${tot68Big.toLocaleString()} <span class="text-[10px] font-normal text-earth-600">${p.unitBig}</span>` : ''}
@@ -1003,13 +1034,11 @@
               <div class="text-[10px] font-mono text-amber-900 mt-0.5">${fmtZero(tot68Val)}</div>
             </td>
 
-            <!-- 3. ขายปี 69 -->
             <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.sales69_tn_1_5)}</td>
             <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.sales69_tn_6)}</td>
             <td class="col-cks w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'TN' ? 'hidden' : ''}">${fmtZero(p.sales69_cks)}</td>
             <td class="w-col-total px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(tot69Sub)}</td>
             
-            <!-- รวมขาย 69 (ตามบริษัทที่เลือก) -->
             <td class="w-col-summary px-2.5 py-1 text-right bg-amber-50/80 border-r-2 border-cream-400">
               <div class="font-extrabold text-earth-900 text-xs">
                 ${tot69Big > 0 ? `${tot69Big.toLocaleString()} <span class="text-[10px] font-normal text-earth-600">${p.unitBig}</span>` : ''}
@@ -1017,14 +1046,12 @@
               <div class="text-[10px] font-mono text-amber-900 mt-0.5">${fmtZero(tot69Val)}</div>
             </td>
 
-            <!-- 4. คลังคงเหลือ -->
             <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.stock_pc)}</td>
             <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.stock_kr)}</td>
             <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.stock_cyp)}</td>
             <td class="col-cks w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'TN' ? 'hidden' : ''}">${fmtZero(p.stock_cks)}</td>
             <td class="w-col-total px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(totStockSub)}</td>
             
-            <!-- รวมคงเหลือ (ตามบริษัทที่เลือก) -->
             <td class="w-col-summary px-2.5 py-1 text-right bg-leaf-100/80 border-r-2 border-leaf-400">
               <div class="font-extrabold text-leaf-900 text-xs">
                 ${totStockBig > 0 ? `${totStockBig.toLocaleString()} <span class="text-[10px] font-normal text-leaf-800">${p.unitBig}</span>` : ''}
@@ -1032,7 +1059,6 @@
               <div class="text-[10px] font-mono text-leaf-800 mt-0.5">${fmtZero(totStockVal)}</div>
             </td>
 
-            <!-- 5. Forecasts -->
             ${activeForecastMonths.map(m => {
               const runRate = ((tot69Sub / 10) || 0) * parseFloat(m);
               const fcBig = Math.ceil(runRate / mul);
@@ -1044,12 +1070,10 @@
               `;
             }).join('')}
 
-            <!-- สถานะ -->
             <td class="w-col-status px-2 py-1.5 text-center border-r border-cream-300">
               <span class="inline-block px-2 py-0.5 rounded text-[11px] font-semibold ${st.badge}">${st.label}</span>
             </td>
 
-            <!-- 6. PO Section -->
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} w-col-order px-2 py-1.5 text-center">
               <div class="flex items-center justify-center gap-1">
                 <input type="number" min="0" step="any" value="${p.orderBigQty > 0 ? p.orderBigQty : ''}" placeholder="" oninput="updateOrderItem('${p.id}', 'order', this.value)" class="w-16 px-1.5 py-1 text-center font-bold text-xs border border-cream-300 rounded focus:border-leaf-600 focus:outline-none bg-amber-50/40">
@@ -1337,9 +1361,6 @@
       XLSX.writeFile(wb, `รายงานสต็อค_ตังนำเกษตร_ชาวเกษตร_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    /**
-     * ดึงข้อมูลพร้อมกัน 3 ชีท: Forecast, ยอดขาย68 และ ยอดขาย69
-     */
     async function fetchGoogleSheetData() {
       const syncBadge = document.getElementById('syncBadge');
       const syncText = document.getElementById('syncStatusText');
@@ -1366,7 +1387,6 @@
         const jsonMain = JSON.parse(matchMain[1]);
         const rowsMain = jsonMain.table.rows;
 
-        // ดึงวันที่และเวลา
         if (rowsMain.length > 0 && rowsMain[0].c) {
           const r0 = rowsMain[0].c;
           for (let k = 0; k < r0.length; k++) {
@@ -1380,7 +1400,6 @@
           updateDateTimeLabels();
         }
 
-        // แยกอ่านชีทรายเดือนของแต่ละปี
         async function parseMonthlySheet(res) {
           const map = new Map();
           if (!res || !res.ok) return map;
@@ -1406,11 +1425,9 @@
                 return isNaN(v) ? 0 : v;
               };
 
-              // คอลัมน์ C - N (index 2-13): TN (12 เดือน)
               const tnMonths = [];
               for (let i = 2; i <= 13; i++) tnMonths.push(getMNum(i));
 
-              // คอลัมน์ O - Z (index 14-25): CKS (12 เดือน)
               const cksMonths = [];
               for (let i = 14; i <= 25; i++) cksMonths.push(getMNum(i));
 
@@ -1429,7 +1446,6 @@
           parseMonthlySheet(res69)
         ]);
 
-        // ค้นหาตำแหน่งคอลัมน์อัตโนมัติในชีท Forecast
         let categoryColIndex = 98;
         let supplierColIndex = 95;
         let genericColIndex = 96;
@@ -1501,32 +1517,25 @@
             unitSub: getVal(7) || 'ย่อย',
             unitPrice: 100,
             isDiscontinued: isDisc,
-            // จำนวนขาย 68
             sales68_tn_1_5: getNum(11),
             sales68_tn_6: getNum(12),
             sales68_cks: getNum(13),
-            // มูลค่าขาย 68 แยกบริษัท: R=17 (TN), S=18 (CKS), T=19 (รวม)
             sales68_val_tn: getNum(17),
             sales68_val_cks: getNum(18),
             sales68_val: getNum(19),
-            // จำนวนขาย 69
             sales69_tn_1_5: getNum(21),
             sales69_tn_6: getNum(22),
             sales69_cks: getNum(23),
-            // มูลค่าขาย 69 แยกบริษัท: AB=27 (TN), AC=28 (CKS), AD=29 (รวม)
             sales69_val_tn: getNum(27),
             sales69_val_cks: getNum(28),
             sales69_val: getNum(29),
-            // สต็อคคงเหลือ
             stock_pc: getNum(30),
             stock_kr: getNum(31),
             stock_cyp: getNum(32),
             stock_cks: getNum(33),
-            // มูลค่าสต็อค แยกบริษัท: AM=38 (TN), AN=39 (CKS), AO=40 (รวม)
             stock_val_tn: getNum(38),
             stock_val_cks: getNum(39),
             stock_val: getNum(40),
-            // ข้อมูลแยก 12 เดือนของปี 68 และ 69
             monthly68_tn: d68.tn,
             monthly68_cks: d68.cks,
             monthly69_tn: d69.tn,
@@ -1544,12 +1553,12 @@
           initFilters();
           resetAndFilter();
           syncText.innerText = `เชื่อมต่อครบทั้ง 3 ชีท (${parsedProducts.length.toLocaleString()} รายการ)`;
-          syncBadge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-800 border border-leaf-300";
+          syncBadge.className = "no-print flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-800 border border-leaf-300";
         }
       } catch (err) {
         console.error("Error fetching Google Sheets:", err);
         syncText.innerText = "เชื่อมต่อชีทไม่สำเร็จ (ตรวจสอบสิทธิ์แชร์ชีท)";
-        syncBadge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-red-50 text-red-700 border border-red-200";
+        syncBadge.className = "no-print flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-red-50 text-red-700 border border-red-200";
       }
     }
   </script>
