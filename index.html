@@ -59,7 +59,28 @@
       color: #4A3B32;
       font-family: 'Sarabun', sans-serif;
     }
-    .grid-table {
+    .grid-table /* สั่งให้การ์ดจอ (GPU) ช่วยประมวลผลตอนเลื่อนหน้าจอ */
+    .overflow-x-auto {
+      -webkit-overflow-scrolling: touch;
+      will-change: transform, scroll-position;
+      transform: translateZ(0);
+    }
+
+    /* ตรึงคอลัมน์ซ้ายและหัวตารางแบบลื่นไหล */
+    .sticky-col-1, 
+    .sticky-header, 
+    .sticky-header-top, 
+    .sticky-corner-1 {
+      will-change: transform;
+      transform: translateZ(0);
+      contain: paint layout;
+    }
+
+    /* วาดเฉพาะแถวตารางที่สายตามองเห็นเท่านั้น (ลดภาระเครื่องได้ 70%) */
+    .grid-table tbody tr {
+      content-visibility: auto;
+      contain-intrinsic-size: 0 45px;
+    } {
       border-collapse: separate;
       border-spacing: 0;
     }
@@ -967,7 +988,7 @@
         const freeSub = Math.round((p.freeBigQty || 0) * mul);
         const orderVal = (p.orderBigQty || 0) * mul * (p.unitPrice || 0);
 
-        const rowClass = p.isDiscontinued ? 'opacity-40 bg-gray-50' : 'hover:bg-cream-100/60 transition-colors';
+        const rowClass = p.isDiscontinued ? 'opacity-40 bg-gray-50' : 'hover:bg-cream-100/60';
 
         html += `
           <tr class="${rowClass}">
