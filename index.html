@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ระบบบริหารสต็อคสินค้าและพยากรณ์ขาย | ตังนำเกษตร & ชาวเกษตร</title>
   
   <!-- Fonts: Sarabun & Prompt -->
@@ -58,57 +58,64 @@
       background-color: #FAF8F5;
       color: #4A3B32;
       font-family: 'Sarabun', sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
-    .grid-table /* สั่งให้การ์ดจอ (GPU) ช่วยประมวลผลตอนเลื่อนหน้าจอ */
-    .overflow-x-auto {
-      -webkit-overflow-scrolling: touch;
-      will-change: transform, scroll-position;
-      transform: translateZ(0);
-    }
-
-    /* ตรึงคอลัมน์ซ้ายและหัวตารางแบบลื่นไหล */
-    .sticky-col-1, 
-    .sticky-header, 
-    .sticky-header-top, 
-    .sticky-corner-1 {
-      will-change: transform;
-      transform: translateZ(0);
-      contain: paint layout;
-    }
-
-    /* วาดเฉพาะแถวตารางที่สายตามองเห็นเท่านั้น (ลดภาระเครื่องได้ 70%) */
-    .grid-table tbody tr {
-      content-visibility: auto;
-      contain-intrinsic-size: 0 45px;
-    } {
+    
+    .grid-table {
       border-collapse: separate;
       border-spacing: 0;
+      contain: layout paint;
     }
     .grid-table th, .grid-table td {
       border-right: 1px solid #E8E3D7;
       border-bottom: 1px solid #E8E3D7;
     }
+
+    /* ตัวเร่งความเร็วการ Scroll บนมือถือ (GPU Hardware Acceleration) */
+    .table-scroll-container {
+      overflow-x: auto;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      will-change: scroll-position, transform;
+      transform: translateZ(0);
+    }
+
     .sticky-col-1 {
       position: sticky;
       left: 0;
       z-index: 20;
+      will-change: transform;
+      transform: translateZ(0);
     }
     .sticky-header {
       position: sticky;
       top: 30px;
       z-index: 30;
+      will-change: transform;
+      transform: translateZ(0);
     }
     .sticky-header-top {
       position: sticky;
       top: 0;
       z-index: 35;
+      will-change: transform;
+      transform: translateZ(0);
     }
     .sticky-corner-1 {
       position: sticky;
       left: 0;
       top: 0;
       z-index: 45;
+      will-change: transform;
+      transform: translateZ(0);
     }
+
+    /* วาดเฉพาะส่วนที่มองเห็น */
+    .grid-table tbody tr {
+      content-visibility: auto;
+      contain-intrinsic-size: 0 45px;
+    }
+
     .icon-sm {
       width: 15px;
       height: 15px;
@@ -116,20 +123,12 @@
       min-height: 15px;
       display: inline-block;
     }
+
     @media print {
-      body {
-        background-color: white !important;
-      }
-      .no-print {
-        display: none !important;
-      }
-      .print-full {
-        width: 100% !important;
-        overflow: visible !important;
-      }
-      .sticky-col-1 {
-        position: static !important;
-      }
+      body { background-color: white !important; }
+      .no-print { display: none !important; }
+      .print-full { width: 100% !important; overflow: visible !important; }
+      .sticky-col-1 { position: static !important; }
     }
   </style>
 </head>
@@ -142,7 +141,7 @@
       <!-- โลโก้จริงของบริษัท ตังนำเกษตร -->
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-2.5">
-          <svg class="h-10 w-auto" viewBox="0 0 350 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg class="h-9 w-auto" viewBox="0 0 350 200" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M165 95C140 40 85 20 25 35C20 90 70 125 155 105C160 100 163 98 165 95Z" fill="#8CB33E"/>
             <path d="M165 95C135 60 90 45 40 50C35 85 75 110 145 98" stroke="#FAF8F5" stroke-width="5" stroke-linecap="round"/>
             <path d="M185 95C210 40 265 20 325 35C330 90 280 125 195 105C190 100 187 98 185 95Z" fill="#8CB33E"/>
@@ -159,7 +158,6 @@
           </div>
         </div>
 
-        <!-- Google Sheets Sync Indicator -->
         <div id="syncBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-700 border border-leaf-200">
           <span class="w-2 h-2 rounded-full bg-leaf-500 animate-pulse"></span>
           <span id="syncStatusText">กำลังเชื่อมต่อ Google Sheets...</span>
@@ -177,23 +175,18 @@
           </button>
         </div>
 
-        <button onclick="fetchGoogleSheetData()" title="รีเฟรชข้อมูลจากระบบ" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 hover:bg-cream-100 text-xs font-semibold transition-all">
+        <button onclick="fetchGoogleSheetData()" title="รีเฟรชข้อมูลจากระบบ" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 hover:bg-cream-100 text-xs font-semibold">
           <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-          <span>รีเฟรช</span>
+          <span class="hidden sm:inline">รีเฟรช</span>
         </button>
 
-        <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 hover:bg-cream-100 text-xs font-semibold transition-all">
-          <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-          <span>พิมพ์</span>
-        </button>
-
-        <button onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-leaf-600 bg-leaf-700 text-white hover:bg-leaf-800 text-xs font-semibold transition-all shadow-sm">
+        <button onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-leaf-600 bg-leaf-700 text-white hover:bg-leaf-800 text-xs font-semibold shadow-sm">
           <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          <span>ส่งออก Excel</span>
+          <span>Excel</span>
         </button>
 
-        <button id="btnOpenAPO" onclick="openAPOModal()" class="hidden items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-earth-700 bg-earth-900 text-cream-50 hover:bg-black text-xs font-semibold transition-all shadow-sm">
-          <span>ใบขออนุมัติสั่งซื้อ (APO)</span>
+        <button id="btnOpenAPO" onclick="openAPOModal()" class="hidden items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-earth-700 bg-earth-900 text-cream-50 hover:bg-black text-xs font-semibold shadow-sm">
+          <span>ใบ APO</span>
           <span id="badgeAPOCount" class="px-1.5 py-0.2 rounded-full bg-leaf-500 text-white text-[10px]">0</span>
         </button>
       </div>
@@ -205,10 +198,10 @@
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2.5">
       
       <!-- 1. มูลค่ารวมยอดขายปี 2568 -->
-      <div class="col-span-1 md:col-span-2 bg-gradient-to-br from-amber-50 to-orange-50/40 p-3 rounded-xl border border-amber-200 shadow-xs flex flex-col justify-between">
+      <div class="col-span-1 md:col-span-2 bg-amber-50 p-3 rounded-xl border border-amber-200 shadow-xs flex flex-col justify-between">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-amber-900">มูลค่ารวมยอดขายปี 2568</span>
-          <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">TN + CKS</span>
+          <span class="text-xs font-semibold text-amber-900">ยอดขายปี 2568</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">TN+CKS</span>
         </div>
         <div class="mt-1 flex items-baseline gap-1">
           <span id="kpiSales68TotalVal" class="text-xl lg:text-2xl font-bold font-prompt text-amber-950">0</span>
@@ -217,10 +210,10 @@
       </div>
 
       <!-- 2. มูลค่ารวมยอดขายปี 2569 -->
-      <div class="col-span-1 md:col-span-2 bg-gradient-to-br from-leaf-50 to-emerald-50/50 p-3 rounded-xl border border-leaf-300 shadow-xs flex flex-col justify-between">
+      <div class="col-span-1 md:col-span-2 bg-leaf-50 p-3 rounded-xl border border-leaf-300 shadow-xs flex flex-col justify-between">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-leaf-900">มูลค่ารวมยอดขายปี 2569</span>
-          <span class="text-[10px] px-1.5 py-0.5 rounded bg-leaf-100 text-leaf-800 font-medium">TN + CKS</span>
+          <span class="text-xs font-semibold text-leaf-900">ยอดขายปี 2569</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-leaf-100 text-leaf-800 font-medium">TN+CKS</span>
         </div>
         <div class="mt-1 flex items-baseline gap-1">
           <span id="kpiSales69TotalVal" class="text-xl lg:text-2xl font-bold font-prompt text-leaf-800">0</span>
@@ -229,10 +222,10 @@
       </div>
 
       <!-- 3. มูลค่าสินค้าคงคลังรวมทั้งหมด -->
-      <div class="col-span-2 md:col-span-2 lg:col-span-2 bg-gradient-to-br from-cream-100 to-amber-100/40 p-3 rounded-xl border border-earth-600/30 shadow-xs flex flex-col justify-between">
+      <div class="col-span-2 md:col-span-2 lg:col-span-2 bg-cream-100 p-3 rounded-xl border border-earth-600/30 shadow-xs flex flex-col justify-between">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-earth-900">มูลค่าสินค้าคงคลังรวม (ทุกคลัง)</span>
-          <span class="text-[10px] px-1.5 py-0.5 rounded bg-cream-300 text-earth-900 font-medium">4 คลังสินค้า</span>
+          <span class="text-xs font-semibold text-earth-900">มูลค่าคงคลังรวม (ทุกคลัง)</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-cream-300 text-earth-900 font-medium">4 คลัง</span>
         </div>
         <div class="mt-1 flex items-baseline gap-1">
           <span id="kpiTotalStockValue" class="text-xl lg:text-2xl font-bold font-prompt text-earth-900">0</span>
@@ -265,29 +258,29 @@
           <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-earth-600">
             <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </div>
-          <input type="text" id="globalSearchInput" oninput="applyFilters()" placeholder="ค้นหาได้ทุกอย่าง (ชื่อสินค้า, สามัญ, คู่ค้า, สต็อค)..." class="w-full pl-8 pr-3 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 placeholder-earth-600 focus:outline-none focus:ring-1 focus:ring-leaf-600">
+          <input type="text" id="globalSearchInput" oninput="handleSearchDebounce()" placeholder="ค้นหาได้ทุกอย่าง (ชื่อสินค้า, สามัญ, คู่ค้า, สต็อค)..." class="w-full pl-8 pr-3 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 placeholder-earth-600 focus:outline-none focus:ring-1 focus:ring-leaf-600">
         </div>
 
         <div>
-          <select id="supplierFilter" onchange="applyFilters()" class="w-full px-2.5 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 focus:outline-none focus:ring-1 focus:ring-leaf-600">
+          <select id="supplierFilter" onchange="resetAndFilter()" class="w-full px-2.5 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 focus:outline-none">
             <option value="ALL">บริษัทคู่ค้า (ทั้งหมด)</option>
           </select>
         </div>
 
         <div>
-          <select id="categoryFilter" onchange="applyFilters()" class="w-full px-2.5 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 focus:outline-none focus:ring-1 focus:ring-leaf-600">
+          <select id="categoryFilter" onchange="resetAndFilter()" class="w-full px-2.5 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 focus:outline-none">
             <option value="ALL">ประเภทสินค้า (ทั้งหมด)</option>
           </select>
         </div>
 
         <div>
-          <select id="genericFilter" onchange="applyFilters()" class="w-full px-2.5 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 focus:outline-none focus:ring-1 focus:ring-leaf-600">
+          <select id="genericFilter" onchange="resetAndFilter()" class="w-full px-2.5 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 focus:outline-none">
             <option value="ALL">ชื่อสามัญ (ทั้งหมด)</option>
           </select>
         </div>
 
         <div>
-          <select id="statusFilter" onchange="applyFilters()" class="w-full px-2.5 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 focus:outline-none focus:ring-1 focus:ring-leaf-600">
+          <select id="statusFilter" onchange="resetAndFilter()" class="w-full px-2.5 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 focus:outline-none">
             <option value="ALL">สถานะสต็อค (ทั้งหมด)</option>
             <option value="CRITICAL">🔴 สั่งด่วน</option>
             <option value="REORDER">🟡 ควรสั่ง</option>
@@ -301,36 +294,36 @@
       <!-- Second Row: Company Views & Forecast Selector -->
       <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-cream-200">
         <div class="flex items-center gap-2">
-          <span class="text-xs font-semibold text-earth-700">มุมมองบริษัท:</span>
+          <span class="text-xs font-semibold text-earth-700">มุมมอง:</span>
           <div class="bg-cream-100 p-0.5 rounded-lg border border-cream-300 flex items-center gap-1">
             <button onclick="setCompanyFilter('ALL')" id="btnCompALL" class="px-3 py-1 rounded text-xs font-semibold bg-earth-900 text-white shadow-xs">รวม TN+CKS</button>
-            <button onclick="setCompanyFilter('TN')" id="btnCompTN" class="px-3 py-1 rounded text-xs font-semibold text-earth-700 hover:text-earth-900">ตังนำเกษตร (TN)</button>
+            <button onclick="setCompanyFilter('TN')" id="btnCompTN" class="px-3 py-1 rounded text-xs font-semibold text-earth-700 hover:text-earth-900">ตังนำ (TN)</button>
             <button onclick="setCompanyFilter('CKS')" id="btnCompCKS" class="px-3 py-1 rounded text-xs font-semibold text-earth-700 hover:text-earth-900">ชาวเกษตร (CKS)</button>
           </div>
         </div>
 
         <div class="flex items-center gap-2">
-          <span class="text-xs font-semibold text-earth-700">ช่วงเดือน Forecast:</span>
+          <span class="text-xs font-semibold text-earth-700">Forecast:</span>
           <div class="flex items-center gap-1.5">
-            <button onclick="toggleForecastMonth('1')" id="fcBtn1" class="px-2.5 py-1 rounded text-xs font-medium border border-leaf-600 bg-leaf-100 text-leaf-800">1 เดือน</button>
-            <button onclick="toggleForecastMonth('1.5')" id="fcBtn1_5" class="px-2.5 py-1 rounded text-xs font-medium border border-cream-300 bg-white text-earth-700">1.5 เดือน</button>
-            <button onclick="toggleForecastMonth('2')" id="fcBtn2" class="px-2.5 py-1 rounded text-xs font-medium border border-leaf-600 bg-leaf-100 text-leaf-800">2 เดือน</button>
-            <button onclick="toggleForecastMonth('3')" id="fcBtn3" class="px-2.5 py-1 rounded text-xs font-medium border border-cream-300 bg-white text-earth-700">3 เดือน</button>
+            <button onclick="toggleForecastMonth('1')" id="fcBtn1" class="px-2 py-0.5 rounded text-xs font-medium border border-leaf-600 bg-leaf-100 text-leaf-800">1 ด.</button>
+            <button onclick="toggleForecastMonth('1.5')" id="fcBtn1_5" class="px-2 py-0.5 rounded text-xs font-medium border border-cream-300 bg-white text-earth-700">1.5 ด.</button>
+            <button onclick="toggleForecastMonth('2')" id="fcBtn2" class="px-2 py-0.5 rounded text-xs font-medium border border-leaf-600 bg-leaf-100 text-leaf-800">2 ด.</button>
+            <button onclick="toggleForecastMonth('3')" id="fcBtn3" class="px-2 py-0.5 rounded text-xs font-medium border border-cream-300 bg-white text-earth-700">3 ด.</button>
           </div>
         </div>
 
         <div class="flex items-center gap-2">
           <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs text-earth-700">
-            <input type="checkbox" id="hideDiscontinued" onchange="applyFilters()" class="rounded border-cream-300 text-leaf-600 focus:ring-0">
-            <span>ซ่อนสินค้าที่เลิกขาย</span>
+            <input type="checkbox" id="hideDiscontinued" onchange="resetAndFilter()" class="rounded border-cream-300 text-leaf-600 focus:ring-0">
+            <span>ซ่อนสินค้าเลิกขาย</span>
           </label>
         </div>
       </div>
     </div>
 
-    <!-- ================= DATA GRID ================= -->
+    <!-- ================= DATA GRID (OPTIMIZED FOR MOBILE) ================= -->
     <div class="bg-white rounded-xl border border-cream-300 shadow-sm overflow-hidden flex-1 flex flex-col">
-      <div class="overflow-x-auto flex-1 max-h-[70vh]">
+      <div class="table-scroll-container flex-1 max-h-[68vh]">
         <table class="grid-table w-full text-left border-collapse text-xs whitespace-nowrap">
           
           <!-- Layer 1: Header Categories with Datetime -->
@@ -344,10 +337,9 @@
               <th id="hdrSales68Group" colspan="4" class="px-2 py-1.5 border-r border-earth-700 text-center bg-earth-800 text-cream-100">
                 จำนวนขายปี 2568 (หน่วยย่อย)
               </th>
-              <!-- รวมขาย 68: รวมหน่วยใหญ่ + มูลค่าบาท ในช่องเดียว -->
-              <th rowspan="2" class="px-2.5 py-1.5 border-r-2 border-cream-400 text-right bg-amber-950/70 text-amber-200 min-w-[105px]">
+              <th rowspan="2" class="px-2.5 py-1.5 border-r-2 border-cream-400 text-right bg-amber-950 text-amber-200 min-w-[105px]">
                 <div>รวมขาย 68</div>
-                <div class="text-[9.5px] font-normal text-amber-300">(หน่วยใหญ่ / มูลค่าบาท)</div>
+                <div class="text-[9.5px] font-normal text-amber-300">(หน่วยใหญ่ / บาท)</div>
               </th>
 
               <!-- Sales 2569 Category with Date/Time -->
@@ -355,10 +347,9 @@
                 <div>จำนวนขายปี 2569 (หน่วยย่อย)</div>
                 <div id="lblSales69DateTime" class="text-[9.5px] font-normal text-amber-300">ข้อมูล: 01/01 - 03/11/2569 10.14 น.</div>
               </th>
-              <!-- รวมขาย 69: รวมหน่วยใหญ่ + มูลค่าบาท ในช่องเดียว -->
-              <th rowspan="2" class="px-2.5 py-1.5 border-r-2 border-cream-400 text-right bg-amber-950/70 text-amber-200 min-w-[105px]">
+              <th rowspan="2" class="px-2.5 py-1.5 border-r-2 border-cream-400 text-right bg-amber-950 text-amber-200 min-w-[105px]">
                 <div>รวมขาย 69</div>
-                <div class="text-[9.5px] font-normal text-amber-300">(หน่วยใหญ่ / มูลค่าบาท)</div>
+                <div class="text-[9.5px] font-normal text-amber-300">(หน่วยใหญ่ / บาท)</div>
               </th>
 
               <!-- Warehouse Stocks with Date/Time -->
@@ -366,10 +357,9 @@
                 <div>สินค้าคงเหลือตามคลัง (หน่วยย่อย)</div>
                 <div id="lblStockDateTime" class="text-[9.5px] font-normal text-leaf-200">สต็อค ณ วันที่: 03/11/2569 10.14 น.</div>
               </th>
-              <!-- รวมคงเหลือ: รวมหน่วยใหญ่ + มูลค่าบาท ในช่องเดียว -->
               <th rowspan="2" class="px-2.5 py-1.5 border-r-2 border-leaf-400 text-right bg-leaf-900 text-leaf-200 min-w-[105px]">
                 <div>รวมคงเหลือ</div>
-                <div class="text-[9.5px] font-normal text-leaf-300">(หน่วยใหญ่ / มูลค่าบาท)</div>
+                <div class="text-[9.5px] font-normal text-leaf-300">(หน่วยใหญ่ / บาท)</div>
               </th>
 
               <!-- Forecast Columns -->
@@ -382,7 +372,7 @@
                 รายการขออนุมัติสั่งซื้อ
               </th>
 
-              <th rowspan="2" class="px-2 py-1.5 text-center bg-earth-900 min-w-[80px]">ประวัติ</th>
+              <th rowspan="2" class="px-2 py-1.5 text-center bg-earth-900 min-w-[70px]">ประวัติ</th>
             </tr>
 
             <!-- Layer 2: Sub-headers -->
@@ -433,25 +423,32 @@
           <tbody id="tableBody" class="divide-y divide-cream-300">
             <tr>
               <td colspan="30" class="text-center py-12 text-earth-600">
-                กำลังโหลดข้อมูลจาก Google Sheets...
+                กำลังโหลดข้อมูล...
               </td>
             </tr>
           </tbody>
         </table>
       </div>
       
-      <!-- Table Footer / Row counter -->
-      <div class="px-4 py-2 border-t border-cream-300 bg-cream-100 flex items-center justify-between text-xs text-earth-700">
-        <div>แสดงผล <span id="filteredRowCount" class="font-bold text-earth-900">0</span> จากทั้งหมด <span id="totalRowCount">0</span> รายการ</div>
-        <div class="text-[11px] text-earth-600">* ค่าที่เป็น 0 แสดงเป็นช่องว่าง | บรรทัดบน: จำนวนหน่วยใหญ่ (ปัดเศษขึ้น) | บรรทัดล่าง: มูลค่าบาท (ตัวเล็ก)</div>
+      <!-- Footer & Load More Buttons (ช่วยให้มือถือเบาเครื่อง) -->
+      <div class="px-4 py-2 border-t border-cream-300 bg-cream-100 flex flex-wrap items-center justify-between gap-2 text-xs text-earth-700">
+        <div>แสดงผล <span id="filteredRowCount" class="font-bold text-earth-900">0</span> รายการ</div>
+        <div id="loadMoreContainer" class="flex items-center gap-2">
+          <button id="btnLoadMore" onclick="loadMoreRows()" class="hidden px-3.5 py-1.5 rounded-lg bg-leaf-700 hover:bg-leaf-800 text-white font-semibold shadow-xs">
+            + แสดงเพิ่มอีก 80 รายการ
+          </button>
+          <button id="btnLoadAll" onclick="loadAllRows()" class="hidden px-2.5 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 hover:bg-cream-200">
+            แสดงทั้งหมด
+          </button>
+        </div>
       </div>
     </div>
   </main>
 
   <!-- ================= POP-UP DRILLDOWN MODAL ================= -->
-  <div id="monthlyModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="monthlyModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3">
     <div class="bg-white rounded-2xl max-w-4xl w-full border border-cream-300 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
-      <div class="px-6 py-4 bg-earth-900 text-cream-50 flex items-center justify-between">
+      <div class="px-5 py-3.5 bg-earth-900 text-cream-50 flex items-center justify-between">
         <div>
           <div class="text-xs text-leaf-300 font-semibold" id="modalProductCode">P-001</div>
           <div class="text-base font-bold font-prompt" id="modalProductName">ชื่อสินค้า</div>
@@ -459,9 +456,9 @@
         <button onclick="closeMonthlyModal()" class="text-cream-300 hover:text-white p-1 text-xl font-bold">&times;</button>
       </div>
 
-      <div class="p-6 overflow-y-auto flex-1 flex flex-col gap-4">
+      <div class="p-4 sm:p-6 overflow-y-auto flex-1 flex flex-col gap-3">
         <div class="flex items-center justify-between">
-          <h4 class="font-prompt font-semibold text-earth-900 text-sm">ประวัติการขายรายเดือนย้อนหลัง (แยกกลุ่มลูกค้า)</h4>
+          <h4 class="font-prompt font-semibold text-earth-900 text-sm">ประวัติการขายรายเดือน (แยกกลุ่มลูกค้า)</h4>
           <span class="text-xs text-earth-600">หน่วยนับ: ย่อย</span>
         </div>
 
@@ -469,11 +466,11 @@
           <table class="w-full text-xs text-left">
             <thead class="bg-cream-200 text-earth-900 font-semibold">
               <tr>
-                <th class="px-3 py-2 border-b border-cream-300">เดือน</th>
-                <th class="px-3 py-2 border-b border-cream-300 text-right">TN (ลูกค้า 1-5)</th>
-                <th class="px-3 py-2 border-b border-cream-300 text-right">TN (ลูกค้า 6)</th>
-                <th class="px-3 py-2 border-b border-cream-300 text-right">ชาวเกษตร (CKS)</th>
-                <th class="px-3 py-2 border-b border-cream-300 text-right font-bold text-leaf-800">รวมทั้งหมด</th>
+                <th class="px-2.5 py-2 border-b border-cream-300">เดือน</th>
+                <th class="px-2.5 py-2 border-b border-cream-300 text-right">TN (1-5)</th>
+                <th class="px-2.5 py-2 border-b border-cream-300 text-right">TN (6)</th>
+                <th class="px-2.5 py-2 border-b border-cream-300 text-right">ชาวเกษตร</th>
+                <th class="px-2.5 py-2 border-b border-cream-300 text-right font-bold text-leaf-800">รวมทั้งหมด</th>
               </tr>
             </thead>
             <tbody id="modalMonthlyBody" class="divide-y divide-cream-200"></tbody>
@@ -481,8 +478,8 @@
         </div>
       </div>
 
-      <div class="px-6 py-3 bg-cream-100 border-t border-cream-300 flex justify-end">
-        <button onclick="closeMonthlyModal()" class="px-4 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 hover:bg-cream-200 text-xs font-semibold">
+      <div class="px-5 py-3 bg-cream-100 border-t border-cream-300 flex justify-end">
+        <button onclick="closeMonthlyModal()" class="px-4 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 text-xs font-semibold">
           ปิดหน้าต่าง
         </button>
       </div>
@@ -490,25 +487,24 @@
   </div>
 
   <!-- ================= POP-UP APO PREVIEW MODAL ================= -->
-  <div id="apoModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+  <div id="apoModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3">
     <div class="bg-white rounded-2xl max-w-5xl w-full border border-cream-300 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
-      <div class="px-6 py-4 bg-earth-900 text-cream-50 flex items-center justify-between">
+      <div class="px-5 py-3.5 bg-earth-900 text-cream-50 flex items-center justify-between">
         <div>
           <div class="text-xs text-leaf-300 font-semibold">APO2026110301</div>
-          <div class="text-base font-bold font-prompt">ใบขออนุมัติสั่งซื้อสินค้า (Purchase Order Approval)</div>
+          <div class="text-base font-bold font-prompt">ใบขออนุมัติสั่งซื้อสินค้า (APO)</div>
         </div>
         <button onclick="closeAPOModal()" class="text-cream-300 hover:text-white p-1 text-xl font-bold">&times;</button>
       </div>
 
-      <div id="apoPrintArea" class="p-6 overflow-y-auto flex-1 flex flex-col gap-4 text-xs">
+      <div id="apoPrintArea" class="p-4 sm:p-6 overflow-y-auto flex-1 flex flex-col gap-4 text-xs">
         <div class="flex justify-between items-start border-b border-cream-300 pb-3">
           <div>
-            <div class="font-prompt font-bold text-base text-earth-900">บริษัท ตังนำเกษตร จำกัด / บริษัท ชาวเกษตร จำกัด</div>
+            <div class="font-prompt font-bold text-sm sm:text-base text-earth-900">บริษัท ตังนำเกษตร จำกัด / บริษัท ชาวเกษตร จำกัด</div>
             <div class="text-earth-700">ฝ่ายจัดซื้อและบริหารคลังสินค้ากลาง</div>
           </div>
           <div class="text-right">
-            <div><strong>วันที่ขออนุมัติ:</strong> <span id="apoDate">03/11/2569</span></div>
-            <div><strong>ผู้เสนอขอ:</strong> ฝ่ายบริหารคลัง / จัดซื้อ</div>
+            <div><strong>วันที่:</strong> <span id="apoDate">03/11/2569</span></div>
           </div>
         </div>
 
@@ -521,40 +517,25 @@
               <th class="p-2 border-b border-r border-cream-300 text-right">จำนวนย่อย</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">แถม (ใหญ่)</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">มูลค่ารวม</th>
-              <th class="p-2 border-b border-r border-cream-300">หมายเหตุ</th>
+              <th class="p-2 border-b border-cream-300">หมายเหตุ</th>
             </tr>
           </thead>
           <tbody id="apoTableBody" class="divide-y divide-cream-200"></tbody>
           <tfoot class="bg-cream-100 font-bold">
             <tr>
-              <td colspan="5" class="p-2 text-right border-t border-cream-300">รวมมูลค่าขออนุมัติสั่งซื้อทั้งสิ้น:</td>
+              <td colspan="5" class="p-2 text-right border-t border-cream-300">รวมมูลค่าขออนุมัติทั้งสิ้น:</td>
               <td id="apoGrandTotal" class="p-2 text-right border-t border-cream-300 text-leaf-800 text-sm">0</td>
               <td class="border-t border-cream-300"></td>
             </tr>
           </tfoot>
         </table>
-
-        <div class="grid grid-cols-3 gap-6 pt-10 text-center">
-          <div>
-            <div class="border-b border-earth-400 w-3/4 mx-auto mb-2"></div>
-            <div>ผู้ขออนุมัติจัดซื้อ</div>
-          </div>
-          <div>
-            <div class="border-b border-earth-400 w-3/4 mx-auto mb-2"></div>
-            <div>ผู้ตรวจสอบสต็อค</div>
-          </div>
-          <div>
-            <div class="border-b border-earth-400 w-3/4 mx-auto mb-2"></div>
-            <div>ผู้มีอำนาจอนุมัติ (ผู้บริหาร)</div>
-          </div>
-        </div>
       </div>
 
-      <div class="px-6 py-3 bg-cream-100 border-t border-cream-300 flex justify-end gap-2">
-        <button onclick="window.print()" class="px-4 py-1.5 rounded-lg border border-leaf-600 bg-leaf-700 text-white hover:bg-leaf-800 text-xs font-semibold">
-          พิมพ์ใบขออนุมัตินี้
+      <div class="px-5 py-3 bg-cream-100 border-t border-cream-300 flex justify-end gap-2">
+        <button onclick="window.print()" class="px-4 py-1.5 rounded-lg border border-leaf-600 bg-leaf-700 text-white text-xs font-semibold">
+          พิมพ์ใบขออนุมัติ
         </button>
-        <button onclick="closeAPOModal()" class="px-4 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 hover:bg-cream-200 text-xs font-semibold">
+        <button onclick="closeAPOModal()" class="px-4 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 text-xs font-semibold">
           ปิด
         </button>
       </div>
@@ -575,131 +556,10 @@
     let activeCompanyFilter = 'ALL';
     let activeForecastMonths = ['1', '2'];
 
-    // ชุดข้อมูลตัวอย่างสำรอง (Fallback) หากยังไม่ได้ดึงจากชีท
-    const initialDataset = [
-      {
-        id: 'P-001',
-        name: 'โกล 500 ซีซี 1*20',
-        genericName: 'ออกซีฟลูออร์เฟน',
-        category: 'ยาฆ่าหญ้า',
-        supplier: 'โกลบอลลิสอะโกรไซแอนส์',
-        unitSub: 'ขวด',
-        unitBig: 'ลัง',
-        unitMultiplier: 20,
-        unitPrice: 520,
-        statusRaw: 'ควรสั่ง',
-        isDiscontinued: false,
-        sales68_tn_1_5: 420,
-        sales68_tn_6: 80,
-        sales68_cks: 130,
-        sales68_val: 327600,
-        sales69_tn_1_5: 280,
-        sales69_tn_6: 60,
-        sales69_cks: 90,
-        sales69_val: 223600,
-        stock_pc: 25,
-        stock_kr: 15,
-        stock_cyp: 8,
-        stock_cks: 12,
-        stock_val: 31200,
-        orderBigQty: 20,
-        freeBigQty: 1,
-        notes: 'เตรียมรับฤดูกาลใหม่',
-        suggestion: 'สต็อคต่ำกว่าเกณฑ์ 1 เดือน แนะนำสั่ง 20 ลัง'
-      },
-      {
-        id: 'P-002',
-        name: 'โกรแคล เอ็มจีบี 1 ลิตร 1*20',
-        genericName: 'แคลเซียม+โบรอน+แมกนีเซียม',
-        category: 'ฮอร์โมนอาหารเสริม',
-        supplier: 'อะโกร ไบโอไซเอนซ์',
-        unitSub: 'ขวด',
-        unitBig: 'ลัง',
-        unitMultiplier: 20,
-        unitPrice: 280,
-        statusRaw: 'เกินF/C 3m',
-        isDiscontinued: false,
-        sales68_tn_1_5: 310,
-        sales68_tn_6: 45,
-        sales68_cks: 95,
-        sales68_val: 126000,
-        sales69_tn_1_5: 220,
-        sales69_tn_6: 30,
-        sales69_cks: 70,
-        sales69_val: 89600,
-        stock_pc: 120,
-        stock_kr: 80,
-        stock_cyp: 60,
-        stock_cks: 102,
-        stock_val: 101360,
-        orderBigQty: 0,
-        freeBigQty: 0,
-        notes: '',
-        suggestion: 'สต็อคเพียงพอสำหรับ 3 เดือน ชะลอการสั่ง'
-      },
-      {
-        id: 'P-003',
-        name: 'ปูนเปลือกหอยนางรม 1 กก.',
-        genericName: 'แคลเซียมออกไซด์',
-        category: 'สารปรับสภาพดิน,น้ำ',
-        supplier: 'ซินเจนทา ครอป',
-        unitSub: 'ถุง (1 กก.)',
-        unitBig: 'กระสอบ',
-        unitMultiplier: 25,
-        unitPrice: 18,
-        statusRaw: 'สั่งด่วน',
-        isDiscontinued: false,
-        sales68_tn_1_5: 600,
-        sales68_tn_6: 120,
-        sales68_cks: 350,
-        sales68_val: 19260,
-        sales69_tn_1_5: 450,
-        sales69_tn_6: 90,
-        sales69_cks: 240,
-        sales69_val: 14040,
-        stock_pc: 15,
-        stock_kr: 10,
-        stock_cyp: 5,
-        stock_cks: 8,
-        stock_val: 684,
-        orderBigQty: 4,
-        freeBigQty: 0.5,
-        notes: 'สั่งตรงโรงงาน',
-        suggestion: 'สั่งด่วน สินค้าใกล้หมดทุกคลัง'
-      },
-      {
-        id: 'P-004',
-        name: 'กันน์ 20 100 ซีซี 1*48',
-        genericName: '',
-        category: 'ยาโรค/เชื้อรา',
-        supplier: 'อะโกร ไบโอไซเอนซ์',
-        unitSub: 'ขวด',
-        unitBig: 'ลัง',
-        unitMultiplier: 48,
-        unitPrice: 95,
-        statusRaw: 'เลิกขาย',
-        isDiscontinued: true,
-        sales68_tn_1_5: 50,
-        sales68_tn_6: 10,
-        sales68_cks: 20,
-        sales68_val: 7600,
-        sales69_tn_1_5: 0,
-        sales69_tn_6: 0,
-        sales69_cks: 0,
-        sales69_val: 0,
-        stock_pc: 0,
-        stock_kr: 0,
-        stock_cyp: 0,
-        stock_cks: 0,
-        stock_val: 0,
-        orderBigQty: 0,
-        freeBigQty: 0,
-        notes: 'ยกเลิกการจำหน่ายแล้ว',
-        suggestion: 'สินค้าเลิกขาย ห้ามสั่งซื้อเพิ่ม'
-      }
-    ];
+    // ระบบควบคุมจำนวนแถวบนมือถือ (Virtual Pagination)
+    let visibleLimit = 80; // แสดงรอบละ 80 แถวเพื่อความลื่นไหลสูงสุดบนมือถือ
+    const CHUNK_SIZE = 80;
 
-    // ฟังก์ชันช่วย: ถ้าค่าเป็น 0 หรือว่าง ให้ส่งกลับเป็นช่องว่าง ''
     function fmtZero(val) {
       if (val === null || val === undefined) return '';
       const num = typeof val === 'number' ? val : parseFloat(String(val).replace(/,/g, ''));
@@ -713,13 +573,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      rawProducts = [...initialDataset];
-      initFilters();
       renderDynamicForecastHeaders();
       updateDateTimeLabels();
-      applyFilters();
-
-      // ดึงข้อมูลจริงจาก Google Sheets
       fetchGoogleSheetData();
     });
 
@@ -764,7 +619,7 @@
       }
       updateForecastButtonStyles();
       renderDynamicForecastHeaders();
-      applyFilters();
+      renderTable();
     }
 
     function updateForecastButtonStyles() {
@@ -772,9 +627,9 @@
         const id = 'fcBtn' + m.replace('.', '_');
         const btn = document.getElementById(id);
         if (activeForecastMonths.includes(m)) {
-          btn.className = "px-2.5 py-1 rounded text-xs font-medium border border-leaf-600 bg-leaf-100 text-leaf-800";
+          btn.className = "px-2 py-0.5 rounded text-xs font-medium border border-leaf-600 bg-leaf-100 text-leaf-800";
         } else {
-          btn.className = "px-2.5 py-1 rounded text-xs font-medium border border-cream-300 bg-white text-earth-700";
+          btn.className = "px-2 py-0.5 rounded text-xs font-medium border border-cream-300 bg-white text-earth-700";
         }
       });
     }
@@ -803,14 +658,14 @@
       const poCols = document.querySelectorAll('.col-po-only');
 
       if (mode === 'stock') {
-        btnStock.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-sm bg-white text-earth-900";
-        btnPO.className = "px-3 py-1.5 rounded-md text-xs font-semibold text-earth-700 hover:text-earth-900 transition-all";
+        btnStock.className = "px-3 py-1.5 rounded-md text-xs font-semibold shadow-sm bg-white text-earth-900";
+        btnPO.className = "px-3 py-1.5 rounded-md text-xs font-semibold text-earth-700 hover:text-earth-900";
         btnOpenAPO.classList.add('hidden');
         btnOpenAPO.classList.remove('inline-flex');
         poCols.forEach(c => c.classList.add('hidden'));
       } else {
-        btnPO.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-sm bg-white text-earth-900";
-        btnStock.className = "px-3 py-1.5 rounded-md text-xs font-semibold text-earth-700 hover:text-earth-900 transition-all";
+        btnPO.className = "px-3 py-1.5 rounded-md text-xs font-semibold shadow-sm bg-white text-earth-900";
+        btnStock.className = "px-3 py-1.5 rounded-md text-xs font-semibold text-earth-700 hover:text-earth-900";
         btnOpenAPO.classList.remove('hidden');
         btnOpenAPO.classList.add('inline-flex');
         poCols.forEach(c => c.classList.remove('hidden'));
@@ -850,7 +705,30 @@
         document.getElementById('hdrSales69Group').setAttribute('colspan', 2);
         document.getElementById('hdrStockGroup').setAttribute('colspan', 2);
       }
+      resetAndFilter();
+    }
+
+    let searchTimer = null;
+    function handleSearchDebounce() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        resetAndFilter();
+      }, 250);
+    }
+
+    function resetAndFilter() {
+      visibleLimit = 80;
       applyFilters();
+    }
+
+    function loadMoreRows() {
+      visibleLimit += CHUNK_SIZE;
+      renderTable();
+    }
+
+    function loadAllRows() {
+      visibleLimit = currentFiltered.length;
+      renderTable();
     }
 
     function applyFilters() {
@@ -882,30 +760,15 @@
       updateKPICards();
     }
 
-    /**
-     * คำนวณและระบุสถานะสินค้า:
-     * 1. ช่องสถานะระบุคำว่า "เลิก" = สินค้าเลิกขาย
-     * 2. ช่องสถานะเว้นว่างไว้ = ปกติ
-     */
     function calculateStatus(p) {
       const raw = (p.statusRaw || '').trim();
 
       if (p.isDiscontinued || raw.includes('เลิก')) {
-        return { 
-          label: raw || '⚪ เลิกขาย', 
-          badge: 'bg-gray-100 text-gray-500 border border-gray-300', 
-          code: 'DISCONTINUED' 
-        };
+        return { label: raw || '⚪ เลิกขาย', badge: 'bg-gray-100 text-gray-500 border border-gray-300', code: 'DISCONTINUED' };
       }
-
       if (!raw) {
-        return { 
-          label: '🟢 ปกติ', 
-          badge: 'bg-leaf-50 text-leaf-800 border border-leaf-200', 
-          code: 'OPTIMAL' 
-        };
+        return { label: '🟢 ปกติ', badge: 'bg-leaf-50 text-leaf-800 border border-leaf-200', code: 'OPTIMAL' };
       }
-
       if (raw.includes('สั่งด่วน')) {
         return { label: '🔴 สั่งด่วน', badge: 'bg-red-50 text-red-700 border border-red-200', code: 'CRITICAL' };
       }
@@ -916,11 +779,7 @@
         return { label: '🔵 เกินสต็อค', badge: 'bg-blue-50 text-blue-700 border border-blue-200', code: 'OVERSTOCK' };
       }
 
-      return { 
-        label: raw, 
-        badge: 'bg-cream-200 text-earth-800 border border-cream-300', 
-        code: 'OPTIMAL' 
-      };
+      return { label: raw, badge: 'bg-cream-200 text-earth-800 border border-cream-300', code: 'OPTIMAL' };
     }
 
     function updateKPICards() {
@@ -958,18 +817,23 @@
       document.getElementById('badgeAPOCount').innerText = orderItemsCount;
     }
 
-    // Render Data Grid: นำมูลค่าบาทมาไว้บรรทัดล่างของจำนวนรวมหน่วยใหญ่
+    // เรนเดอร์ตารางแบบเบาเครื่อง (แสดงผลเฉพาะแถวที่จำเป็น)
     function renderTable() {
       const tbody = document.getElementById('tableBody');
-      if (currentFiltered.length === 0) {
+      const totalLen = currentFiltered.length;
+
+      if (totalLen === 0) {
         tbody.innerHTML = `<tr><td colspan="30" class="text-center py-10 text-earth-600">ไม่พบข้อมูลที่ตรงกับเงื่อนไขการค้นหา</td></tr>`;
         document.getElementById('filteredRowCount').innerText = "0";
-        document.getElementById('totalRowCount').innerText = rawProducts.length.toLocaleString();
+        document.getElementById('btnLoadMore').classList.add('hidden');
+        document.getElementById('btnLoadAll').classList.add('hidden');
         return;
       }
 
+      const displayList = currentFiltered.slice(0, visibleLimit);
       let html = '';
-      currentFiltered.forEach(p => {
+
+      displayList.forEach(p => {
         const mul = p.unitMultiplier || 1;
         const cleanSubUnit = getCleanUnitName(p.unitSub);
 
@@ -992,7 +856,6 @@
 
         html += `
           <tr class="${rowClass}">
-            <!-- 1. รายการสินค้า & คู่ค้า & หน่วยขาย (ตรึงซ้าย) -->
             <td class="sticky-col-1 bg-white px-3 py-2 border-r border-cream-300">
               <div class="font-semibold text-earth-900 leading-tight">${p.name}</div>
               <div class="flex flex-wrap items-center gap-1.5 mt-1 text-[11px] text-earth-700">
@@ -1003,56 +866,43 @@
               </div>
             </td>
 
-            <!-- 2. จำนวนขายปี 68 (ถ้าเป็น 0 แสดงช่องว่าง) -->
             <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales68_tn_1_5)}</td>
             <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales68_tn_6)}</td>
             <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales68_cks)}</td>
             <td class="px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(tot68Sub)}</td>
             
-            <!-- รวมขาย 68 (บน: จำนวนหน่วยใหญ่ หนาเด่น / ล่าง: มูลค่าบาท ตัวเล็ก) -->
             <td class="px-2.5 py-1 text-right bg-amber-50/80 border-r-2 border-cream-400">
               <div class="font-extrabold text-earth-900 text-xs">
                 ${tot68Big > 0 ? `${tot68Big.toLocaleString()} <span class="text-[10px] font-normal text-earth-600">${p.unitBig}</span>` : ''}
               </div>
-              <div class="text-[10.5px] font-mono text-amber-900 mt-0.5">
-                ${p.sales68_val > 0 ? `${fmtZero(p.sales68_val)}` : ''}
-              </div>
+              <div class="text-[10.5px] font-mono text-amber-900 mt-0.5">${fmtZero(p.sales68_val)}</div>
             </td>
 
-            <!-- 3. จำนวนขายปี 69 (ถ้าเป็น 0 แสดงช่องว่าง) -->
             <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales69_tn_1_5)}</td>
             <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales69_tn_6)}</td>
             <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales69_cks)}</td>
             <td class="px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(tot69Sub)}</td>
             
-            <!-- รวมขาย 69 (บน: จำนวนหน่วยใหญ่ หนาเด่น / ล่าง: มูลค่าบาท ตัวเล็ก) -->
             <td class="px-2.5 py-1 text-right bg-amber-50/80 border-r-2 border-cream-400">
               <div class="font-extrabold text-earth-900 text-xs">
                 ${tot69Big > 0 ? `${tot69Big.toLocaleString()} <span class="text-[10px] font-normal text-earth-600">${p.unitBig}</span>` : ''}
               </div>
-              <div class="text-[10.5px] font-mono text-amber-900 mt-0.5">
-                ${p.sales69_val > 0 ? `${fmtZero(p.sales69_val)}` : ''}
-              </div>
+              <div class="text-[10.5px] font-mono text-amber-900 mt-0.5">${fmtZero(p.sales69_val)}</div>
             </td>
 
-            <!-- 4. คลังสินค้าคงเหลือ (ถ้าเป็น 0 แสดงช่องว่าง) -->
             <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.stock_pc)}</td>
             <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.stock_kr)}</td>
             <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.stock_cyp)}</td>
             <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.stock_cks)}</td>
             <td class="px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(totStockSub)}</td>
             
-            <!-- รวมคงเหลือ (บน: จำนวนหน่วยใหญ่ หนาเด่น / ล่าง: มูลค่าบาท ตัวเล็ก) -->
             <td class="px-2.5 py-1 text-right bg-leaf-100/80 border-r-2 border-leaf-400">
               <div class="font-extrabold text-leaf-900 text-xs">
                 ${totStockBig > 0 ? `${totStockBig.toLocaleString()} <span class="text-[10px] font-normal text-leaf-800">${p.unitBig}</span>` : ''}
               </div>
-              <div class="text-[10.5px] font-mono text-leaf-800 mt-0.5">
-                ${p.stock_val > 0 ? `${fmtZero(p.stock_val)}` : ''}
-              </div>
+              <div class="text-[10.5px] font-mono text-leaf-800 mt-0.5">${fmtZero(p.stock_val)}</div>
             </td>
 
-            <!-- 5. Forecasts Dynamic Columns -->
             ${activeForecastMonths.map(m => {
               const runRate = ((tot69Sub / 10) || 0) * parseFloat(m);
               const fcBig = Math.ceil(runRate / mul);
@@ -1064,12 +914,10 @@
               `;
             }).join('')}
 
-            <!-- สถานะสต็อค -->
             <td class="px-2 py-1.5 text-center">
               <span class="inline-block px-2 py-0.5 rounded text-[11px] font-semibold ${st.badge}">${st.label}</span>
             </td>
 
-            <!-- 6. แถบสั่งซื้อ (แสดงเฉพาะ PO Mode) -->
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 text-center">
               <div class="flex items-center justify-center gap-1">
                 <input type="number" min="0" step="any" value="${p.orderBigQty > 0 ? p.orderBigQty : ''}" placeholder="" onchange="updateOrderItem('${p.id}', 'order', this.value)" class="w-16 px-1.5 py-1 text-center font-bold text-xs border border-cream-300 rounded focus:border-leaf-600 focus:outline-none bg-amber-50/40">
@@ -1095,19 +943,31 @@
               ${p.suggestion ? `<div class="text-[10px] text-earth-600 mt-0.5 leading-tight">💡 ${p.suggestion}</div>` : ''}
             </td>
 
-            <!-- 7. ดูประวัติรายเดือน -->
             <td class="px-2 py-1.5 text-center">
-              <button onclick="openMonthlyModal('${p.id}')" class="px-2 py-1 rounded bg-cream-200 hover:bg-cream-300 text-earth-800 text-[11px] font-semibold transition-all">
-                📊 ดูรายเดือน
+              <button onclick="openMonthlyModal('${p.id}')" class="px-2 py-1 rounded bg-cream-200 hover:bg-cream-300 text-earth-800 text-[11px] font-semibold">
+                📊 ดู
               </button>
             </td>
           </tr>
         `;
       });
 
-      tbody.innerHTML = html;
-      document.getElementById('filteredRowCount').innerText = currentFiltered.length.toLocaleString();
-      document.getElementById('totalRowCount').innerText = rawProducts.length.toLocaleString();
+      // เรนเดอร์ลงในตารางแบบลื่นไหล
+      window.requestAnimationFrame(() => {
+        tbody.innerHTML = html;
+        document.getElementById('filteredRowCount').innerText = `${displayList.length.toLocaleString()} จาก ${totalLen.toLocaleString()}`;
+
+        // จัดการปุ่มโหลดเพิ่มเติม
+        const btnLoadMore = document.getElementById('btnLoadMore');
+        const btnLoadAll = document.getElementById('btnLoadAll');
+        if (visibleLimit < totalLen) {
+          btnLoadMore.classList.remove('hidden');
+          btnLoadAll.classList.remove('hidden');
+        } else {
+          btnLoadMore.classList.add('hidden');
+          btnLoadAll.classList.add('hidden');
+        }
+      });
     }
 
     function updateOrderItem(id, field, val) {
@@ -1139,11 +999,11 @@
 
         html += `
           <tr>
-            <td class="px-3 py-1.5 font-medium text-earth-900">${m} 2569</td>
-            <td class="px-3 py-1.5 text-right font-mono">${fmtZero(tn1)}</td>
-            <td class="px-3 py-1.5 text-right font-mono">${fmtZero(tn6)}</td>
-            <td class="px-3 py-1.5 text-right font-mono">${fmtZero(cks)}</td>
-            <td class="px-3 py-1.5 text-right font-mono font-bold text-leaf-800">${fmtZero(tot)}</td>
+            <td class="px-2.5 py-1.5 font-medium text-earth-900">${m} 2569</td>
+            <td class="px-2.5 py-1.5 text-right font-mono">${fmtZero(tn1)}</td>
+            <td class="px-2.5 py-1.5 text-right font-mono">${fmtZero(tn6)}</td>
+            <td class="px-2.5 py-1.5 text-right font-mono">${fmtZero(cks)}</td>
+            <td class="px-2.5 py-1.5 text-right font-mono font-bold text-leaf-800">${fmtZero(tot)}</td>
           </tr>
         `;
       });
@@ -1244,86 +1104,59 @@
       XLSX.writeFile(wb, `รายงานสต็อค_ตังนำเกษตร_ชาวเกษตร_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    /**
-     * ดึงข้อมูลจริงจาก Google Sheets แบบปลอดภัย ไม่ค้างโหลด
-     */
     async function fetchGoogleSheetData() {
       const syncBadge = document.getElementById('syncBadge');
       const syncText = document.getElementById('syncStatusText');
       syncBadge.classList.remove('hidden');
       syncBadge.classList.add('flex');
-      syncText.innerText = "กำลังดึงข้อมูลทั้งหมดจาก Google Sheets...";
+      syncText.innerText = "กำลังเชื่อมต่อชีท...";
 
       const url = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME)}`;
 
       try {
         const res = await fetch(url);
-        if (!res.ok) throw new Error("ไม่สามารถเชื่อมต่อ Google Sheets ได้ (HTTP " + res.status + ")");
-        
+        if (!res.ok) throw new Error("Network error");
         const rawText = await res.text();
-        
-        // ตัดข้อความแปลงเป็น JSON อย่างปลอดภัยด้วย Regex
         const match = rawText.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
-        if (!match || !match[1]) {
-          throw new Error("รูปแบบข้อมูลที่ตอบกลับมาจากชีทไม่ถูกต้อง");
-        }
+        if (!match || !match[1]) throw new Error("JSON error");
 
         const json = JSON.parse(match[1]);
-        if (!json.table || !json.table.rows) {
-          throw new Error("ไม่พบโครงสร้างตารางข้อมูลในชีท");
-        }
-
         const rows = json.table.rows;
 
-        // ดึงวันที่และเวลาจากแถวบนสุด
-        if (rows.length > 0) {
+        if (rows.length > 0 && rows[0].c) {
           const r0 = rows[0].c;
-          if (r0) {
-            for (let k = 0; k < r0.length; k++) {
-              const val = r0[k] && r0[k].v ? String(r0[k].v) : '';
-              if (val.includes('01/01 -') || (val.includes('2569') && val.includes('-'))) {
-                sales69DateTime = val;
-              } else if (val.includes('น.') && val.includes('2569')) {
-                stockDateTime = val;
-              }
+          for (let k = 0; k < r0.length; k++) {
+            const val = r0[k] && r0[k].v ? String(r0[k].v) : '';
+            if (val.includes('01/01 -') || (val.includes('2569') && val.includes('-'))) {
+              sales69DateTime = val;
+            } else if (val.includes('น.') && val.includes('2569')) {
+              stockDateTime = val;
             }
           }
           updateDateTimeLabels();
         }
 
         const parsedProducts = [];
-        
-        // อ่านข้อมูลทุกแถว
         for (let i = 4; i < rows.length; i++) {
           const rowObj = rows[i];
           if (!rowObj || !rowObj.c) continue;
           const c = rowObj.c;
 
-          const getVal = (idx) => {
-            if (!c[idx] || c[idx].v === null || c[idx].v === undefined) return '';
-            return String(c[idx].v).trim();
-          };
-
+          const getVal = (idx) => (c[idx] && c[idx].v !== null && c[idx].v !== undefined) ? String(c[idx].v).trim() : '';
           const getNum = (idx) => {
             if (!c[idx] || c[idx].v === null || c[idx].v === undefined) return 0;
-            const strVal = String(c[idx].v).replace(/,/g, '').trim();
-            const val = parseFloat(strVal);
+            const val = parseFloat(String(c[idx].v).replace(/,/g, '').trim());
             return isNaN(val) ? 0 : val;
           };
 
           let nameVal = getVal(5);
-          if (!nameVal || nameVal === '0' || nameVal === 'ชื่อสินค้า') {
-            continue;
-          }
+          if (!nameVal || nameVal === '0' || nameVal === 'ชื่อสินค้า') continue;
 
-          // คอลัมน์สถานะ (BA หรือ Index 52)
           const statusVal = getVal(52);
           const isDisc = statusVal.includes('เลิก');
 
           let supplierVal = getVal(95);
-          if (!supplierVal || supplierVal === '0' || supplierVal === '.') {
-            supplierVal = 'ทั่วไป';
-          }
+          if (!supplierVal || supplierVal === '0' || supplierVal === '.') supplierVal = 'ทั่วไป';
 
           let genericVal = getVal(96);
           if (genericVal === '0' || genericVal === '.') genericVal = '';
@@ -1366,22 +1199,18 @@
         if (parsedProducts.length > 0) {
           rawProducts = parsedProducts;
           initFilters();
-          applyFilters();
-          syncText.innerText = `เชื่อมต่อสำเร็จ: ดึงข้อมูลครบ ${parsedProducts.length.toLocaleString()} SKU`;
+          resetAndFilter();
+          syncText.innerText = `ดึงข้อมูลครบ ${parsedProducts.length.toLocaleString()} SKU`;
           syncBadge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-800 border border-leaf-300";
-        } else {
-          syncText.innerText = "ไม่พบรายการสินค้าในชีท";
         }
       } catch (err) {
         console.error("Error fetching Google Sheets:", err);
-        syncText.innerText = "ดึงข้อมูลจากชีทไม่สำเร็จ (กำลังแสดงชุดข้อมูลสำรอง)";
+        syncText.innerText = "กำลังแสดงข้อมูลสำรอง";
         syncBadge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-amber-50 text-amber-800 border border-amber-300";
-        
-        // ถ้าเชื่อมต่อไม่ได้ ให้แสดงข้อมูลตัวอย่างสำรองทันที ไม่ให้หน้าเว็บค้างว่างเปล่า
         if (rawProducts.length === 0) {
           rawProducts = [...initialDataset];
           initFilters();
-          applyFilters();
+          resetAndFilter();
         }
       }
     }
