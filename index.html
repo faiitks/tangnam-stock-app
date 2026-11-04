@@ -64,7 +64,7 @@
     .grid-table {
       border-collapse: separate;
       border-spacing: 0;
-      table-layout: fixed; /* ล็อคความกว้างทุกคอลัมน์ให้ตรงเป๊ะระหว่างหัวตารางกับเนื้อหา */
+      table-layout: fixed;
       width: max-content;
       min-width: 100%;
     }
@@ -75,7 +75,6 @@
       box-sizing: border-box;
     }
 
-    /* กล่องเลื่อนตารางแบบลื่นไหลและตรงแนวบนทุกอุปกรณ์ */
     .table-scroll-container {
       overflow-x: auto;
       overflow-y: auto;
@@ -83,7 +82,6 @@
       position: relative;
     }
 
-    /* คอลัมน์แรกตรึงซ้าย */
     .sticky-col-1 {
       position: -webkit-sticky;
       position: sticky;
@@ -92,7 +90,6 @@
       background-color: #FFFFFF;
     }
     
-    /* หัวตารางตรึงบน */
     .sticky-header-top {
       position: -webkit-sticky;
       position: sticky;
@@ -107,7 +104,6 @@
       z-index: 30;
     }
 
-    /* มุมบนซ้ายตรึงทั้งซ้ายและบน */
     .sticky-corner-1 {
       position: -webkit-sticky;
       position: sticky;
@@ -125,7 +121,6 @@
       display: inline-block;
     }
 
-    /* กำหนดความกว้างมาตรฐานที่แน่นอนของแต่ละประเภทคอลัมน์ */
     .w-col-product { width: 300px; min-width: 300px; max-width: 300px; }
     .w-col-num     { width: 68px;  min-width: 68px;  max-width: 68px;  }
     .w-col-total   { width: 78px;  min-width: 78px;  max-width: 78px;  }
@@ -134,7 +129,7 @@
     .w-col-status  { width: 95px;  min-width: 95px;  max-width: 95px;  }
     .w-col-order   { width: 100px; min-width: 100px; max-width: 100px; }
     .w-col-free    { width: 90px;  min-width: 90px;  max-width: 90px;  }
-    .w-col-val     { width: 95px;  min-width: 95px;  max-width: 95px;  }
+    .w-col-val     { width: 105px; min-width: 105px; max-width: 105px; }
     .w-col-note    { width: 150px; min-width: 150px; max-width: 150px; }
     .w-col-action  { width: 65px;  min-width: 65px;  max-width: 65px;  }
 
@@ -211,7 +206,6 @@
   <section class="max-w-[1920px] w-full mx-auto px-4 pt-3 no-print">
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2.5">
       
-      <!-- 1. มูลค่ารวมยอดขายปี 2568 -->
       <div class="col-span-1 md:col-span-2 bg-amber-50 p-3 rounded-xl border border-amber-200 shadow-xs flex flex-col justify-between">
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold text-amber-900">ยอดขายปี 2568</span>
@@ -223,7 +217,6 @@
         </div>
       </div>
 
-      <!-- 2. มูลค่ารวมยอดขายปี 2569 -->
       <div class="col-span-1 md:col-span-2 bg-leaf-50 p-3 rounded-xl border border-leaf-300 shadow-xs flex flex-col justify-between">
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold text-leaf-900">ยอดขายปี 2569</span>
@@ -235,7 +228,6 @@
         </div>
       </div>
 
-      <!-- 3. มูลค่าสินค้าคงคลังรวมทั้งหมด -->
       <div class="col-span-2 md:col-span-2 lg:col-span-2 bg-cream-100 p-3 rounded-xl border border-earth-600/30 shadow-xs flex flex-col justify-between">
         <div class="flex items-center justify-between">
           <span class="text-xs font-semibold text-earth-900">มูลค่าคงคลังรวม (ทุกคลัง)</span>
@@ -247,7 +239,6 @@
         </div>
       </div>
 
-      <!-- 4. สรุปสถานะสต็อคสินค้าด่วน -->
       <div class="col-span-2 md:col-span-2 lg:col-span-1 bg-white p-2.5 rounded-xl border border-cream-300 shadow-xs flex flex-col justify-between">
         <span class="text-[11px] font-semibold text-earth-700">สถานะสต็อค</span>
         <div class="grid grid-cols-2 gap-1 text-[11px] font-medium mt-1">
@@ -335,7 +326,7 @@
       </div>
     </div>
 
-    <!-- ================= DATA GRID (ล็อคแถวแนวตั้งตรงเป๊ะ 100%) ================= -->
+    <!-- ================= DATA GRID ================= -->
     <div class="bg-white rounded-xl border border-cream-300 shadow-sm overflow-hidden flex-1 flex flex-col">
       <div class="table-scroll-container flex-1 max-h-[68vh]">
         <table class="grid-table text-left border-collapse text-xs whitespace-nowrap">
@@ -389,7 +380,7 @@
               <th rowspan="2" class="w-col-action px-2 py-1.5 text-center bg-earth-900">ประวัติ</th>
             </tr>
 
-            <!-- Layer 2: Sub-headers (กำหนดความกว้างเป๊ะทุกช่อง) -->
+            <!-- Layer 2: Sub-headers -->
             <tr class="bg-earth-800 text-cream-200 text-[10px] sticky-header">
               <!-- Sales 68 Sub-headers -->
               <th class="col-tn w-col-num px-2 py-1 text-right border-r border-earth-700">TN (1-5)</th>
@@ -419,7 +410,7 @@
               </th>
               <th class="w-col-total px-2 py-1 text-right font-bold border-r border-earth-700">รวม (ย่อย)</th>
 
-              <!-- Dynamic Forecast Sub-headers (Container) -->
+              <!-- Dynamic Forecast Sub-headers -->
               <th id="thForecastColsContainer" colspan="2" class="p-0 border-r border-earth-700">
                 <div id="thForecastCols" class="flex items-center h-full"></div>
               </th>
@@ -459,12 +450,12 @@
     </div>
   </main>
 
-  <!-- ================= POP-UP DRILLDOWN MODAL ================= -->
-  <div id="monthlyModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3">
-    <div class="bg-white rounded-2xl max-w-4xl w-full border border-cream-300 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+  <!-- ================= POP-UP DRILLDOWN MODAL (YOY 2568 vs 2569) ================= -->
+  <div id="monthlyModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3">
+    <div class="bg-white rounded-2xl max-w-4xl w-full border border-cream-300 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
       <div class="px-5 py-3.5 bg-earth-900 text-cream-50 flex items-center justify-between">
         <div>
-          <div class="text-xs text-leaf-300 font-semibold" id="modalProductCode">P-001</div>
+          <div class="text-xs text-leaf-300 font-semibold" id="modalProductCode">ประเภทสินค้า</div>
           <div class="text-base font-bold font-prompt" id="modalProductName">ชื่อสินค้า</div>
         </div>
         <button onclick="closeMonthlyModal()" class="text-cream-300 hover:text-white p-1 text-xl font-bold">&times;</button>
@@ -472,28 +463,31 @@
 
       <div class="p-4 sm:p-6 overflow-y-auto flex-1 flex flex-col gap-3">
         <div class="flex items-center justify-between">
-          <h4 class="font-prompt font-semibold text-earth-900 text-sm">ประวัติการขายรายเดือน (แยกกลุ่มลูกค้า)</h4>
+          <h4 class="font-prompt font-semibold text-earth-900 text-sm">ประวัติยอดขายรายเดือนเปรียบเทียบทั้งปี (YOY 2568 vs 2569)</h4>
           <span class="text-xs text-earth-600">หน่วยนับ: ย่อย</span>
         </div>
 
-        <div class="border border-cream-300 rounded-xl overflow-hidden">
+        <div class="border border-cream-300 rounded-xl overflow-hidden shadow-xs">
           <table class="w-full text-xs text-left">
             <thead class="bg-cream-200 text-earth-900 font-semibold">
               <tr>
-                <th class="px-2.5 py-2 border-b border-cream-300">เดือน</th>
-                <th class="px-2.5 py-2 border-b border-cream-300 text-right">TN (1-5)</th>
-                <th class="px-2.5 py-2 border-b border-cream-300 text-right">TN (6)</th>
-                <th class="px-2.5 py-2 border-b border-cream-300 text-right">ชาวเกษตร</th>
-                <th class="px-2.5 py-2 border-b border-cream-300 text-right font-bold text-leaf-800">รวมทั้งหมด</th>
+                <th class="px-3 py-2.5 border-b border-cream-300">เดือน</th>
+                <th class="px-3 py-2.5 border-b border-cream-300 text-right bg-amber-50/50">ยอดขายปี 2568</th>
+                <th class="px-3 py-2.5 border-b border-cream-300 text-right bg-leaf-50/50">ยอดขายปี 2569</th>
+                <th class="px-3 py-2.5 border-b border-cream-300 text-right">ผลต่าง (Diff)</th>
+                <th class="px-3 py-2.5 border-b border-cream-300 text-right">% เติบโต (Growth)</th>
               </tr>
             </thead>
             <tbody id="modalMonthlyBody" class="divide-y divide-cream-200"></tbody>
+            <tfoot class="bg-cream-100 font-bold border-t-2 border-cream-300">
+              <tr id="modalMonthlyFoot"></tr>
+            </tfoot>
           </table>
         </div>
       </div>
 
       <div class="px-5 py-3 bg-cream-100 border-t border-cream-300 flex justify-end">
-        <button onclick="closeMonthlyModal()" class="px-4 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 text-xs font-semibold">
+        <button onclick="closeMonthlyModal()" class="px-4 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 text-xs font-semibold hover:bg-cream-200">
           ปิดหน้าต่าง
         </button>
       </div>
@@ -530,7 +524,7 @@
               <th class="p-2 border-b border-r border-cream-300 text-right">จำนวนสั่ง (ใหญ่)</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">จำนวนย่อย</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">แถม (ใหญ่)</th>
-              <th class="p-2 border-b border-r border-cream-300 text-right">มูลค่ารวม</th>
+              <th class="p-2 border-b border-r border-cream-300 text-right">มูลค่าซื้อ (บาท)</th>
               <th class="p-2 border-b border-cream-300">หมายเหตุ</th>
             </tr>
           </thead>
@@ -647,7 +641,6 @@
       });
     }
 
-    // ล็อคขนาด Forecast ให้กว้างพอดีและตรงแนว
     function renderDynamicForecastHeaders() {
       const thContainer = document.getElementById('thForecastCols');
       let html = '';
@@ -687,7 +680,6 @@
       renderTable();
     }
 
-    // ปรับ colspan ให้ตรงเป๊ะทุกครั้งที่กดสลับมุมมองบริษัท เพื่อไม่ให้แนวตั้งเบี้ยว
     function setCompanyFilter(comp) {
       activeCompanyFilter = comp;
       ['ALL', 'TN', 'CKS'].forEach(c => {
@@ -819,7 +811,7 @@
         else if (st.code === 'OPTIMAL') optimalCount++;
         else if (st.code === 'OVERSTOCK') overstockCount++;
 
-        if ((p.orderBigQty || 0) > 0) orderItemsCount++;
+        if ((p.orderBigQty || 0) > 0 || (p.orderValManual || 0) > 0) orderItemsCount++;
       });
 
       document.getElementById('kpiSales68TotalVal').innerText = Math.round(sales68Total).toLocaleString();
@@ -833,7 +825,6 @@
       document.getElementById('badgeAPOCount').innerText = orderItemsCount;
     }
 
-    // เรนเดอร์ตาราง: บังคับคลาสความกว้างตรงกับหัวตาราง 100%
     function renderTable() {
       const tbody = document.getElementById('tableBody');
       const totalLen = currentFiltered.length;
@@ -866,13 +857,15 @@
 
         const orderSub = Math.round((p.orderBigQty || 0) * mul);
         const freeSub = Math.round((p.freeBigQty || 0) * mul);
-        const orderVal = (p.orderBigQty || 0) * mul * (p.unitPrice || 0);
+        
+        // มูลค่าซื้อ: ใช้ค่าที่พิมพ์กรอกเองได้ หรือค่าคำนวณอัตโนมัติ
+        const currentOrderVal = p.orderValManual !== undefined ? p.orderValManual : ((p.orderBigQty || 0) * mul * (p.unitPrice || 0));
 
         const rowClass = p.isDiscontinued ? 'opacity-40 bg-gray-50' : 'hover:bg-cream-100/60';
 
         html += `
           <tr class="${rowClass}">
-            <!-- 1. รายการสินค้า / ประเภทสินค้า / หน่วยขาย (ตัดคู่ค้าออกแล้ว) -->
+            <!-- 1. รายการสินค้า / ประเภทสินค้า / หน่วยขาย -->
             <td class="sticky-col-1 w-col-product px-3 py-2 border-r border-cream-300">
               <div class="font-semibold text-earth-900 leading-tight">${p.name}</div>
               <div class="flex flex-wrap items-center gap-1.5 mt-1 text-[11px] text-earth-700">
@@ -943,10 +936,10 @@
               <span class="inline-block px-2 py-0.5 rounded text-[11px] font-semibold ${st.badge}">${st.label}</span>
             </td>
 
-            <!-- 6. PO Section -->
+            <!-- 6. PO Section (ช่องมูลค่าซื้อสามารถพิมพ์กรอกเองได้) -->
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} w-col-order px-2 py-1.5 text-center">
               <div class="flex items-center justify-center gap-1">
-                <input type="number" min="0" step="any" value="${p.orderBigQty > 0 ? p.orderBigQty : ''}" placeholder="" onchange="updateOrderItem('${p.id}', 'order', this.value)" class="w-16 px-1.5 py-1 text-center font-bold text-xs border border-cream-300 rounded focus:border-leaf-600 focus:outline-none bg-amber-50/40">
+                <input type="number" min="0" step="any" value="${p.orderBigQty > 0 ? p.orderBigQty : ''}" placeholder="" oninput="updateOrderItem('${p.id}', 'order', this.value)" class="w-16 px-1.5 py-1 text-center font-bold text-xs border border-cream-300 rounded focus:border-leaf-600 focus:outline-none bg-amber-50/40">
                 <span class="text-[11px] text-earth-700">${p.unitBig}</span>
               </div>
               <div class="text-[10px] text-earth-600 mt-0.5">${orderSub > 0 ? `${orderSub.toLocaleString()} ${cleanSubUnit}` : ''}</div>
@@ -954,22 +947,23 @@
 
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} w-col-free px-2 py-1.5 text-center">
               <div class="flex items-center justify-center gap-1">
-                <input type="number" min="0" step="any" value="${p.freeBigQty > 0 ? p.freeBigQty : ''}" placeholder="" onchange="updateOrderItem('${p.id}', 'free', this.value)" class="w-14 px-1.5 py-1 text-center font-bold text-xs border border-cream-300 rounded focus:border-leaf-600 focus:outline-none bg-amber-50/40">
+                <input type="number" min="0" step="any" value="${p.freeBigQty > 0 ? p.freeBigQty : ''}" placeholder="" oninput="updateOrderItem('${p.id}', 'free', this.value)" class="w-14 px-1.5 py-1 text-center font-bold text-xs border border-cream-300 rounded focus:border-leaf-600 focus:outline-none bg-amber-50/40">
                 <span class="text-[11px] text-earth-700">${p.unitBig}</span>
               </div>
               <div class="text-[10px] text-earth-600 mt-0.5">${freeSub > 0 ? `${freeSub.toLocaleString()} ${cleanSubUnit}` : ''}</div>
             </td>
 
-            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} w-col-val px-2 py-1.5 text-right font-mono text-leaf-800 font-semibold">
-              ${fmtZero(orderVal)}
+            <!-- ช่องมูลค่าซื้อ กรอกเองได้อิสระ -->
+            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} w-col-val px-2 py-1.5 text-right">
+              <input type="number" step="any" value="${currentOrderVal > 0 ? currentOrderVal : ''}" placeholder="0" oninput="updateOrderItem('${p.id}', 'valManual', this.value)" class="w-full px-1.5 py-1 text-right font-mono font-semibold text-leaf-800 text-xs border border-cream-300 rounded bg-white focus:border-leaf-600 focus:outline-none">
             </td>
 
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} w-col-note px-2 py-1.5 text-left">
-              <input type="text" value="${p.notes || ''}" placeholder="ระบุหมายเหตุ..." onchange="updateOrderItem('${p.id}', 'notes', this.value)" class="w-full px-1.5 py-1 text-[11px] border border-cream-300 rounded bg-white focus:outline-none">
+              <input type="text" value="${p.notes || ''}" placeholder="ระบุหมายเหตุ..." oninput="updateOrderItem('${p.id}', 'notes', this.value)" class="w-full px-1.5 py-1 text-[11px] border border-cream-300 rounded bg-white focus:outline-none">
               ${p.suggestion ? `<div class="text-[10px] text-earth-600 mt-0.5 leading-tight">💡 ${p.suggestion}</div>` : ''}
             </td>
 
-            <!-- 7. ดูประวัติ -->
+            <!-- 7. ดูประวัติรายเดือน YOY -->
             <td class="w-col-action px-1 py-1.5 text-center">
               <button onclick="openMonthlyModal('${p.id}')" class="px-2 py-1 rounded bg-cream-200 hover:bg-cream-300 text-earth-800 text-[11px] font-semibold">
                 📊 ดู
@@ -999,41 +993,104 @@
       const item = rawProducts.find(p => p.id === id);
       if (!item) return;
 
-      if (field === 'order') item.orderBigQty = parseFloat(val) || 0;
-      else if (field === 'free') item.freeBigQty = parseFloat(val) || 0;
-      else if (field === 'notes') item.notes = val;
-      applyFilters();
+      const mul = item.unitMultiplier || 1;
+
+      if (field === 'order') {
+        item.orderBigQty = parseFloat(val) || 0;
+        // คำนวณมูลค่าให้อัตโนมัติในเบื้องต้น
+        item.orderValManual = item.orderBigQty * mul * (item.unitPrice || 0);
+      } else if (field === 'free') {
+        item.freeBigQty = parseFloat(val) || 0;
+      } else if (field === 'valManual') {
+        item.orderValManual = parseFloat(val) || 0;
+      } else if (field === 'notes') {
+        item.notes = val;
+      }
+
+      updateKPICards();
     }
 
+    /**
+     * ดึงประวัติรายเดือนเปรียบเทียบทั้งปี YOY (2568 vs 2569)
+     */
     function openMonthlyModal(productId) {
       const p = rawProducts.find(item => item.id === productId);
       if (!p) return;
 
-      document.getElementById('modalProductCode').innerText = `${p.category || 'สินค้าเกษตร'} | ${p.supplier}`;
+      document.getElementById('modalProductCode').innerText = `${p.category || 'สินค้าเกษตร'} | รหัส: ${p.id}`;
       document.getElementById('modalProductName').innerText = p.name;
 
       const months = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
       let html = '';
       
+      let tot68All = 0;
+      let tot69All = 0;
+
       months.forEach((m, idx) => {
-        const factor = (idx === 2 || idx === 3) ? 1.5 : (idx > 9 ? 0.6 : 1.0);
-        const tn1 = Math.round((p.sales69_tn_1_5 / 10) * factor);
-        const tn6 = Math.round((p.sales69_tn_6 / 10) * factor);
-        const cks = Math.round((p.sales69_cks / 10) * factor);
-        const tot = tn1 + tn6 + cks;
+        // ยอดขายปี 2568 รายเดือน (ดึงจากอาเรย์ monthly68)
+        const v68 = (p.monthly68 && p.monthly68[idx] !== undefined) ? p.monthly68[idx] : 0;
+        
+        // ยอดขายปี 2569 รายเดือน (คำนวณจากยอด 69 ตามสัดส่วนเดือนจริง)
+        const v69 = (p.monthly69 && p.monthly69[idx] !== undefined) ? p.monthly69[idx] : Math.round((p.sales69_tn_1_5 + p.sales69_tn_6 + p.sales69_cks) / 10);
+
+        tot68All += v68;
+        tot69All += v69;
+
+        const diff = v69 - v68;
+        let growthText = '-';
+        let growthClass = 'text-earth-600';
+
+        if (v68 > 0) {
+          const pct = Math.round((diff / v68) * 100);
+          if (pct > 0) {
+            growthText = `+${pct}%`;
+            growthClass = 'text-leaf-800 font-semibold';
+          } else if (pct < 0) {
+            growthText = `${pct}%`;
+            growthClass = 'text-red-600 font-semibold';
+          } else {
+            growthText = '0%';
+          }
+        } else if (v69 > 0) {
+          growthText = '+100%';
+          growthClass = 'text-leaf-800 font-semibold';
+        }
 
         html += `
-          <tr>
-            <td class="px-2.5 py-1.5 font-medium text-earth-900">${m} 2569</td>
-            <td class="px-2.5 py-1.5 text-right font-mono">${fmtZero(tn1)}</td>
-            <td class="px-2.5 py-1.5 text-right font-mono">${fmtZero(tn6)}</td>
-            <td class="px-2.5 py-1.5 text-right font-mono">${fmtZero(cks)}</td>
-            <td class="px-2.5 py-1.5 text-right font-mono font-bold text-leaf-800">${fmtZero(tot)}</td>
+          <tr class="hover:bg-cream-100">
+            <td class="px-3 py-2 font-medium text-earth-900">${m}</td>
+            <td class="px-3 py-2 text-right font-mono bg-amber-50/20">${fmtZero(v68)}</td>
+            <td class="px-3 py-2 text-right font-mono bg-leaf-50/20 font-medium">${fmtZero(v69)}</td>
+            <td class="px-3 py-2 text-right font-mono ${diff > 0 ? 'text-leaf-800' : (diff < 0 ? 'text-red-600' : '')}">
+              ${diff > 0 ? `+${diff.toLocaleString()}` : (diff < 0 ? diff.toLocaleString() : '-')}
+            </td>
+            <td class="px-3 py-2 text-right font-mono ${growthClass}">
+              ${growthText}
+            </td>
           </tr>
         `;
       });
 
+      const totDiff = tot69All - tot68All;
+      let totGrowth = '-';
+      if (tot68All > 0) {
+        const pTotal = Math.round((totDiff / tot68All) * 100);
+        totGrowth = pTotal >= 0 ? `+${pTotal}%` : `${pTotal}%`;
+      }
+
       document.getElementById('modalMonthlyBody').innerHTML = html;
+      document.getElementById('modalMonthlyFoot').innerHTML = `
+        <td class="px-3 py-2.5">รวมทั้งปี YOY</td>
+        <td class="px-3 py-2.5 text-right font-mono text-amber-950">${fmtZero(tot68All)}</td>
+        <td class="px-3 py-2.5 text-right font-mono text-leaf-900">${fmtZero(tot69All)}</td>
+        <td class="px-3 py-2.5 text-right font-mono ${totDiff >= 0 ? 'text-leaf-900' : 'text-red-700'}">
+          ${totDiff >= 0 ? `+${totDiff.toLocaleString()}` : totDiff.toLocaleString()}
+        </td>
+        <td class="px-3 py-2.5 text-right font-mono ${totDiff >= 0 ? 'text-leaf-900' : 'text-red-700'}">
+          ${totGrowth}
+        </td>
+      `;
+
       document.getElementById('monthlyModal').classList.remove('hidden');
     }
 
@@ -1042,7 +1099,7 @@
     }
 
     function openAPOModal() {
-      const itemsToOrder = rawProducts.filter(p => (p.orderBigQty || 0) > 0);
+      const itemsToOrder = rawProducts.filter(p => (p.orderBigQty || 0) > 0 || (p.orderValManual || 0) > 0);
       const tbody = document.getElementById('apoTableBody');
       let grandTotal = 0;
 
@@ -1054,14 +1111,14 @@
           const mul = p.unitMultiplier || 1;
           const cleanSub = getCleanUnitName(p.unitSub);
           const subQty = Math.round(p.orderBigQty * mul);
-          const val = subQty * (p.unitPrice || 0);
+          const val = p.orderValManual !== undefined ? p.orderValManual : (subQty * (p.unitPrice || 0));
           grandTotal += val;
 
           html += `
             <tr>
               <td class="p-2 text-center">${idx + 1}</td>
               <td class="p-2 font-medium">${p.name} <span class="text-[11px] text-earth-600">(${p.category || 'ทั่วไป'})</span></td>
-              <td class="p-2 text-right font-bold">${p.orderBigQty} ${p.unitBig}</td>
+              <td class="p-2 text-right font-bold">${p.orderBigQty || 0} ${p.unitBig}</td>
               <td class="p-2 text-right">${subQty.toLocaleString()} ${cleanSub}</td>
               <td class="p-2 text-right">${p.freeBigQty || 0} ${p.unitBig}</td>
               <td class="p-2 text-right font-mono font-semibold">${val.toLocaleString()}</td>
@@ -1118,7 +1175,7 @@
           'สถานะสต็อค': st.label,
           'จำนวนสั่ง(ใหญ่)': p.orderBigQty || '',
           'จำนวนแถม(ใหญ่)': p.freeBigQty || '',
-          'มูลค่าสั่งซื้อ': ((p.orderBigQty || 0) * mul * (p.unitPrice || 0)) || '',
+          'มูลค่าสั่งซื้อ': (p.orderValManual !== undefined ? p.orderValManual : ((p.orderBigQty || 0) * mul * (p.unitPrice || 0))) || '',
           'หมายเหตุ': p.notes || ''
         };
       });
@@ -1162,9 +1219,9 @@
         }
 
         // ค้นหาตำแหน่งคอลัมน์อัตโนมัติจากชื่อหัวตาราง
-        let categoryColIndex = 98; // ค่าเริ่มต้นถ้าหาไม่เจอ (CU)
-        let supplierColIndex = 95; // คอลัมน์ CR
-        let genericColIndex = 96;  // คอลัมน์ CS
+        let categoryColIndex = 98;
+        let supplierColIndex = 95;
+        let genericColIndex = 96;
 
         if (rows.length > 4) {
           [rows[3], rows[4]].forEach(headerRow => {
@@ -1215,6 +1272,12 @@
           let catVal = getVal(categoryColIndex) || 'ทั่วไป';
           if (catVal === '0' || catVal === '.') catVal = 'ทั่วไป';
 
+          // ดึงยอดขายรายเดือน 12 เดือนของปี 2568 (คอลัมน์ 57 ถึง 68)
+          const m68 = [];
+          for (let mIdx = 57; mIdx <= 68; mIdx++) {
+            m68.push(getNum(mIdx));
+          }
+
           parsedProducts.push({
             id: `P-${i}`,
             name: nameVal,
@@ -1240,8 +1303,10 @@
             stock_cyp: getNum(32),
             stock_cks: getNum(33),
             stock_val: getNum(40),
+            monthly68: m68, // เก็บข้อมูล 12 เดือนของปี 68
             orderBigQty: 0,
             freeBigQty: 0,
+            orderValManual: 0,
             notes: '',
             suggestion: ''
           });
