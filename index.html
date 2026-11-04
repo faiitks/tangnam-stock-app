@@ -64,56 +64,57 @@
     .grid-table {
       border-collapse: separate;
       border-spacing: 0;
-      contain: layout paint;
+      table-layout: fixed; /* ล็อคความกว้างทุกคอลัมน์ให้ตรงเป๊ะระหว่างหัวตารางกับเนื้อหา */
+      width: max-content;
+      min-width: 100%;
     }
+    
     .grid-table th, .grid-table td {
       border-right: 1px solid #E8E3D7;
       border-bottom: 1px solid #E8E3D7;
+      box-sizing: border-box;
     }
 
-    /* ตัวเร่งความเร็วการ Scroll บนมือถือและเดสก์ท็อป (GPU Hardware Acceleration) */
+    /* กล่องเลื่อนตารางแบบลื่นไหลและตรงแนวบนทุกอุปกรณ์ */
     .table-scroll-container {
       overflow-x: auto;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      will-change: scroll-position, transform;
-      transform: translateZ(0);
+      position: relative;
     }
 
+    /* คอลัมน์แรกตรึงซ้าย */
     .sticky-col-1 {
+      position: -webkit-sticky;
       position: sticky;
       left: 0;
-      z-index: 20;
-      will-change: transform;
-      transform: translateZ(0);
+      z-index: 25;
+      background-color: #FFFFFF;
     }
-    .sticky-header {
-      position: sticky;
-      top: 30px;
-      z-index: 30;
-      will-change: transform;
-      transform: translateZ(0);
-    }
+    
+    /* หัวตารางตรึงบน */
     .sticky-header-top {
+      position: -webkit-sticky;
       position: sticky;
       top: 0;
       z-index: 35;
-      will-change: transform;
-      transform: translateZ(0);
     }
+    
+    .sticky-header {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 29px;
+      z-index: 30;
+    }
+
+    /* มุมบนซ้ายตรึงทั้งซ้ายและบน */
     .sticky-corner-1 {
+      position: -webkit-sticky;
       position: sticky;
       left: 0;
       top: 0;
       z-index: 45;
-      will-change: transform;
-      transform: translateZ(0);
-    }
-
-    /* วาดเฉพาะส่วนที่มองเห็นบนหน้าจอ */
-    .grid-table tbody tr {
-      content-visibility: auto;
-      contain-intrinsic-size: 0 45px;
+      background-color: #4A3B32 !important;
     }
 
     .icon-sm {
@@ -123,6 +124,19 @@
       min-height: 15px;
       display: inline-block;
     }
+
+    /* กำหนดความกว้างมาตรฐานที่แน่นอนของแต่ละประเภทคอลัมน์ */
+    .w-col-product { width: 300px; min-width: 300px; max-width: 300px; }
+    .w-col-num     { width: 68px;  min-width: 68px;  max-width: 68px;  }
+    .w-col-total   { width: 78px;  min-width: 78px;  max-width: 78px;  }
+    .w-col-summary { width: 110px; min-width: 110px; max-width: 110px; }
+    .w-col-fc      { width: 75px;  min-width: 75px;  max-width: 75px;  }
+    .w-col-status  { width: 95px;  min-width: 95px;  max-width: 95px;  }
+    .w-col-order   { width: 100px; min-width: 100px; max-width: 100px; }
+    .w-col-free    { width: 90px;  min-width: 90px;  max-width: 90px;  }
+    .w-col-val     { width: 95px;  min-width: 95px;  max-width: 95px;  }
+    .w-col-note    { width: 150px; min-width: 150px; max-width: 150px; }
+    .w-col-action  { width: 65px;  min-width: 65px;  max-width: 65px;  }
 
     @media print {
       body { background-color: white !important; }
@@ -258,7 +272,7 @@
           <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-earth-600">
             <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </div>
-          <input type="text" id="globalSearchInput" oninput="handleSearchDebounce()" placeholder="ค้นหาได้ทุกอย่าง (ชื่อสินค้า, สามัญ, คู่ค้า, สต็อค)..." class="w-full pl-8 pr-3 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 placeholder-earth-600 focus:outline-none focus:ring-1 focus:ring-leaf-600">
+          <input type="text" id="globalSearchInput" oninput="handleSearchDebounce()" placeholder="ค้นหาได้ทุกอย่าง (ชื่อสินค้า, สามัญ, คู่ค้า, หมวดหมู่, สต็อค)..." class="w-full pl-8 pr-3 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 placeholder-earth-600 focus:outline-none focus:ring-1 focus:ring-leaf-600">
         </div>
 
         <div>
@@ -321,25 +335,25 @@
       </div>
     </div>
 
-    <!-- ================= DATA GRID ================= -->
+    <!-- ================= DATA GRID (ล็อคแถวแนวตั้งตรงเป๊ะ 100%) ================= -->
     <div class="bg-white rounded-xl border border-cream-300 shadow-sm overflow-hidden flex-1 flex flex-col">
       <div class="table-scroll-container flex-1 max-h-[68vh]">
-        <table class="grid-table w-full text-left border-collapse text-xs whitespace-nowrap">
+        <table class="grid-table text-left border-collapse text-xs whitespace-nowrap">
           
           <!-- Layer 1: Header Categories with Datetime -->
           <thead>
             <tr class="bg-earth-900 text-cream-50 text-[11px] font-semibold sticky-header-top">
-              <th rowspan="2" class="sticky-corner-1 bg-earth-900 px-3 py-2 border-r border-earth-700 min-w-[280px] text-center">
-                รายการสินค้า / คู่ค้า / หน่วยขาย
+              <th rowspan="2" class="sticky-corner-1 w-col-product px-3 py-2 border-r border-earth-700 text-center">
+                รายการสินค้า / ประเภท / หน่วยขาย
               </th>
 
               <!-- Sales 2568 Category -->
               <th id="hdrSales68Group" colspan="4" class="px-2 py-1.5 border-r border-earth-700 text-center bg-earth-800 text-cream-100">
                 จำนวนขายปี 2568 (หน่วยย่อย)
               </th>
-              <th rowspan="2" class="px-2.5 py-1.5 border-r-2 border-cream-400 text-right bg-amber-950 text-amber-200 min-w-[105px]">
+              <th rowspan="2" class="w-col-summary px-2.5 py-1.5 border-r-2 border-cream-400 text-right bg-amber-950 text-amber-200">
                 <div>รวมขาย 68</div>
-                <div class="text-[9.5px] font-normal text-amber-300">(หน่วยใหญ่ / บาท)</div>
+                <div class="text-[9px] font-normal text-amber-300">(ใหญ่ / บาท)</div>
               </th>
 
               <!-- Sales 2569 Category with Date/Time -->
@@ -347,9 +361,9 @@
                 <div>จำนวนขายปี 2569 (หน่วยย่อย)</div>
                 <div id="lblSales69DateTime" class="text-[9.5px] font-normal text-amber-300">ข้อมูล: 01/01 - 03/11/2569 10.14 น.</div>
               </th>
-              <th rowspan="2" class="px-2.5 py-1.5 border-r-2 border-cream-400 text-right bg-amber-950 text-amber-200 min-w-[105px]">
+              <th rowspan="2" class="w-col-summary px-2.5 py-1.5 border-r-2 border-cream-400 text-right bg-amber-950 text-amber-200">
                 <div>รวมขาย 69</div>
-                <div class="text-[9.5px] font-normal text-amber-300">(หน่วยใหญ่ / บาท)</div>
+                <div class="text-[9px] font-normal text-amber-300">(ใหญ่ / บาท)</div>
               </th>
 
               <!-- Warehouse Stocks with Date/Time -->
@@ -357,9 +371,9 @@
                 <div>สินค้าคงเหลือตามคลัง (หน่วยย่อย)</div>
                 <div id="lblStockDateTime" class="text-[9.5px] font-normal text-leaf-200">สต็อค ณ วันที่: 03/11/2569 10.14 น.</div>
               </th>
-              <th rowspan="2" class="px-2.5 py-1.5 border-r-2 border-leaf-400 text-right bg-leaf-900 text-leaf-200 min-w-[105px]">
+              <th rowspan="2" class="w-col-summary px-2.5 py-1.5 border-r-2 border-leaf-400 text-right bg-leaf-900 text-leaf-200">
                 <div>รวมคงเหลือ</div>
-                <div class="text-[9.5px] font-normal text-leaf-300">(หน่วยใหญ่ / บาท)</div>
+                <div class="text-[9px] font-normal text-leaf-300">(ใหญ่ / บาท)</div>
               </th>
 
               <!-- Forecast Columns -->
@@ -372,50 +386,50 @@
                 รายการขออนุมัติสั่งซื้อ
               </th>
 
-              <th rowspan="2" class="px-2 py-1.5 text-center bg-earth-900 min-w-[70px]">ประวัติ</th>
+              <th rowspan="2" class="w-col-action px-2 py-1.5 text-center bg-earth-900">ประวัติ</th>
             </tr>
 
-            <!-- Layer 2: Sub-headers -->
+            <!-- Layer 2: Sub-headers (กำหนดความกว้างเป๊ะทุกช่อง) -->
             <tr class="bg-earth-800 text-cream-200 text-[10px] sticky-header">
               <!-- Sales 68 Sub-headers -->
-              <th class="col-tn px-2 py-1 text-right border-r border-earth-700">TN (1-5)</th>
-              <th class="col-tn px-2 py-1 text-right border-r border-earth-700">TN (6)</th>
-              <th class="col-cks px-2 py-1 text-right border-r border-earth-700">
+              <th class="col-tn w-col-num px-2 py-1 text-right border-r border-earth-700">TN (1-5)</th>
+              <th class="col-tn w-col-num px-2 py-1 text-right border-r border-earth-700">TN (6)</th>
+              <th class="col-cks w-col-num px-2 py-1 text-right border-r border-earth-700">
                 <div>ชาวเกษตร</div>
                 <div class="text-[9px] text-cream-300 font-normal">(30 สาขา)</div>
               </th>
-              <th class="px-2 py-1 text-right font-bold border-r border-earth-700">รวม (ย่อย)</th>
+              <th class="w-col-total px-2 py-1 text-right font-bold border-r border-earth-700">รวม (ย่อย)</th>
 
               <!-- Sales 69 Sub-headers -->
-              <th class="col-tn px-2 py-1 text-right border-r border-earth-700">TN (1-5)</th>
-              <th class="col-tn px-2 py-1 text-right border-r border-earth-700">TN (6)</th>
-              <th class="col-cks px-2 py-1 text-right border-r border-earth-700">
+              <th class="col-tn w-col-num px-2 py-1 text-right border-r border-earth-700">TN (1-5)</th>
+              <th class="col-tn w-col-num px-2 py-1 text-right border-r border-earth-700">TN (6)</th>
+              <th class="col-cks w-col-num px-2 py-1 text-right border-r border-earth-700">
                 <div>ชาวเกษตร</div>
                 <div class="text-[9px] text-cream-300 font-normal">(37 สาขา)</div>
               </th>
-              <th class="px-2 py-1 text-right font-bold border-r border-earth-700">รวม (ย่อย)</th>
+              <th class="w-col-total px-2 py-1 text-right font-bold border-r border-earth-700">รวม (ย่อย)</th>
 
               <!-- Stock Sub-headers -->
-              <th class="col-tn px-2 py-1 text-right border-r border-earth-700">ปากช่อง</th>
-              <th class="col-tn px-2 py-1 text-right border-r border-earth-700">โคราช</th>
-              <th class="col-tn px-2 py-1 text-right border-r border-earth-700">ชัยภูมิ</th>
-              <th class="col-cks px-2 py-1 text-right border-r border-earth-700">
+              <th class="col-tn w-col-num px-2 py-1 text-right border-r border-earth-700">ปากช่อง</th>
+              <th class="col-tn w-col-num px-2 py-1 text-right border-r border-earth-700">โคราช</th>
+              <th class="col-tn w-col-num px-2 py-1 text-right border-r border-earth-700">ชัยภูมิ</th>
+              <th class="col-cks w-col-num px-2 py-1 text-right border-r border-earth-700">
                 <div>ชาวเกษตร</div>
                 <div class="text-[9px] text-cream-300 font-normal">(41 สาขา)</div>
               </th>
-              <th class="px-2 py-1 text-right font-bold border-r border-earth-700">รวม (ย่อย)</th>
+              <th class="w-col-total px-2 py-1 text-right font-bold border-r border-earth-700">รวม (ย่อย)</th>
 
-              <!-- Dynamic Forecast Sub-headers -->
-              <th id="thForecastCols" colspan="2" class="px-2 py-1 text-center border-r border-earth-700">
-                เป้าขาย
+              <!-- Dynamic Forecast Sub-headers (Container) -->
+              <th id="thForecastColsContainer" colspan="2" class="p-0 border-r border-earth-700">
+                <div id="thForecastCols" class="flex items-center h-full"></div>
               </th>
-              <th class="px-2 py-1 text-center border-r border-earth-700 min-w-[90px]">สถานะ</th>
+              <th class="w-col-status px-2 py-1 text-center border-r border-earth-700">สถานะ</th>
 
               <!-- PO Sub-headers -->
-              <th class="col-po-only hidden px-2 py-1 text-center border-r border-earth-700 min-w-[95px]">จำนวนสั่ง (ใหญ่)</th>
-              <th class="col-po-only hidden px-2 py-1 text-center border-r border-earth-700 min-w-[85px]">แถม (ใหญ่)</th>
-              <th class="col-po-only hidden px-2 py-1 text-right border-r border-earth-700 min-w-[90px]">มูลค่าซื้อ</th>
-              <th class="col-po-only hidden px-2 py-1 text-left border-r border-earth-700 min-w-[150px]">หมายเหตุ & แนะนำ</th>
+              <th class="col-po-only hidden w-col-order px-2 py-1 text-center border-r border-earth-700">จำนวนสั่ง (ใหญ่)</th>
+              <th class="col-po-only hidden w-col-free px-2 py-1 text-center border-r border-earth-700">แถม (ใหญ่)</th>
+              <th class="col-po-only hidden w-col-val px-2 py-1 text-right border-r border-earth-700">มูลค่าซื้อ</th>
+              <th class="col-po-only hidden w-col-note px-2 py-1 text-left border-r border-earth-700">หมายเหตุ & แนะนำ</th>
             </tr>
           </thead>
 
@@ -512,7 +526,7 @@
           <thead class="bg-cream-200 text-earth-900 font-semibold">
             <tr>
               <th class="p-2 border-b border-r border-cream-300 text-center">ลำดับ</th>
-              <th class="p-2 border-b border-r border-cream-300">รายการสินค้า / คู่ค้า</th>
+              <th class="p-2 border-b border-r border-cream-300">รายการสินค้า / ประเภท</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">จำนวนสั่ง (ใหญ่)</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">จำนวนย่อย</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">แถม (ใหญ่)</th>
@@ -556,7 +570,6 @@
     let activeCompanyFilter = 'ALL';
     let activeForecastMonths = ['1', '2'];
 
-    // ระบบควบคุมจำนวนแถว (Virtual Pagination) เพื่อความลื่นไหลสูงสุด
     let visibleLimit = 80;
     const CHUNK_SIZE = 80;
 
@@ -634,19 +647,20 @@
       });
     }
 
+    // ล็อคขนาด Forecast ให้กว้างพอดีและตรงแนว
     function renderDynamicForecastHeaders() {
       const thContainer = document.getElementById('thForecastCols');
       let html = '';
       activeForecastMonths.forEach(m => {
         html += `
-          <div class="inline-block px-2 text-center border-r border-earth-700 last:border-0">
+          <div class="w-col-fc flex-1 h-full flex flex-col justify-center px-1 text-center border-r border-earth-700 last:border-0">
             <div>เป้า ${m} ด.</div>
-            <div class="text-[9px] font-normal text-cream-300">(หน่วยใหญ่)</div>
+            <div class="text-[9px] font-normal text-cream-300">(ใหญ่)</div>
           </div>
         `;
       });
-      thContainer.innerHTML = `<div class="flex items-center justify-around">${html}</div>`;
-      thContainer.setAttribute('colspan', activeForecastMonths.length);
+      thContainer.innerHTML = html;
+      document.getElementById('thForecastColsContainer').setAttribute('colspan', activeForecastMonths.length);
       document.getElementById('hdrForecastGroup').setAttribute('colspan', activeForecastMonths.length + 1);
     }
 
@@ -670,8 +684,10 @@
         btnOpenAPO.classList.add('inline-flex');
         poCols.forEach(c => c.classList.remove('hidden'));
       }
+      renderTable();
     }
 
+    // ปรับ colspan ให้ตรงเป๊ะทุกครั้งที่กดสลับมุมมองบริษัท เพื่อไม่ให้แนวตั้งเบี้ยว
     function setCompanyFilter(comp) {
       activeCompanyFilter = comp;
       ['ALL', 'TN', 'CKS'].forEach(c => {
@@ -817,12 +833,13 @@
       document.getElementById('badgeAPOCount').innerText = orderItemsCount;
     }
 
+    // เรนเดอร์ตาราง: บังคับคลาสความกว้างตรงกับหัวตาราง 100%
     function renderTable() {
       const tbody = document.getElementById('tableBody');
       const totalLen = currentFiltered.length;
 
       if (totalLen === 0) {
-        tbody.innerHTML = `<tr><td colspan="30" class="text-center py-10 text-earth-600">ไม่พบข้อมูลที่ตรงกับเงื่อนไขการค้นหา</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="35" class="text-center py-10 text-earth-600">ไม่พบข้อมูลที่ตรงกับเงื่อนไขการค้นหา</td></tr>`;
         document.getElementById('filteredRowCount').innerText = "0";
         document.getElementById('btnLoadMore').classList.add('hidden');
         document.getElementById('btnLoadAll').classList.add('hidden');
@@ -855,69 +872,79 @@
 
         html += `
           <tr class="${rowClass}">
-            <td class="sticky-col-1 bg-white px-3 py-2 border-r border-cream-300">
+            <!-- 1. รายการสินค้า / ประเภทสินค้า / หน่วยขาย (ตัดคู่ค้าออกแล้ว) -->
+            <td class="sticky-col-1 w-col-product px-3 py-2 border-r border-cream-300">
               <div class="font-semibold text-earth-900 leading-tight">${p.name}</div>
               <div class="flex flex-wrap items-center gap-1.5 mt-1 text-[11px] text-earth-700">
-                <span class="px-1.5 py-0.2 rounded bg-leaf-50 text-leaf-800 border border-leaf-200 font-medium">${p.supplier}</span>
+                <span class="px-1.5 py-0.2 rounded bg-leaf-50 text-leaf-800 border border-leaf-200 font-medium">${p.category || 'ทั่วไป'}</span>
                 <span class="px-1.5 py-0.2 rounded bg-cream-200 border border-cream-300">${cleanSubUnit}</span>
                 <span class="text-earth-600">(1*${mul} ${p.unitBig})</span>
                 ${p.genericName ? `<span class="text-earth-600">| ${p.genericName}</span>` : ''}
               </div>
             </td>
 
-            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales68_tn_1_5)}</td>
-            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales68_tn_6)}</td>
-            <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales68_cks)}</td>
-            <td class="px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(tot68Sub)}</td>
+            <!-- 2. ขายปี 68 -->
+            <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.sales68_tn_1_5)}</td>
+            <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.sales68_tn_6)}</td>
+            <td class="col-cks w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'TN' ? 'hidden' : ''}">${fmtZero(p.sales68_cks)}</td>
+            <td class="w-col-total px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(tot68Sub)}</td>
             
-            <td class="px-2.5 py-1 text-right bg-amber-50/80 border-r-2 border-cream-400">
+            <!-- รวมขาย 68 -->
+            <td class="w-col-summary px-2.5 py-1 text-right bg-amber-50/80 border-r-2 border-cream-400">
               <div class="font-extrabold text-earth-900 text-xs">
                 ${tot68Big > 0 ? `${tot68Big.toLocaleString()} <span class="text-[10px] font-normal text-earth-600">${p.unitBig}</span>` : ''}
               </div>
-              <div class="text-[10.5px] font-mono text-amber-900 mt-0.5">${fmtZero(p.sales68_val)}</div>
+              <div class="text-[10px] font-mono text-amber-900 mt-0.5">${fmtZero(p.sales68_val)}</div>
             </td>
 
-            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales69_tn_1_5)}</td>
-            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales69_tn_6)}</td>
-            <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales69_cks)}</td>
-            <td class="px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(tot69Sub)}</td>
+            <!-- 3. ขายปี 69 -->
+            <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.sales69_tn_1_5)}</td>
+            <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.sales69_tn_6)}</td>
+            <td class="col-cks w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'TN' ? 'hidden' : ''}">${fmtZero(p.sales69_cks)}</td>
+            <td class="w-col-total px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(tot69Sub)}</td>
             
-            <td class="px-2.5 py-1 text-right bg-amber-50/80 border-r-2 border-cream-400">
+            <!-- รวมขาย 69 -->
+            <td class="w-col-summary px-2.5 py-1 text-right bg-amber-50/80 border-r-2 border-cream-400">
               <div class="font-extrabold text-earth-900 text-xs">
                 ${tot69Big > 0 ? `${tot69Big.toLocaleString()} <span class="text-[10px] font-normal text-earth-600">${p.unitBig}</span>` : ''}
               </div>
-              <div class="text-[10.5px] font-mono text-amber-900 mt-0.5">${fmtZero(p.sales69_val)}</div>
+              <div class="text-[10px] font-mono text-amber-900 mt-0.5">${fmtZero(p.sales69_val)}</div>
             </td>
 
-            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.stock_pc)}</td>
-            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.stock_kr)}</td>
-            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.stock_cyp)}</td>
-            <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.stock_cks)}</td>
-            <td class="px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(totStockSub)}</td>
+            <!-- 4. คลังคงเหลือ -->
+            <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.stock_pc)}</td>
+            <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.stock_kr)}</td>
+            <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.stock_cyp)}</td>
+            <td class="col-cks w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'TN' ? 'hidden' : ''}">${fmtZero(p.stock_cks)}</td>
+            <td class="w-col-total px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(totStockSub)}</td>
             
-            <td class="px-2.5 py-1 text-right bg-leaf-100/80 border-r-2 border-leaf-400">
+            <!-- รวมคงเหลือ -->
+            <td class="w-col-summary px-2.5 py-1 text-right bg-leaf-100/80 border-r-2 border-leaf-400">
               <div class="font-extrabold text-leaf-900 text-xs">
                 ${totStockBig > 0 ? `${totStockBig.toLocaleString()} <span class="text-[10px] font-normal text-leaf-800">${p.unitBig}</span>` : ''}
               </div>
-              <div class="text-[10.5px] font-mono text-leaf-800 mt-0.5">${fmtZero(p.stock_val)}</div>
+              <div class="text-[10px] font-mono text-leaf-800 mt-0.5">${fmtZero(p.stock_val)}</div>
             </td>
 
+            <!-- 5. Forecasts -->
             ${activeForecastMonths.map(m => {
               const runRate = ((tot69Sub / 10) || 0) * parseFloat(m);
               const fcBig = Math.ceil(runRate / mul);
               return `
-                <td class="px-2 py-1.5 text-right border-r border-cream-300">
+                <td class="w-col-fc px-1.5 py-1.5 text-right border-r border-cream-300">
                   <div class="font-semibold text-earth-900">${fmtZero(fcBig)}</div>
-                  <div class="text-[10px] text-earth-600">${fcBig > 0 ? p.unitBig : ''}</div>
+                  <div class="text-[9px] text-earth-600">${fcBig > 0 ? p.unitBig : ''}</div>
                 </td>
               `;
             }).join('')}
 
-            <td class="px-2 py-1.5 text-center">
+            <!-- สถานะ -->
+            <td class="w-col-status px-2 py-1.5 text-center border-r border-cream-300">
               <span class="inline-block px-2 py-0.5 rounded text-[11px] font-semibold ${st.badge}">${st.label}</span>
             </td>
 
-            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 text-center">
+            <!-- 6. PO Section -->
+            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} w-col-order px-2 py-1.5 text-center">
               <div class="flex items-center justify-center gap-1">
                 <input type="number" min="0" step="any" value="${p.orderBigQty > 0 ? p.orderBigQty : ''}" placeholder="" onchange="updateOrderItem('${p.id}', 'order', this.value)" class="w-16 px-1.5 py-1 text-center font-bold text-xs border border-cream-300 rounded focus:border-leaf-600 focus:outline-none bg-amber-50/40">
                 <span class="text-[11px] text-earth-700">${p.unitBig}</span>
@@ -925,7 +952,7 @@
               <div class="text-[10px] text-earth-600 mt-0.5">${orderSub > 0 ? `${orderSub.toLocaleString()} ${cleanSubUnit}` : ''}</div>
             </td>
 
-            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 text-center">
+            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} w-col-free px-2 py-1.5 text-center">
               <div class="flex items-center justify-center gap-1">
                 <input type="number" min="0" step="any" value="${p.freeBigQty > 0 ? p.freeBigQty : ''}" placeholder="" onchange="updateOrderItem('${p.id}', 'free', this.value)" class="w-14 px-1.5 py-1 text-center font-bold text-xs border border-cream-300 rounded focus:border-leaf-600 focus:outline-none bg-amber-50/40">
                 <span class="text-[11px] text-earth-700">${p.unitBig}</span>
@@ -933,16 +960,17 @@
               <div class="text-[10px] text-earth-600 mt-0.5">${freeSub > 0 ? `${freeSub.toLocaleString()} ${cleanSubUnit}` : ''}</div>
             </td>
 
-            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 text-right font-mono text-leaf-800 font-semibold">
+            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} w-col-val px-2 py-1.5 text-right font-mono text-leaf-800 font-semibold">
               ${fmtZero(orderVal)}
             </td>
 
-            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 text-left">
+            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} w-col-note px-2 py-1.5 text-left">
               <input type="text" value="${p.notes || ''}" placeholder="ระบุหมายเหตุ..." onchange="updateOrderItem('${p.id}', 'notes', this.value)" class="w-full px-1.5 py-1 text-[11px] border border-cream-300 rounded bg-white focus:outline-none">
               ${p.suggestion ? `<div class="text-[10px] text-earth-600 mt-0.5 leading-tight">💡 ${p.suggestion}</div>` : ''}
             </td>
 
-            <td class="px-2 py-1.5 text-center">
+            <!-- 7. ดูประวัติ -->
+            <td class="w-col-action px-1 py-1.5 text-center">
               <button onclick="openMonthlyModal('${p.id}')" class="px-2 py-1 rounded bg-cream-200 hover:bg-cream-300 text-earth-800 text-[11px] font-semibold">
                 📊 ดู
               </button>
@@ -981,7 +1009,7 @@
       const p = rawProducts.find(item => item.id === productId);
       if (!p) return;
 
-      document.getElementById('modalProductCode').innerText = `${p.supplier} | ${p.category}`;
+      document.getElementById('modalProductCode').innerText = `${p.category || 'สินค้าเกษตร'} | ${p.supplier}`;
       document.getElementById('modalProductName').innerText = p.name;
 
       const months = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
@@ -1032,7 +1060,7 @@
           html += `
             <tr>
               <td class="p-2 text-center">${idx + 1}</td>
-              <td class="p-2 font-medium">${p.name} <span class="text-[11px] text-earth-600">(${p.supplier})</span></td>
+              <td class="p-2 font-medium">${p.name} <span class="text-[11px] text-earth-600">(${p.category || 'ทั่วไป'})</span></td>
               <td class="p-2 text-right font-bold">${p.orderBigQty} ${p.unitBig}</td>
               <td class="p-2 text-right">${subQty.toLocaleString()} ${cleanSub}</td>
               <td class="p-2 text-right">${p.freeBigQty || 0} ${p.unitBig}</td>
@@ -1062,9 +1090,9 @@
 
         return {
           'ชื่อสินค้า': p.name,
+          'ประเภทสินค้า': p.category,
           'ชื่อสามัญ': p.genericName || '-',
           'บริษัทคู่ค้า': p.supplier,
-          'ประเภท': p.category,
           'หน่วยย่อย': getCleanUnitName(p.unitSub),
           'หน่วยใหญ่': p.unitBig,
           'หน่วยคูณ': mul,
@@ -1101,9 +1129,6 @@
       XLSX.writeFile(wb, `รายงานสต็อค_ตังนำเกษตร_ชาวเกษตร_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    /**
-     * ดึงข้อมูลจริงจาก Google Sheets พร้อมตรวจหาตำแหน่งคอลัมน์อัตโนมัติ
-     */
     async function fetchGoogleSheetData() {
       const syncBadge = document.getElementById('syncBadge');
       const syncText = document.getElementById('syncStatusText');
@@ -1123,7 +1148,6 @@
         const json = JSON.parse(match[1]);
         const rows = json.table.rows;
 
-        // ดึงวันที่และเวลา
         if (rows.length > 0 && rows[0].c) {
           const r0 = rows[0].c;
           for (let k = 0; k < r0.length; k++) {
@@ -1137,9 +1161,7 @@
           updateDateTimeLabels();
         }
 
-        // ==========================================
-        // ระบบตรวจหาตำแหน่งคอลัมน์อัตโนมัติจากชื่อหัวตาราง
-        // ==========================================
+        // ค้นหาตำแหน่งคอลัมน์อัตโนมัติจากชื่อหัวตาราง
         let categoryColIndex = 98; // ค่าเริ่มต้นถ้าหาไม่เจอ (CU)
         let supplierColIndex = 95; // คอลัมน์ CR
         let genericColIndex = 96;  // คอลัมน์ CS
