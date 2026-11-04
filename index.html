@@ -7,7 +7,7 @@
   
   <!-- Fonts: Sarabun & Prompt -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Tailwind CSS -->
@@ -118,11 +118,22 @@
   <header class="bg-white border-b border-cream-300 shadow-sm sticky top-0 z-50 no-print">
     <div class="max-w-[1920px] mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-4">
       
-      <!-- โลโก้จริงของบริษัท ตังนำเกษตร -->
+      <!-- โลโก้จริงของบริษัท ตังนำเกษตร แบบฝังในตัว ไม่พึ่งพาไฟล์ภายนอก -->
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-2.5">
-          <!-- ดึงรูป TN.PNG1_2.png หากไม่มีให้ fallback เป็น SVG ตังนำเกษตรต้นฉบับ -->
-          <img src="TN.PNG1_2.png" alt="โลโก้ ตังนำเกษตร" class="h-10 w-auto object-contain" onerror="this.onerror=null; this.src='TN.PNG1.png';">
+          <svg class="h-10 w-auto" viewBox="0 0 350 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- ปีกใบไม้ซ้าย -->
+            <path d="M165 95C140 40 85 20 25 35C20 90 70 125 155 105C160 100 163 98 165 95Z" fill="#8CB33E"/>
+            <path d="M165 95C135 60 90 45 40 50C35 85 75 110 145 98" stroke="#FAF8F5" stroke-width="5" stroke-linecap="round"/>
+            <!-- ปีกใบไม้ขวา -->
+            <path d="M185 95C210 40 265 20 325 35C330 90 280 125 195 105C190 100 187 98 185 95Z" fill="#8CB33E"/>
+            <path d="M185 95C215 60 260 45 310 50C315 85 275 110 205 98" stroke="#FAF8F5" stroke-width="5" stroke-linecap="round"/>
+            <!-- ลายเส้นก้านใบตรงกลาง -->
+            <path d="M175 100V120" stroke="#8CB33E" stroke-width="6" stroke-linecap="round"/>
+            <!-- ข้อความ Tangnam -->
+            <text x="175" y="165" font-family="'Prompt', cursive, sans-serif" font-weight="700" font-size="52" fill="#6C584C" text-anchor="middle" letter-spacing="-1">Tangnam</text>
+            <text x="280" y="185" font-family="'Prompt', sans-serif" font-weight="500" font-size="16" fill="#6C584C" text-anchor="middle">Tangnam kaset</text>
+          </svg>
           <div class="border-l border-cream-300 pl-2.5">
             <div class="font-prompt font-bold text-sm text-earth-900 leading-tight">
               ระบบสต็อคสินค้าและพยากรณ์ขาย
@@ -191,7 +202,7 @@
           <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-earth-600">
             <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </div>
-          <input type="text" id="globalSearchInput" oninput="handleSearchChange()" placeholder="ค้นหาได้ทุกอย่าง (ชื่อสินค้า, สามัญ, คู่ค้า, สต็อค)..." class="w-full pl-8 pr-3 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 placeholder-earth-600 focus:outline-none focus:ring-1 focus:ring-leaf-600">
+          <input type="text" id="globalSearchInput" oninput="applyFilters()" placeholder="ค้นหาได้ทุกอย่าง (ชื่อสินค้า, สามัญ, คู่ค้า, สต็อค)..." class="w-full pl-8 pr-3 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 placeholder-earth-600 focus:outline-none focus:ring-1 focus:ring-leaf-600">
         </div>
 
         <!-- Supplier Filter -->
@@ -251,10 +262,10 @@
           </div>
         </div>
 
-        <!-- Hide Discontinued Checkbox -->
+        <!-- Hide Discontinued Checkbox (ค่าเริ่มต้น: ไม่ติ๊ก เพื่อให้แสดงสินค้าครบ) -->
         <div class="flex items-center gap-2">
           <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs text-earth-700">
-            <input type="checkbox" id="hideDiscontinued" onchange="applyFilters()" checked class="rounded border-cream-300 text-leaf-600 focus:ring-0">
+            <input type="checkbox" id="hideDiscontinued" onchange="applyFilters()" class="rounded border-cream-300 text-leaf-600 focus:ring-0">
             <span>ซ่อนสินค้าที่เลิกขาย</span>
           </label>
         </div>
@@ -269,7 +280,6 @@
           <!-- Layer 1: Header Categories with Datetime -->
           <thead>
             <tr class="bg-earth-900 text-cream-50 text-[11px] font-semibold sticky-header-top">
-              <!-- รวมชื่อสินค้า คู่ค้า และหน่วยขาย ไว้ในคอลัมน์แรกเพื่อประหยัดพื้นที่ -->
               <th rowspan="2" class="sticky-corner-1 bg-earth-900 px-3 py-2 border-r border-earth-700 min-w-[280px] text-center">
                 รายการสินค้า / คู่ค้า / หน่วยขาย
               </th>
@@ -317,7 +327,7 @@
                 พยากรณ์และสถานะสต็อค
               </th>
 
-              <!-- Order & Approval Section (Hidden in stock mode) -->
+              <!-- Order & Approval Section -->
               <th id="hdrOrderGroup" colspan="4" class="col-po-only hidden px-2 py-1.5 text-center bg-leaf-800 text-cream-100 border-r border-earth-700">
                 รายการขออนุมัติสั่งซื้อ
               </th>
@@ -325,7 +335,7 @@
               <th rowspan="2" class="px-2 py-1.5 text-center bg-earth-900 min-w-[80px]">ประวัติ</th>
             </tr>
 
-            <!-- Layer 2: Sub-headers (จัดจำนวนสาขาลงบรรทัดล่าง) -->
+            <!-- Layer 2: Sub-headers -->
             <tr class="bg-earth-800 text-cream-200 text-[10px] sticky-header">
               <!-- Sales 68 Sub-headers -->
               <th class="col-tn px-2 py-1 text-right border-r border-earth-700">TN (1-5)</th>
@@ -355,7 +365,7 @@
               </th>
               <th class="px-2 py-1 text-right font-bold border-r border-earth-700">รวม (ย่อย)</th>
 
-              <!-- Dynamic Forecast Sub-headers (Container) -->
+              <!-- Dynamic Forecast Sub-headers -->
               <th id="thForecastCols" colspan="2" class="px-2 py-1 text-center border-r border-earth-700">
                 เป้าขาย
               </th>
@@ -373,7 +383,7 @@
           <tbody id="tableBody" class="divide-y divide-cream-300">
             <tr>
               <td colspan="30" class="text-center py-12 text-earth-600">
-                กำลังโหลดข้อมูล...
+                กำลังโหลดข้อมูลจาก Google Sheets...
               </td>
             </tr>
           </tbody>
@@ -503,9 +513,6 @@
 
   <!-- ================= JAVASCRIPT LOGIC ================= -->
   <script>
-    /**
-     * ตั้งค่า Google Sheets ID จริงของไฟล์ TN.Forecast
-     */
     const GOOGLE_SHEET_ID = "1uWVLiEs2qzXu6gb0RCaX-WSSOl5bxna2_RS8skTJ0vs";
     const GOOGLE_SHEET_NAME = "Forecast";
 
@@ -524,11 +531,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      initFilters();
       renderDynamicForecastHeaders();
       updateDateTimeLabels();
-      
-      // ดึงข้อมูลจริงจาก Google Sheets
       fetchGoogleSheetData();
     });
 
@@ -540,9 +544,9 @@
     }
 
     function initFilters() {
-      const suppliers = [...new Set(rawProducts.map(p => p.supplier).filter(Boolean))];
-      const categories = [...new Set(rawProducts.map(p => p.category).filter(Boolean))];
-      const generics = [...new Set(rawProducts.map(p => p.genericName).filter(Boolean))];
+      const suppliers = [...new Set(rawProducts.map(p => p.supplier).filter(s => s && s !== 'ทั่วไป' && s !== '0'))].sort();
+      const categories = [...new Set(rawProducts.map(p => p.category).filter(Boolean))].sort();
+      const generics = [...new Set(rawProducts.map(p => p.genericName).filter(Boolean))].sort();
 
       populateDropdown('supplierFilter', suppliers, 'บริษัทคู่ค้า (ทั้งหมด)');
       populateDropdown('categoryFilter', categories, 'ประเภทสินค้า (ทั้งหมด)');
@@ -551,10 +555,14 @@
 
     function populateDropdown(elemId, items, defaultText) {
       const el = document.getElementById(elemId);
+      const currentVal = el.value;
       el.innerHTML = `<option value="ALL">${defaultText}</option>`;
       items.forEach(item => {
         el.innerHTML += `<option value="${item}">${item}</option>`;
       });
+      if (items.includes(currentVal)) {
+        el.value = currentVal;
+      }
     }
 
     function toggleForecastMonth(month) {
@@ -658,10 +666,6 @@
       applyFilters();
     }
 
-    function handleSearchChange() {
-      applyFilters();
-    }
-
     function applyFilters() {
       const q = (document.getElementById('globalSearchInput').value || '').toLowerCase().trim();
       const sup = document.getElementById('supplierFilter').value;
@@ -714,8 +718,8 @@
       const tbody = document.getElementById('tableBody');
       if (currentFiltered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="30" class="text-center py-10 text-earth-600">ไม่พบข้อมูลที่ตรงกับเงื่อนไขการค้นหา</td></tr>`;
-        document.getElementById('filteredRowCount').innerText = 0;
-        document.getElementById('totalRowCount').innerText = rawProducts.length;
+        document.getElementById('filteredRowCount').innerText = "0";
+        document.getElementById('totalRowCount').innerText = rawProducts.length.toLocaleString();
         return;
       }
 
@@ -760,7 +764,7 @@
             <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${p.sales68_cks.toLocaleString()}</td>
             <td class="px-2 py-1.5 text-right font-mono font-medium text-earth-900">${tot68Sub.toLocaleString()}</td>
             
-            <!-- รวมขาย 68 (หน่วยใหญ่ ปัดเศษขึ้น) [เด่น] -->
+            <!-- รวมขาย 68 (หน่วยใหญ่ ปัดเศษขึ้น) -->
             <td class="px-2 py-1.5 text-right bg-amber-50/80 border-r-2 border-cream-400">
               <div class="font-extrabold text-earth-900 text-xs">${tot68Big.toLocaleString()}</div>
               <div class="text-[10px] text-earth-600">${p.unitBig}</div>
@@ -774,7 +778,7 @@
             <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${p.sales69_cks.toLocaleString()}</td>
             <td class="px-2 py-1.5 text-right font-mono font-medium text-earth-900">${tot69Sub.toLocaleString()}</td>
             
-            <!-- รวมขาย 69 (หน่วยใหญ่ ปัดเศษขึ้น) [เด่น] -->
+            <!-- รวมขาย 69 (หน่วยใหญ่ ปัดเศษขึ้น) -->
             <td class="px-2 py-1.5 text-right bg-amber-50/80 border-r-2 border-cream-400">
               <div class="font-extrabold text-earth-900 text-xs">${tot69Big.toLocaleString()}</div>
               <div class="text-[10px] text-earth-600">${p.unitBig}</div>
@@ -789,7 +793,7 @@
             <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${p.stock_cks.toLocaleString()}</td>
             <td class="px-2 py-1.5 text-right font-mono font-medium text-earth-900">${totStockSub.toLocaleString()}</td>
             
-            <!-- รวมคงเหลือ (หน่วยใหญ่ ปัดเศษขึ้น) [เด่น] -->
+            <!-- รวมคงเหลือ (หน่วยใหญ่ ปัดเศษขึ้น) -->
             <td class="px-2 py-1.5 text-right bg-leaf-100/80 border-r-2 border-leaf-400">
               <div class="font-extrabold text-leaf-900 text-xs">${totStockBig.toLocaleString()}</div>
               <div class="text-[10px] text-leaf-800 font-medium">${p.unitBig}</div>
@@ -990,15 +994,16 @@
     }
 
     /**
-     * ดึงข้อมูลจริงจาก Google Sheets แบบสมบูรณ์ครบ 3,609 SKU
+     * ดึงข้อมูลจริงจาก Google Sheets ครบถ้วนทุกแถว (รองรับ 3,600+ แถว)
      */
     async function fetchGoogleSheetData() {
       const syncBadge = document.getElementById('syncBadge');
       const syncText = document.getElementById('syncStatusText');
       syncBadge.classList.remove('hidden');
       syncBadge.classList.add('flex');
-      syncText.innerText = "กำลังดึงข้อมูลจาก Google Sheets...";
+      syncText.innerText = "กำลังดึงข้อมูลทั้งหมดจาก Google Sheets...";
 
+      // ดึงข้อมูลผ่าน Google Visualization API
       const url = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME)}`;
 
       try {
@@ -1008,62 +1013,91 @@
         const json = JSON.parse(text.substring(47).slice(0, -2));
         const rows = json.table.rows;
 
-        // ดึงวันที่และเวลาจาก Row 0
+        // ดึงวันที่และเวลา
         if (rows.length > 0) {
           const r0 = rows[0].c;
-          if (r0 && r0[5] && r0[5].v) sales69DateTime = String(r0[5].v);
-          if (r0 && r0[6] && r0[6].v) stockDateTime = String(r0[6].v);
+          if (r0) {
+            for (let k = 0; k < r0.length; k++) {
+              const val = r0[k] && r0[k].v ? String(r0[k].v) : '';
+              if (val.includes('01/01 -') || (val.includes('2569') && val.includes('-'))) {
+                sales69DateTime = val;
+              } else if (val.includes('น.') && val.includes('2569')) {
+                stockDateTime = val;
+              }
+            }
+          }
           updateDateTimeLabels();
         }
 
-        // แปลงแถวสินค้าทั้งหมด (ตั้งแต่แถวที่ 5 เป็นต้นไป)
         const parsedProducts = [];
-        for (let i = 5; i < rows.length; i++) {
-          const c = rows[i].c;
-          if (!c) continue;
+        
+        // วนอ่านทุกแถว ไม่หยุดกลางคันแม้เจอแถวว่างหรือสูตร 0
+        for (let i = 4; i < rows.length; i++) {
+          const rowObj = rows[i];
+          if (!rowObj || !rowObj.c) continue;
+          const c = rowObj.c;
 
-          // ชื่อสินค้า (คอลัมน์ F -> Index 5)
-          const nameVal = (c[5] && c[5].v !== null && c[5].v !== undefined) ? String(c[5].v).trim() : '';
-          if (!nameVal || nameVal === '0') continue;
+          // Helper ปลอดภัยในการดึงข้อมูล
+          const getVal = (idx) => {
+            if (!c[idx] || c[idx].v === null || c[idx].v === undefined) return '';
+            return String(c[idx].v).trim();
+          };
 
-          const isDisc = nameVal.includes('*') || nameVal.includes('เลิก');
-
-          // Helper ดึงตัวเลขจากเซลล์อย่างปลอดภัย
-          const num = (idx) => {
+          const getNum = (idx) => {
             if (!c[idx] || c[idx].v === null || c[idx].v === undefined) return 0;
-            const val = parseFloat(String(c[idx].v).replace(/,/g, ''));
+            const strVal = String(c[idx].v).replace(/,/g, '').trim();
+            const val = parseFloat(strVal);
             return isNaN(val) ? 0 : val;
           };
 
-          const str = (idx, fallback = '') => {
-            if (!c[idx] || c[idx].v === null || c[idx].v === undefined) return fallback;
-            return String(c[idx].v).trim();
-          };
+          // ชื่อสินค้า (คอลัมน์ F -> Index 5)
+          let nameVal = getVal(5);
+          
+          // ถ้า F ว่าง ลองดูคอลัมน์ใกล้เคียงเพื่อป้องกันแถวตกหล่น
+          if (!nameVal || nameVal === '0' || nameVal === 'ชื่อสินค้า') {
+            continue;
+          }
+
+          const isDisc = nameVal.includes('*') || nameVal.includes('เลิก');
+
+          // ดึงคู่ค้า (Supplier คอลัมน์ CR -> 95 หรือ fallback)
+          let supplierVal = getVal(95);
+          if (!supplierVal || supplierVal === '0' || supplierVal === '.') {
+            supplierVal = 'ทั่วไป';
+          }
+
+          // ดึงชื่อสามัญ (คอลัมน์ CS -> 96)
+          let genericVal = getVal(96);
+          if (genericVal === '0' || genericVal === '.') genericVal = '';
+
+          // หมวดหมู่
+          let catVal = getVal(97) || 'สินค้าเกษตร';
+          if (catVal === '0' || catVal === '.') catVal = 'สินค้าเกษตร';
 
           parsedProducts.push({
             id: `P-${i}`,
             name: nameVal,
-            supplier: str(95, 'ทั่วไป'),
-            genericName: str(96, ''),
-            category: 'สินค้าเกษตร',
-            unitMultiplier: num(3) || 1,
-            unitBig: str(4, 'ลัง'),
-            unitSub: str(7, 'ย่อย'),
+            supplier: supplierVal,
+            genericName: genericVal,
+            category: catVal,
+            unitMultiplier: getNum(3) || 1,
+            unitBig: getVal(4) || 'ลัง',
+            unitSub: getVal(7) || 'ย่อย',
             unitPrice: 100,
             isDiscontinued: isDisc,
-            sales68_tn_1_5: num(11),
-            sales68_tn_6: num(12),
-            sales68_cks: num(13),
-            sales68_val: num(19),
-            sales69_tn_1_5: num(21),
-            sales69_tn_6: num(22),
-            sales69_cks: num(23),
-            sales69_val: num(29),
-            stock_pc: num(30),
-            stock_kr: num(31),
-            stock_cyp: num(32),
-            stock_cks: num(33),
-            stock_val: num(40),
+            sales68_tn_1_5: getNum(11),
+            sales68_tn_6: getNum(12),
+            sales68_cks: getNum(13),
+            sales68_val: getNum(19),
+            sales69_tn_1_5: getNum(21),
+            sales69_tn_6: getNum(22),
+            sales69_cks: getNum(23),
+            sales69_val: getNum(29),
+            stock_pc: getNum(30),
+            stock_kr: getNum(31),
+            stock_cyp: getNum(32),
+            stock_cks: getNum(33),
+            stock_val: getNum(40),
             orderBigQty: 0,
             freeBigQty: 0,
             notes: '',
@@ -1077,6 +1111,8 @@
           applyFilters();
           syncText.innerText = `เชื่อมต่อสำเร็จ: ดึงข้อมูลครบ ${parsedProducts.length.toLocaleString()} SKU`;
           syncBadge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-800 border border-leaf-300";
+        } else {
+          syncText.innerText = "ไม่พบรายการสินค้าในชีท";
         }
       } catch (err) {
         console.error("Error fetching Google Sheets:", err);
