@@ -450,50 +450,55 @@
     </div>
   </main>
 
-  <!-- ================= POP-UP DRILLDOWN MODAL (YOY 2568 vs 2569) ================= -->
-  <div id="monthlyModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3">
+  <!-- ================= POP-UP DRILLDOWN MODAL (YOY 2568 vs 2569) ปรับขนาดพอดีจอ ================= -->
+  <div id="monthlyModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
     <div class="bg-white rounded-2xl max-w-4xl w-full border border-cream-300 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
-      <div class="px-5 py-3.5 bg-earth-900 text-cream-50 flex items-center justify-between">
+      
+      <!-- Header -->
+      <div class="px-5 py-3 bg-earth-900 text-cream-50 flex items-center justify-between">
         <div>
           <div class="text-xs text-leaf-300 font-semibold" id="modalProductCode">ประเภทสินค้า</div>
-          <div class="text-base font-bold font-prompt" id="modalProductName">ชื่อสินค้า</div>
+          <div class="text-base font-bold font-prompt leading-tight" id="modalProductName">ชื่อสินค้า</div>
         </div>
-        <button onclick="closeMonthlyModal()" class="text-cream-300 hover:text-white p-1 text-xl font-bold">&times;</button>
+        <button onclick="closeMonthlyModal()" class="text-cream-300 hover:text-white p-1 text-2xl font-bold leading-none">&times;</button>
       </div>
 
-      <div class="p-4 sm:p-6 overflow-y-auto flex-1 flex flex-col gap-3">
-        <!-- ตัวเลือกมุมมองใน Modal: รวม หรือ แยกบริษัท -->
-        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-cream-200 pb-2.5">
-          <h4 class="font-prompt font-semibold text-earth-900 text-sm">ประวัติยอดขายเปรียบเทียบทั้งปี (YOY 2568 vs 2569)</h4>
-          
-          <div class="flex items-center gap-1 bg-cream-100 p-0.5 rounded-lg border border-cream-300 text-xs">
-            <button onclick="changeModalView('ALL')" id="mBtnALL" class="px-2.5 py-1 rounded font-semibold bg-earth-900 text-white">รวม TN+CKS</button>
-            <button onclick="changeModalView('TN')" id="mBtnTN" class="px-2.5 py-1 rounded text-earth-700 hover:text-earth-900">เฉพาะ ตังนำ (TN)</button>
-            <button onclick="changeModalView('CKS')" id="mBtnCKS" class="px-2.5 py-1 rounded text-earth-700 hover:text-earth-900">เฉพาะ ชาวเกษตร (CKS)</button>
-          </div>
+      <!-- Controls & Views -->
+      <div class="px-5 pt-3 pb-2 flex flex-wrap items-center justify-between gap-2 border-b border-cream-200 bg-cream-50/50">
+        <h4 class="font-prompt font-semibold text-earth-900 text-xs sm:text-sm">ยอดขายเปรียบเทียบทั้งปี (YOY 2568 vs 2569)</h4>
+        
+        <div class="flex items-center gap-1 bg-cream-200 p-0.5 rounded-lg border border-cream-300 text-xs">
+          <button onclick="changeModalView('ALL')" id="mBtnALL" class="px-2.5 py-1 rounded font-semibold bg-earth-900 text-white">รวม TN+CKS</button>
+          <button onclick="changeModalView('TN')" id="mBtnTN" class="px-2.5 py-1 rounded text-earth-700 hover:text-earth-900">ตังนำ (TN)</button>
+          <button onclick="changeModalView('CKS')" id="mBtnCKS" class="px-2.5 py-1 rounded text-earth-700 hover:text-earth-900">ชาวเกษตร (CKS)</button>
         </div>
+      </div>
 
+      <!-- Table Body Container (เลื่อนได้และพอดีจอ) -->
+      <div class="p-3 sm:p-5 overflow-y-auto flex-1">
         <div class="border border-cream-300 rounded-xl overflow-hidden shadow-xs">
-          <table class="w-full text-xs text-left">
-            <thead class="bg-cream-200 text-earth-900 font-semibold">
+          <table class="w-full text-xs text-left border-collapse">
+            <thead class="bg-cream-200 text-earth-900 font-semibold sticky top-0 z-10 shadow-xs">
               <tr>
-                <th class="px-3 py-2.5 border-b border-cream-300">เดือน</th>
-                <th class="px-3 py-2.5 border-b border-cream-300 text-right bg-amber-50/50">ยอดขายปี 2568</th>
-                <th class="px-3 py-2.5 border-b border-cream-300 text-right bg-leaf-50/50">ยอดขายปี 2569</th>
-                <th class="px-3 py-2.5 border-b border-cream-300 text-right">ผลต่าง (Diff)</th>
-                <th class="px-3 py-2.5 border-b border-cream-300 text-right">% เติบโต (Growth)</th>
+                <th class="px-3 py-2 border-b border-cream-300">เดือน</th>
+                <th class="px-3 py-2 border-b border-cream-300 text-right bg-amber-100/50">ยอดขายปี 2568</th>
+                <th class="px-3 py-2 border-b border-cream-300 text-right bg-leaf-100/50">ยอดขายปี 2569</th>
+                <th class="px-3 py-2 border-b border-cream-300 text-right">ผลต่าง (Diff)</th>
+                <th class="px-3 py-2 border-b border-cream-300 text-right">% เติบโต (Growth)</th>
               </tr>
             </thead>
-            <tbody id="modalMonthlyBody" class="divide-y divide-cream-200"></tbody>
-            <tfoot class="bg-cream-100 font-bold border-t-2 border-cream-300">
-              <tr id="modalMonthlyFoot"></tr>
+            <!-- ปรับ padding ให้กระชับ มองเห็น ธ.ค. แน่นอน -->
+            <tbody id="modalMonthlyBody" class="divide-y divide-cream-200 text-[11.5px]"></tbody>
+            <tfoot class="bg-cream-100 font-bold border-t-2 border-cream-300 sticky bottom-0 z-10 shadow-xs">
+              <tr id="modalMonthlyFoot" class="bg-cream-200/90 text-xs"></tr>
             </tfoot>
           </table>
         </div>
       </div>
 
-      <div class="px-5 py-3 bg-cream-100 border-t border-cream-300 flex justify-end">
-        <button onclick="closeMonthlyModal()" class="px-4 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 text-xs font-semibold hover:bg-cream-200">
+      <!-- Footer -->
+      <div class="px-5 py-2.5 bg-cream-100 border-t border-cream-300 flex justify-end">
+        <button onclick="closeMonthlyModal()" class="px-4 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 text-xs font-semibold hover:bg-cream-200 shadow-xs">
           ปิดหน้าต่าง
         </button>
       </div>
@@ -531,7 +536,7 @@
               <th class="p-2 border-b border-r border-cream-300 text-right">จำนวนย่อย</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">แถม (ใหญ่)</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">มูลค่าซื้อ (บาท)</th>
-              <th class="p-2 border-b border-r border-cream-300">หมายเหตุ</th>
+              <th class="p-2 border-b border-cream-300">หมายเหตุ</th>
             </tr>
           </thead>
           <tbody id="apoTableBody" class="divide-y divide-cream-200"></tbody>
@@ -560,10 +565,9 @@
   <script>
     const GOOGLE_SHEET_ID = "1uWVLiEs2qzXu6gb0RCaX-WSSOl5bxna2_RS8skTJ0vs";
     
-    // ตั้งชื่อชีทแยกตามปี 68 และ 69
     const GOOGLE_SHEET_NAME_MAIN = "Forecast";
-    const GOOGLE_SHEET_NAME_68   = "ยอดขาย68"; // หรือ "Sales68"
-    const GOOGLE_SHEET_NAME_69   = "ยอดขาย69"; // หรือ "Sales69"
+    const GOOGLE_SHEET_NAME_68   = "ยอดขาย68"; 
+    const GOOGLE_SHEET_NAME_69   = "ยอดขาย69"; 
 
     let sales69DateTime = "01/01 - 03/11/2569 10.14 น.";
     let stockDateTime = "03/11/2569 10.14 น.";
@@ -577,9 +581,8 @@
     let visibleLimit = 80;
     const CHUNK_SIZE = 80;
 
-    // ตัวแปรสำหรับคุม Modal YOY
     let currentModalProduct = null;
-    let modalCompanyView = 'ALL'; // 'ALL', 'TN', 'CKS'
+    let modalCompanyView = 'ALL';
 
     function fmtZero(val) {
       if (val === null || val === undefined) return '';
@@ -1022,6 +1025,16 @@
       document.getElementById('modalProductCode').innerText = `${p.category || 'สินค้าเกษตร'} | รหัส: ${p.code || p.id}`;
       document.getElementById('modalProductName').innerText = p.name;
 
+      // รีเซ็ตปุ่มใน Modal
+      ['ALL', 'TN', 'CKS'].forEach(v => {
+        const btn = document.getElementById('mBtn' + v);
+        if (v === 'ALL') {
+          btn.className = "px-2.5 py-1 rounded font-semibold bg-earth-900 text-white";
+        } else {
+          btn.className = "px-2.5 py-1 rounded text-earth-700 hover:text-earth-900";
+        }
+      });
+
       renderMonthlyModalTable();
       document.getElementById('monthlyModal').classList.remove('hidden');
     }
@@ -1059,7 +1072,6 @@
           v68 = (p.monthly68_cks && p.monthly68_cks[idx] !== undefined) ? p.monthly68_cks[idx] : 0;
           v69 = (p.monthly69_cks && p.monthly69_cks[idx] !== undefined) ? p.monthly69_cks[idx] : 0;
         } else {
-          // รวม TN + CKS
           const tn68 = (p.monthly68_tn && p.monthly68_tn[idx] !== undefined) ? p.monthly68_tn[idx] : 0;
           const cks68 = (p.monthly68_cks && p.monthly68_cks[idx] !== undefined) ? p.monthly68_cks[idx] : 0;
           v68 = tn68 + cks68;
@@ -1080,27 +1092,28 @@
           const pct = Math.round((diff / v68) * 100);
           if (pct > 0) {
             growthText = `+${pct}%`;
-            growthClass = 'text-leaf-800 font-semibold';
+            growthClass = 'text-leaf-800 font-bold';
           } else if (pct < 0) {
             growthText = `${pct}%`;
-            growthClass = 'text-red-600 font-semibold';
+            growthClass = 'text-red-600 font-bold';
           } else {
             growthText = '0%';
           }
         } else if (v69 > 0) {
           growthText = '+100%';
-          growthClass = 'text-leaf-800 font-semibold';
+          growthClass = 'text-leaf-800 font-bold';
         }
 
+        // ใช้ py-1.5 เพื่อให้กระชับ เห็น ธ.ค. แน่นอน
         html += `
           <tr class="hover:bg-cream-100">
-            <td class="px-3 py-2 font-medium text-earth-900">${m}</td>
-            <td class="px-3 py-2 text-right font-mono bg-amber-50/20">${fmtZero(v68)}</td>
-            <td class="px-3 py-2 text-right font-mono bg-leaf-50/20 font-medium">${fmtZero(v69)}</td>
-            <td class="px-3 py-2 text-right font-mono ${diff > 0 ? 'text-leaf-800' : (diff < 0 ? 'text-red-600' : '')}">
+            <td class="px-3 py-1.5 font-medium text-earth-900">${m}</td>
+            <td class="px-3 py-1.5 text-right font-mono bg-amber-50/20">${fmtZero(v68)}</td>
+            <td class="px-3 py-1.5 text-right font-mono bg-leaf-50/20 font-medium">${fmtZero(v69)}</td>
+            <td class="px-3 py-1.5 text-right font-mono ${diff > 0 ? 'text-leaf-800 font-medium' : (diff < 0 ? 'text-red-600 font-medium' : '')}">
               ${diff > 0 ? `+${diff.toLocaleString()}` : (diff < 0 ? diff.toLocaleString() : '-')}
             </td>
-            <td class="px-3 py-2 text-right font-mono ${growthClass}">
+            <td class="px-3 py-1.5 text-right font-mono ${growthClass}">
               ${growthText}
             </td>
           </tr>
@@ -1114,15 +1127,16 @@
         totGrowth = pTotal >= 0 ? `+${pTotal}%` : `${pTotal}%`;
       }
 
+      // แสดงแถวรวมทั้งปี Total YOY ด้านล่างสุด
       document.getElementById('modalMonthlyBody').innerHTML = html;
       document.getElementById('modalMonthlyFoot').innerHTML = `
-        <td class="px-3 py-2.5">รวมทั้งปี YOY</td>
-        <td class="px-3 py-2.5 text-right font-mono text-amber-950">${fmtZero(tot68All)}</td>
-        <td class="px-3 py-2.5 text-right font-mono text-leaf-900">${fmtZero(tot69All)}</td>
-        <td class="px-3 py-2.5 text-right font-mono ${totDiff >= 0 ? 'text-leaf-900' : 'text-red-700'}">
+        <td class="px-3 py-2 font-bold text-earth-900">รวมทั้งปี (Total YOY)</td>
+        <td class="px-3 py-2 text-right font-mono font-bold text-amber-950 bg-amber-100/40">${fmtZero(tot68All)}</td>
+        <td class="px-3 py-2 text-right font-mono font-bold text-leaf-900 bg-leaf-100/40">${fmtZero(tot69All)}</td>
+        <td class="px-3 py-2 text-right font-mono font-bold ${totDiff >= 0 ? 'text-leaf-900' : 'text-red-700'}">
           ${totDiff >= 0 ? `+${totDiff.toLocaleString()}` : totDiff.toLocaleString()}
         </td>
-        <td class="px-3 py-2.5 text-right font-mono ${totDiff >= 0 ? 'text-leaf-900' : 'text-red-700'}">
+        <td class="px-3 py-2 text-right font-mono font-extrabold ${totDiff >= 0 ? 'text-leaf-900' : 'text-red-700'}">
           ${totGrowth}
         </td>
       `;
@@ -1229,7 +1243,7 @@
       const syncText = document.getElementById('syncStatusText');
       syncBadge.classList.remove('hidden');
       syncBadge.classList.add('flex');
-      syncText.innerText = "กำลังซิงค์ข้อมูลจากทุกชีท...";
+      syncText.innerText = "กำลังซิงค์ข้อมูล...";
 
       const urlMain = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME_MAIN)}`;
       const url68   = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME_68)}`;
@@ -1250,7 +1264,7 @@
         const jsonMain = JSON.parse(matchMain[1]);
         const rowsMain = jsonMain.table.rows;
 
-        // ดึงวันที่และเวลาจากแถวบนสุด
+        // ดึงวันที่และเวลา
         if (rowsMain.length > 0 && rowsMain[0].c) {
           const r0 = rowsMain[0].c;
           for (let k = 0; k < r0.length; k++) {
@@ -1264,7 +1278,7 @@
           updateDateTimeLabels();
         }
 
-        // ฟังก์ชันช่วยแยกอ่านชีทรายเดือนของแต่ละปี
+        // แยกอ่านชีทรายเดือนของแต่ละปี
         async function parseMonthlySheet(res) {
           const map = new Map();
           if (!res || !res.ok) return map;
@@ -1369,7 +1383,6 @@
           let catVal = getVal(categoryColIndex) || 'ทั่วไป';
           if (catVal === '0' || catVal === '.') catVal = 'ทั่วไป';
 
-          // แมตช์ข้อมูลยอดขายรายเดือนจากชีท ยอดขาย68 และ ยอดขาย69
           const d68 = map68.get(codeVal) || map68.get(nameVal) || { tn: new Array(12).fill(0), cks: new Array(12).fill(0) };
           const d69 = map69.get(codeVal) || map69.get(nameVal) || { tn: new Array(12).fill(0), cks: new Array(12).fill(0) };
 
@@ -1399,10 +1412,8 @@
             stock_cyp: getNum(32),
             stock_cks: getNum(33),
             stock_val: getNum(40),
-            // ข้อมูลแยก 12 เดือนของปี 68
             monthly68_tn: d68.tn,
             monthly68_cks: d68.cks,
-            // ข้อมูลแยก 12 เดือนของปี 69
             monthly69_tn: d69.tn,
             monthly69_cks: d69.cks,
             orderBigQty: 0,
