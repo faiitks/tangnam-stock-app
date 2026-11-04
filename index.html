@@ -462,9 +462,15 @@
       </div>
 
       <div class="p-4 sm:p-6 overflow-y-auto flex-1 flex flex-col gap-3">
-        <div class="flex items-center justify-between">
-          <h4 class="font-prompt font-semibold text-earth-900 text-sm">ประวัติยอดขายรายเดือนเปรียบเทียบทั้งปี (YOY 2568 vs 2569)</h4>
-          <span class="text-xs text-earth-600">หน่วยนับ: ย่อย</span>
+        <!-- ตัวเลือกมุมมองใน Modal: รวม หรือ แยกบริษัท -->
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-cream-200 pb-2.5">
+          <h4 class="font-prompt font-semibold text-earth-900 text-sm">ประวัติยอดขายเปรียบเทียบทั้งปี (YOY 2568 vs 2569)</h4>
+          
+          <div class="flex items-center gap-1 bg-cream-100 p-0.5 rounded-lg border border-cream-300 text-xs">
+            <button onclick="changeModalView('ALL')" id="mBtnALL" class="px-2.5 py-1 rounded font-semibold bg-earth-900 text-white">รวม TN+CKS</button>
+            <button onclick="changeModalView('TN')" id="mBtnTN" class="px-2.5 py-1 rounded text-earth-700 hover:text-earth-900">เฉพาะ ตังนำ (TN)</button>
+            <button onclick="changeModalView('CKS')" id="mBtnCKS" class="px-2.5 py-1 rounded text-earth-700 hover:text-earth-900">เฉพาะ ชาวเกษตร (CKS)</button>
+          </div>
         </div>
 
         <div class="border border-cream-300 rounded-xl overflow-hidden shadow-xs">
@@ -525,7 +531,7 @@
               <th class="p-2 border-b border-r border-cream-300 text-right">จำนวนย่อย</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">แถม (ใหญ่)</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">มูลค่าซื้อ (บาท)</th>
-              <th class="p-2 border-b border-cream-300">หมายเหตุ</th>
+              <th class="p-2 border-b border-r border-cream-300">หมายเหตุ</th>
             </tr>
           </thead>
           <tbody id="apoTableBody" class="divide-y divide-cream-200"></tbody>
@@ -553,7 +559,11 @@
   <!-- ================= JAVASCRIPT LOGIC ================= -->
   <script>
     const GOOGLE_SHEET_ID = "1uWVLiEs2qzXu6gb0RCaX-WSSOl5bxna2_RS8skTJ0vs";
-    const GOOGLE_SHEET_NAME = "Forecast";
+    
+    // ตั้งชื่อชีทแยกตามปี 68 และ 69
+    const GOOGLE_SHEET_NAME_MAIN = "Forecast";
+    const GOOGLE_SHEET_NAME_68   = "ยอดขาย68"; // หรือ "Sales68"
+    const GOOGLE_SHEET_NAME_69   = "ยอดขาย69"; // หรือ "Sales69"
 
     let sales69DateTime = "01/01 - 03/11/2569 10.14 น.";
     let stockDateTime = "03/11/2569 10.14 น.";
@@ -566,6 +576,10 @@
 
     let visibleLimit = 80;
     const CHUNK_SIZE = 80;
+
+    // ตัวแปรสำหรับคุม Modal YOY
+    let currentModalProduct = null;
+    let modalCompanyView = 'ALL'; // 'ALL', 'TN', 'CKS'
 
     function fmtZero(val) {
       if (val === null || val === undefined) return '';
@@ -754,7 +768,7 @@
         if (gen !== 'ALL' && p.genericName !== gen) return false;
 
         if (q) {
-          const matchString = `${p.name} ${p.genericName} ${p.category} ${p.supplier} ${p.unitSub} ${p.unitBig} ${p.notes} ${p.suggestion} ${p.statusRaw}`.toLowerCase();
+          const matchString = `${p.name} ${p.code} ${p.genericName} ${p.category} ${p.supplier} ${p.unitSub} ${p.unitBig} ${p.notes} ${p.suggestion} ${p.statusRaw}`.toLowerCase();
           if (!matchString.includes(q)) return false;
         }
 
@@ -857,15 +871,12 @@
 
         const orderSub = Math.round((p.orderBigQty || 0) * mul);
         const freeSub = Math.round((p.freeBigQty || 0) * mul);
-        
-        // มูลค่าซื้อ: ใช้ค่าที่พิมพ์กรอกเองได้ หรือค่าคำนวณอัตโนมัติ
         const currentOrderVal = p.orderValManual !== undefined ? p.orderValManual : ((p.orderBigQty || 0) * mul * (p.unitPrice || 0));
 
         const rowClass = p.isDiscontinued ? 'opacity-40 bg-gray-50' : 'hover:bg-cream-100/60';
 
         html += `
           <tr class="${rowClass}">
-            <!-- 1. รายการสินค้า / ประเภทสินค้า / หน่วยขาย -->
             <td class="sticky-col-1 w-col-product px-3 py-2 border-r border-cream-300">
               <div class="font-semibold text-earth-900 leading-tight">${p.name}</div>
               <div class="flex flex-wrap items-center gap-1.5 mt-1 text-[11px] text-earth-700">
@@ -876,13 +887,11 @@
               </div>
             </td>
 
-            <!-- 2. ขายปี 68 -->
             <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.sales68_tn_1_5)}</td>
             <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.sales68_tn_6)}</td>
             <td class="col-cks w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'TN' ? 'hidden' : ''}">${fmtZero(p.sales68_cks)}</td>
             <td class="w-col-total px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(tot68Sub)}</td>
             
-            <!-- รวมขาย 68 -->
             <td class="w-col-summary px-2.5 py-1 text-right bg-amber-50/80 border-r-2 border-cream-400">
               <div class="font-extrabold text-earth-900 text-xs">
                 ${tot68Big > 0 ? `${tot68Big.toLocaleString()} <span class="text-[10px] font-normal text-earth-600">${p.unitBig}</span>` : ''}
@@ -890,13 +899,11 @@
               <div class="text-[10px] font-mono text-amber-900 mt-0.5">${fmtZero(p.sales68_val)}</div>
             </td>
 
-            <!-- 3. ขายปี 69 -->
             <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.sales69_tn_1_5)}</td>
             <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.sales69_tn_6)}</td>
             <td class="col-cks w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'TN' ? 'hidden' : ''}">${fmtZero(p.sales69_cks)}</td>
             <td class="w-col-total px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(tot69Sub)}</td>
             
-            <!-- รวมขาย 69 -->
             <td class="w-col-summary px-2.5 py-1 text-right bg-amber-50/80 border-r-2 border-cream-400">
               <div class="font-extrabold text-earth-900 text-xs">
                 ${tot69Big > 0 ? `${tot69Big.toLocaleString()} <span class="text-[10px] font-normal text-earth-600">${p.unitBig}</span>` : ''}
@@ -904,14 +911,12 @@
               <div class="text-[10px] font-mono text-amber-900 mt-0.5">${fmtZero(p.sales69_val)}</div>
             </td>
 
-            <!-- 4. คลังคงเหลือ -->
             <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.stock_pc)}</td>
             <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.stock_kr)}</td>
             <td class="col-tn w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'CKS' ? 'hidden' : ''}">${fmtZero(p.stock_cyp)}</td>
             <td class="col-cks w-col-num px-2 py-1.5 text-right font-mono text-earth-800 ${activeCompanyFilter === 'TN' ? 'hidden' : ''}">${fmtZero(p.stock_cks)}</td>
             <td class="w-col-total px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(totStockSub)}</td>
             
-            <!-- รวมคงเหลือ -->
             <td class="w-col-summary px-2.5 py-1 text-right bg-leaf-100/80 border-r-2 border-leaf-400">
               <div class="font-extrabold text-leaf-900 text-xs">
                 ${totStockBig > 0 ? `${totStockBig.toLocaleString()} <span class="text-[10px] font-normal text-leaf-800">${p.unitBig}</span>` : ''}
@@ -919,7 +924,6 @@
               <div class="text-[10px] font-mono text-leaf-800 mt-0.5">${fmtZero(p.stock_val)}</div>
             </td>
 
-            <!-- 5. Forecasts -->
             ${activeForecastMonths.map(m => {
               const runRate = ((tot69Sub / 10) || 0) * parseFloat(m);
               const fcBig = Math.ceil(runRate / mul);
@@ -931,12 +935,10 @@
               `;
             }).join('')}
 
-            <!-- สถานะ -->
             <td class="w-col-status px-2 py-1.5 text-center border-r border-cream-300">
               <span class="inline-block px-2 py-0.5 rounded text-[11px] font-semibold ${st.badge}">${st.label}</span>
             </td>
 
-            <!-- 6. PO Section (ช่องมูลค่าซื้อสามารถพิมพ์กรอกเองได้) -->
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} w-col-order px-2 py-1.5 text-center">
               <div class="flex items-center justify-center gap-1">
                 <input type="number" min="0" step="any" value="${p.orderBigQty > 0 ? p.orderBigQty : ''}" placeholder="" oninput="updateOrderItem('${p.id}', 'order', this.value)" class="w-16 px-1.5 py-1 text-center font-bold text-xs border border-cream-300 rounded focus:border-leaf-600 focus:outline-none bg-amber-50/40">
@@ -953,7 +955,6 @@
               <div class="text-[10px] text-earth-600 mt-0.5">${freeSub > 0 ? `${freeSub.toLocaleString()} ${cleanSubUnit}` : ''}</div>
             </td>
 
-            <!-- ช่องมูลค่าซื้อ กรอกเองได้อิสระ -->
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} w-col-val px-2 py-1.5 text-right">
               <input type="number" step="any" value="${currentOrderVal > 0 ? currentOrderVal : ''}" placeholder="0" oninput="updateOrderItem('${p.id}', 'valManual', this.value)" class="w-full px-1.5 py-1 text-right font-mono font-semibold text-leaf-800 text-xs border border-cream-300 rounded bg-white focus:border-leaf-600 focus:outline-none">
             </td>
@@ -963,7 +964,6 @@
               ${p.suggestion ? `<div class="text-[10px] text-earth-600 mt-0.5 leading-tight">💡 ${p.suggestion}</div>` : ''}
             </td>
 
-            <!-- 7. ดูประวัติรายเดือน YOY -->
             <td class="w-col-action px-1 py-1.5 text-center">
               <button onclick="openMonthlyModal('${p.id}')" class="px-2 py-1 rounded bg-cream-200 hover:bg-cream-300 text-earth-800 text-[11px] font-semibold">
                 📊 ดู
@@ -997,7 +997,6 @@
 
       if (field === 'order') {
         item.orderBigQty = parseFloat(val) || 0;
-        // คำนวณมูลค่าให้อัตโนมัติในเบื้องต้น
         item.orderValManual = item.orderBigQty * mul * (item.unitPrice || 0);
       } else if (field === 'free') {
         item.freeBigQty = parseFloat(val) || 0;
@@ -1011,15 +1010,38 @@
     }
 
     /**
-     * ดึงประวัติรายเดือนเปรียบเทียบทั้งปี YOY (2568 vs 2569)
+     * เปิดหน้าต่างดูยอดขาย YOY เปรียบเทียบ 2568 vs 2569
      */
     function openMonthlyModal(productId) {
       const p = rawProducts.find(item => item.id === productId);
       if (!p) return;
 
-      document.getElementById('modalProductCode').innerText = `${p.category || 'สินค้าเกษตร'} | รหัส: ${p.id}`;
+      currentModalProduct = p;
+      modalCompanyView = 'ALL';
+
+      document.getElementById('modalProductCode').innerText = `${p.category || 'สินค้าเกษตร'} | รหัส: ${p.code || p.id}`;
       document.getElementById('modalProductName').innerText = p.name;
 
+      renderMonthlyModalTable();
+      document.getElementById('monthlyModal').classList.remove('hidden');
+    }
+
+    function changeModalView(view) {
+      modalCompanyView = view;
+      ['ALL', 'TN', 'CKS'].forEach(v => {
+        const btn = document.getElementById('mBtn' + v);
+        if (v === view) {
+          btn.className = "px-2.5 py-1 rounded font-semibold bg-earth-900 text-white";
+        } else {
+          btn.className = "px-2.5 py-1 rounded text-earth-700 hover:text-earth-900";
+        }
+      });
+      renderMonthlyModalTable();
+    }
+
+    function renderMonthlyModalTable() {
+      if (!currentModalProduct) return;
+      const p = currentModalProduct;
       const months = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
       let html = '';
       
@@ -1027,11 +1049,25 @@
       let tot69All = 0;
 
       months.forEach((m, idx) => {
-        // ยอดขายปี 2568 รายเดือน (ดึงจากอาเรย์ monthly68)
-        const v68 = (p.monthly68 && p.monthly68[idx] !== undefined) ? p.monthly68[idx] : 0;
-        
-        // ยอดขายปี 2569 รายเดือน (คำนวณจากยอด 69 ตามสัดส่วนเดือนจริง)
-        const v69 = (p.monthly69 && p.monthly69[idx] !== undefined) ? p.monthly69[idx] : Math.round((p.sales69_tn_1_5 + p.sales69_tn_6 + p.sales69_cks) / 10);
+        let v68 = 0;
+        let v69 = 0;
+
+        if (modalCompanyView === 'TN') {
+          v68 = (p.monthly68_tn && p.monthly68_tn[idx] !== undefined) ? p.monthly68_tn[idx] : 0;
+          v69 = (p.monthly69_tn && p.monthly69_tn[idx] !== undefined) ? p.monthly69_tn[idx] : 0;
+        } else if (modalCompanyView === 'CKS') {
+          v68 = (p.monthly68_cks && p.monthly68_cks[idx] !== undefined) ? p.monthly68_cks[idx] : 0;
+          v69 = (p.monthly69_cks && p.monthly69_cks[idx] !== undefined) ? p.monthly69_cks[idx] : 0;
+        } else {
+          // รวม TN + CKS
+          const tn68 = (p.monthly68_tn && p.monthly68_tn[idx] !== undefined) ? p.monthly68_tn[idx] : 0;
+          const cks68 = (p.monthly68_cks && p.monthly68_cks[idx] !== undefined) ? p.monthly68_cks[idx] : 0;
+          v68 = tn68 + cks68;
+
+          const tn69 = (p.monthly69_tn && p.monthly69_tn[idx] !== undefined) ? p.monthly69_tn[idx] : 0;
+          const cks69 = (p.monthly69_cks && p.monthly69_cks[idx] !== undefined) ? p.monthly69_cks[idx] : 0;
+          v69 = tn69 + cks69;
+        }
 
         tot68All += v68;
         tot69All += v69;
@@ -1090,8 +1126,6 @@
           ${totGrowth}
         </td>
       `;
-
-      document.getElementById('monthlyModal').classList.remove('hidden');
     }
 
     function closeMonthlyModal() {
@@ -1146,6 +1180,7 @@
         const st = calculateStatus(p);
 
         return {
+          'รหัสสินค้า': p.code || '',
           'ชื่อสินค้า': p.name,
           'ประเภทสินค้า': p.category,
           'ชื่อสามัญ': p.genericName || '-',
@@ -1186,27 +1221,38 @@
       XLSX.writeFile(wb, `รายงานสต็อค_ตังนำเกษตร_ชาวเกษตร_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
+    /**
+     * ดึงข้อมูลพร้อมกัน 3 ชีท: Forecast, ยอดขาย68 และ ยอดขาย69
+     */
     async function fetchGoogleSheetData() {
       const syncBadge = document.getElementById('syncBadge');
       const syncText = document.getElementById('syncStatusText');
       syncBadge.classList.remove('hidden');
       syncBadge.classList.add('flex');
-      syncText.innerText = "กำลังเชื่อมต่อชีท...";
+      syncText.innerText = "กำลังซิงค์ข้อมูลจากทุกชีท...";
 
-      const url = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME)}`;
+      const urlMain = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME_MAIN)}`;
+      const url68   = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME_68)}`;
+      const url69   = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME_69)}`;
 
       try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Network error");
-        const rawText = await res.text();
-        const match = rawText.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
-        if (!match || !match[1]) throw new Error("JSON error");
+        const [resMain, res68, res69] = await Promise.all([
+          fetch(urlMain),
+          fetch(url68).catch(() => null),
+          fetch(url69).catch(() => null)
+        ]);
 
-        const json = JSON.parse(match[1]);
-        const rows = json.table.rows;
+        if (!resMain.ok) throw new Error("Network error");
+        const rawTextMain = await resMain.text();
+        const matchMain = rawTextMain.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
+        if (!matchMain || !matchMain[1]) throw new Error("JSON error");
 
-        if (rows.length > 0 && rows[0].c) {
-          const r0 = rows[0].c;
+        const jsonMain = JSON.parse(matchMain[1]);
+        const rowsMain = jsonMain.table.rows;
+
+        // ดึงวันที่และเวลาจากแถวบนสุด
+        if (rowsMain.length > 0 && rowsMain[0].c) {
+          const r0 = rowsMain[0].c;
           for (let k = 0; k < r0.length; k++) {
             const val = r0[k] && r0[k].v ? String(r0[k].v) : '';
             if (val.includes('01/01 -') || (val.includes('2569') && val.includes('-'))) {
@@ -1218,13 +1264,62 @@
           updateDateTimeLabels();
         }
 
-        // ค้นหาตำแหน่งคอลัมน์อัตโนมัติจากชื่อหัวตาราง
+        // ฟังก์ชันช่วยแยกอ่านชีทรายเดือนของแต่ละปี
+        async function parseMonthlySheet(res) {
+          const map = new Map();
+          if (!res || !res.ok) return map;
+          try {
+            const text = await res.text();
+            const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
+            if (!match || !match[1]) return map;
+            const json = JSON.parse(match[1]);
+            const rows = json.table.rows;
+
+            for (let r = 1; r < rows.length; r++) {
+              const rObj = rows[r];
+              if (!rObj || !rObj.c) continue;
+              const mc = rObj.c;
+
+              const code = mc[0] && mc[0].v ? String(mc[0].v).trim() : '';
+              const name = mc[1] && mc[1].v ? String(mc[1].v).trim() : '';
+              if (!code && !name) continue;
+
+              const getMNum = (cIdx) => {
+                if (!mc[cIdx] || mc[cIdx].v === null || mc[cIdx].v === undefined) return 0;
+                const v = parseFloat(String(mc[cIdx].v).replace(/,/g, ''));
+                return isNaN(v) ? 0 : v;
+              };
+
+              // คอลัมน์ C - N (index 2-13): TN (12 เดือน)
+              const tnMonths = [];
+              for (let i = 2; i <= 13; i++) tnMonths.push(getMNum(i));
+
+              // คอลัมน์ O - Z (index 14-25): CKS (12 เดือน)
+              const cksMonths = [];
+              for (let i = 14; i <= 25; i++) cksMonths.push(getMNum(i));
+
+              const item = { tn: tnMonths, cks: cksMonths };
+              if (code) map.set(code, item);
+              if (name) map.set(name, item);
+            }
+          } catch (e) {
+            console.warn("Parse monthly sheet error:", e);
+          }
+          return map;
+        }
+
+        const [map68, map69] = await Promise.all([
+          parseMonthlySheet(res68),
+          parseMonthlySheet(res69)
+        ]);
+
+        // ค้นหาตำแหน่งคอลัมน์อัตโนมัติในชีท Forecast
         let categoryColIndex = 98;
         let supplierColIndex = 95;
         let genericColIndex = 96;
 
-        if (rows.length > 4) {
-          [rows[3], rows[4]].forEach(headerRow => {
+        if (rowsMain.length > 4) {
+          [rowsMain[3], rowsMain[4]].forEach(headerRow => {
             if (headerRow && headerRow.c) {
               headerRow.c.forEach((cell, idx) => {
                 if (cell && cell.v) {
@@ -1245,8 +1340,8 @@
         }
 
         const parsedProducts = [];
-        for (let i = 4; i < rows.length; i++) {
-          const rowObj = rows[i];
+        for (let i = 4; i < rowsMain.length; i++) {
+          const rowObj = rowsMain[i];
           if (!rowObj || !rowObj.c) continue;
           const c = rowObj.c;
 
@@ -1260,6 +1355,8 @@
           let nameVal = getVal(5);
           if (!nameVal || nameVal === '0' || nameVal === 'ชื่อสินค้า') continue;
 
+          let codeVal = getVal(2) || getVal(1) || '';
+
           const statusVal = getVal(52);
           const isDisc = statusVal.includes('เลิก');
 
@@ -1272,14 +1369,13 @@
           let catVal = getVal(categoryColIndex) || 'ทั่วไป';
           if (catVal === '0' || catVal === '.') catVal = 'ทั่วไป';
 
-          // ดึงยอดขายรายเดือน 12 เดือนของปี 2568 (คอลัมน์ 57 ถึง 68)
-          const m68 = [];
-          for (let mIdx = 57; mIdx <= 68; mIdx++) {
-            m68.push(getNum(mIdx));
-          }
+          // แมตช์ข้อมูลยอดขายรายเดือนจากชีท ยอดขาย68 และ ยอดขาย69
+          const d68 = map68.get(codeVal) || map68.get(nameVal) || { tn: new Array(12).fill(0), cks: new Array(12).fill(0) };
+          const d69 = map69.get(codeVal) || map69.get(nameVal) || { tn: new Array(12).fill(0), cks: new Array(12).fill(0) };
 
           parsedProducts.push({
             id: `P-${i}`,
+            code: codeVal,
             name: nameVal,
             statusRaw: statusVal,
             supplier: supplierVal,
@@ -1303,7 +1399,12 @@
             stock_cyp: getNum(32),
             stock_cks: getNum(33),
             stock_val: getNum(40),
-            monthly68: m68, // เก็บข้อมูล 12 เดือนของปี 68
+            // ข้อมูลแยก 12 เดือนของปี 68
+            monthly68_tn: d68.tn,
+            monthly68_cks: d68.cks,
+            // ข้อมูลแยก 12 เดือนของปี 69
+            monthly69_tn: d69.tn,
+            monthly69_cks: d69.cks,
             orderBigQty: 0,
             freeBigQty: 0,
             orderValManual: 0,
@@ -1316,7 +1417,7 @@
           rawProducts = parsedProducts;
           initFilters();
           resetAndFilter();
-          syncText.innerText = `ดึงข้อมูลครบ ${parsedProducts.length.toLocaleString()} SKU`;
+          syncText.innerText = `เชื่อมต่อครบทั้ง 3 ชีท (${parsedProducts.length.toLocaleString()} รายการ)`;
           syncBadge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-800 border border-leaf-300";
         }
       } catch (err) {
