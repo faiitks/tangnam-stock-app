@@ -118,7 +118,7 @@
   <header class="bg-white border-b border-cream-300 shadow-sm sticky top-0 z-50 no-print">
     <div class="max-w-[1920px] mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-4">
       
-      <!-- โลโก้จริงของบริษัท ตังนำเกษตร -->
+      <!-- โลโก้บริษัท ตังนำเกษตร -->
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-2.5">
           <svg class="h-10 w-auto" viewBox="0 0 350 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -179,7 +179,7 @@
     </div>
   </header>
 
-  <!-- ================= TOP FINANCIAL KPI CARDS (แสดงมูลค่าชัดเจน) ================= -->
+  <!-- ================= TOP FINANCIAL KPI CARDS ================= -->
   <section class="max-w-[1920px] w-full mx-auto px-4 pt-3 no-print">
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2.5">
       
@@ -273,6 +273,7 @@
             <option value="REORDER">🟡 ควรสั่ง</option>
             <option value="OPTIMAL">🟢 ปกติ</option>
             <option value="OVERSTOCK">🔵 เกินสต็อค</option>
+            <option value="DISCONTINUED">⚪ เลิกขาย</option>
           </select>
         </div>
       </div>
@@ -506,7 +507,7 @@
               <th class="p-2 border-b border-r border-cream-300 text-right">จำนวนย่อย</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">แถม (ใหญ่)</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">มูลค่ารวม</th>
-              <th class="p-2 border-b border-r border-cream-300">หมายเหตุ</th>
+              <th class="p-2 border-b border-cream-300">หมายเหตุ</th>
             </tr>
           </thead>
           <tbody id="apoTableBody" class="divide-y divide-cream-200"></tbody>
@@ -724,7 +725,7 @@
         if (gen !== 'ALL' && p.genericName !== gen) return false;
 
         if (q) {
-          const matchString = `${p.name} ${p.genericName} ${p.category} ${p.supplier} ${p.unitSub} ${p.unitBig} ${p.notes} ${p.suggestion}`.toLowerCase();
+          const matchString = `${p.name} ${p.genericName} ${p.category} ${p.supplier} ${p.unitSub} ${p.unitBig} ${p.notes} ${p.suggestion} ${p.statusRaw}`.toLowerCase();
           if (!matchString.includes(q)) return false;
         }
 
@@ -738,23 +739,50 @@
       updateKPICards();
     }
 
+    /**
+     * คำนวณและระบุสถานะสินค้า:
+     * 1. ถ้าช่องสถานะระบุคำว่า "เลิก" ให้เป็นสินค้าเลิกขาย
+     * 2. ถ้าช่องสถานะเว้นว่างไว้ ให้เป็น "🟢 ปกติ"
+     * 3. ถ้ามีสถานะอื่นๆ (เช่น สั่งด่วน, ควรสั่ง, เกินF/C 3m) ให้แสดงตามข้อมูลจริง
+     */
     function calculateStatus(p) {
-      if (p.isDiscontinued) {
-        return { label: '⚪ เลิกขาย', badge: 'bg-gray-100 text-gray-500 border border-gray-300', code: 'DISCONTINUED' };
+      const raw = (p.statusRaw || '').trim();
+
+      // 1. ถ้ามีคำว่า "เลิก" เช่น เลิกขาย, บ.เลิกผลิต, เลิกใช้รหัส, บ.ยกเลิกขาย
+      if (p.isDiscontinued || raw.includes('เลิก')) {
+        return { 
+          label: raw || '⚪ เลิกขาย', 
+          badge: 'bg-gray-100 text-gray-500 border border-gray-300', 
+          code: 'DISCONTINUED' 
+        };
       }
-      const totalStock = p.stock_pc + p.stock_kr + p.stock_cyp + p.stock_cks;
-      const runRateMonth = (p.sales69_tn_1_5 + p.sales69_tn_6 + p.sales69_cks) / 10 || 1;
 
-      const stockMonths = totalStock / runRateMonth;
+      // 2. ถ้าช่องสถานะเว้นว่างไว้ = ปกติ
+      if (!raw) {
+        return { 
+          label: '🟢 ปกติ', 
+          badge: 'bg-leaf-50 text-leaf-800 border border-leaf-200', 
+          code: 'OPTIMAL' 
+        };
+      }
 
-      if (stockMonths < 0.5) {
+      // 3. ตรวจสอบสถานะที่มีข้อมูลระบุมา
+      if (raw.includes('สั่งด่วน')) {
         return { label: '🔴 สั่งด่วน', badge: 'bg-red-50 text-red-700 border border-red-200', code: 'CRITICAL' };
-      } else if (stockMonths < 1.5) {
+      }
+      if (raw.includes('ควรสั่ง')) {
         return { label: '🟡 ควรสั่ง', badge: 'bg-amber-50 text-amber-800 border border-amber-200', code: 'REORDER' };
-      } else if (stockMonths > 3.0) {
+      }
+      if (raw.includes('เกิน') || raw.includes('ล้น')) {
         return { label: '🔵 เกินสต็อค', badge: 'bg-blue-50 text-blue-700 border border-blue-200', code: 'OVERSTOCK' };
       }
-      return { label: '🟢 ปกติ', badge: 'bg-leaf-50 text-leaf-800 border border-leaf-200', code: 'OPTIMAL' };
+
+      // สถานะอื่นๆ ที่ไม่ใช่เลิกขาย เช่น ตักแบ่ง, เปลี่ยนชื่อ ฯลฯ
+      return { 
+        label: raw, 
+        badge: 'bg-cream-200 text-earth-800 border border-cream-300', 
+        code: 'OPTIMAL' 
+      };
     }
 
     // คำนวณสรุปการ์ดด้านบน (มูลค่ารวมยอดขาย 68, 69 และมูลค่าสต็อค)
@@ -768,7 +796,6 @@
       let overstockCount = 0;
       let orderItemsCount = 0;
 
-      // คำนวณจากสินค้าทั้งหมดที่แสดงผลอยู่
       currentFiltered.forEach(p => {
         sales68Total += p.sales68_val || 0;
         sales69Total += p.sales69_val || 0;
@@ -850,7 +877,7 @@
               <div class="font-extrabold text-earth-900 text-xs">${fmtZero(tot68Big)}</div>
               <div class="text-[10px] text-earth-600">${tot68Big > 0 ? p.unitBig : ''}</div>
             </td>
-            <!-- รวมขาย 68 (บาท ไม่มีสัญลักษณ์เงิน) -->
+            <!-- รวมขาย 68 (บาท) -->
             <td class="px-2 py-1.5 text-right font-mono text-earth-900">${fmtZero(p.sales68_val)}</td>
 
             <!-- 3. จำนวนขายปี 69 (ถ้าเป็น 0 แสดงช่องว่าง) -->
@@ -864,7 +891,7 @@
               <div class="font-extrabold text-earth-900 text-xs">${fmtZero(tot69Big)}</div>
               <div class="text-[10px] text-earth-600">${tot69Big > 0 ? p.unitBig : ''}</div>
             </td>
-            <!-- รวมขาย 69 (บาท ไม่มีสัญลักษณ์เงิน) -->
+            <!-- รวมขาย 69 (บาท) -->
             <td class="px-2 py-1.5 text-right font-mono text-earth-900">${fmtZero(p.sales69_val)}</td>
 
             <!-- 4. คลังสินค้าคงเหลือ (ถ้าเป็น 0 แสดงช่องว่าง) -->
@@ -879,7 +906,7 @@
               <div class="font-extrabold text-leaf-900 text-xs">${fmtZero(totStockBig)}</div>
               <div class="text-[10px] text-leaf-800 font-medium">${totStockBig > 0 ? p.unitBig : ''}</div>
             </td>
-            <!-- มูลค่าคงเหลือ (บาท ไม่มีสัญลักษณ์เงิน) -->
+            <!-- มูลค่าคงเหลือ (บาท) -->
             <td class="px-2 py-1.5 text-right font-mono text-earth-900">${fmtZero(p.stock_val)}</td>
 
             <!-- 5. Forecasts Dynamic Columns -->
@@ -1133,7 +1160,10 @@
             continue;
           }
 
-          const isDisc = nameVal.includes('*') || nameVal.includes('เลิก');
+          // คอลัมน์ BA (Index 52) คือสถานะสต็อค
+          const statusVal = getVal(52);
+          // สินค้าเลิกขาย: ให้ดูว่าช่องสถานะมีคำว่า "เลิก" หรือไม่
+          const isDisc = statusVal.includes('เลิก');
 
           let supplierVal = getVal(95);
           if (!supplierVal || supplierVal === '0' || supplierVal === '.') {
@@ -1149,6 +1179,7 @@
           parsedProducts.push({
             id: `P-${i}`,
             name: nameVal,
+            statusRaw: statusVal, // สถานะจากคอลัมน์ BA
             supplier: supplierVal,
             genericName: genericVal,
             category: catVal,
