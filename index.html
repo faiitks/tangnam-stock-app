@@ -74,7 +74,7 @@
     }
     .sticky-header {
       position: sticky;
-      top: 28px;
+      top: 30px;
       z-index: 30;
     }
     .sticky-header-top {
@@ -121,7 +121,8 @@
       <!-- โลโก้จริงของบริษัท ตังนำเกษตร -->
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-2.5">
-          <img src="TN.PNG1_2.png" alt="โลโก้ ตังนำเกษตร" class="h-10 w-auto object-contain" onerror="this.onerror=null; this.src='logo.png';">
+          <!-- ดึงรูป TN.PNG1_2.png หากไม่มีให้ fallback เป็น SVG ตังนำเกษตรต้นฉบับ -->
+          <img src="TN.PNG1_2.png" alt="โลโก้ ตังนำเกษตร" class="h-10 w-auto object-contain" onerror="this.onerror=null; this.src='TN.PNG1.png';">
           <div class="border-l border-cream-300 pl-2.5">
             <div class="font-prompt font-bold text-sm text-earth-900 leading-tight">
               ระบบสต็อคสินค้าและพยากรณ์ขาย
@@ -131,9 +132,9 @@
         </div>
 
         <!-- Google Sheets Sync Indicator -->
-        <div id="syncBadge" class="hidden items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-700 border border-leaf-200">
+        <div id="syncBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-700 border border-leaf-200">
           <span class="w-2 h-2 rounded-full bg-leaf-500 animate-pulse"></span>
-          <span id="syncStatusText">เชื่อมต่อ Google Sheets</span>
+          <span id="syncStatusText">กำลังเชื่อมต่อ Google Sheets...</span>
         </div>
       </div>
 
@@ -390,7 +391,6 @@
   <!-- ================= POP-UP DRILLDOWN MODAL ================= -->
   <div id="monthlyModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-4xl w-full border border-cream-300 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
-      <!-- Modal Header -->
       <div class="px-6 py-4 bg-earth-900 text-cream-50 flex items-center justify-between">
         <div>
           <div class="text-xs text-leaf-300 font-semibold" id="modalProductCode">P-001</div>
@@ -399,7 +399,6 @@
         <button onclick="closeMonthlyModal()" class="text-cream-300 hover:text-white p-1 text-xl font-bold">&times;</button>
       </div>
 
-      <!-- Modal Body -->
       <div class="p-6 overflow-y-auto flex-1 flex flex-col gap-4">
         <div class="flex items-center justify-between">
           <h4 class="font-prompt font-semibold text-earth-900 text-sm">ประวัติการขายรายเดือนย้อนหลัง (แยกกลุ่มลูกค้า)</h4>
@@ -433,7 +432,6 @@
   <!-- ================= POP-UP APO PREVIEW MODAL ================= -->
   <div id="apoModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-5xl w-full border border-cream-300 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
-      <!-- APO Header -->
       <div class="px-6 py-4 bg-earth-900 text-cream-50 flex items-center justify-between">
         <div>
           <div class="text-xs text-leaf-300 font-semibold">APO2026110301</div>
@@ -442,7 +440,6 @@
         <button onclick="closeAPOModal()" class="text-cream-300 hover:text-white p-1 text-xl font-bold">&times;</button>
       </div>
 
-      <!-- APO Printable Content -->
       <div id="apoPrintArea" class="p-6 overflow-y-auto flex-1 flex flex-col gap-4 text-xs">
         <div class="flex justify-between items-start border-b border-cream-300 pb-3">
           <div>
@@ -477,7 +474,6 @@
           </tfoot>
         </table>
 
-        <!-- Signature Lines -->
         <div class="grid grid-cols-3 gap-6 pt-10 text-center">
           <div>
             <div class="border-b border-earth-400 w-3/4 mx-auto mb-2"></div>
@@ -508,10 +504,9 @@
   <!-- ================= JAVASCRIPT LOGIC ================= -->
   <script>
     /**
-     * ตั้งค่า Google Sheets ID ตรงนี้
+     * ตั้งค่า Google Sheets ID จริงของไฟล์ TN.Forecast
      */
-    const GOOGLE_SHEET_ID = "const GOOGLE_SHEET_ID = "1uWVLiEs2qzXu6gb0RCaX-WSSOl5bxna2_RS8skTJ0vs";
-const GOOGLE_SHEET_NAME = "Forecast";"; // วาง Sheet ID ที่นี่
+    const GOOGLE_SHEET_ID = "1uWVLiEs2qzXu6gb0RCaX-WSSOl5bxna2_RS8skTJ0vs";
     const GOOGLE_SHEET_NAME = "Forecast";
 
     let sales69DateTime = "01/01 - 03/11/2569 10.14 น.";
@@ -523,141 +518,18 @@ const GOOGLE_SHEET_NAME = "Forecast";"; // วาง Sheet ID ที่นี่
     let activeCompanyFilter = 'ALL';
     let activeForecastMonths = ['1', '2'];
 
-    // Sample Data สำหรับแสดงผลเบื้องต้น
-    const initialDataset = [
-      {
-        id: 'P-001',
-        name: 'โกล 500 ซีซี 1*20',
-        genericName: 'ออกซีฟลูออร์เฟน',
-        category: 'ยาฆ่าหญ้า',
-        supplier: 'โกลบอลลิสอะโกรไซแอนส์',
-        unitSub: 'ขวด',
-        unitBig: 'ลัง',
-        unitMultiplier: 20,
-        unitPrice: 520,
-        isDiscontinued: false,
-        sales68_tn_1_5: 420,
-        sales68_tn_6: 80,
-        sales68_cks: 130,
-        sales68_val: 327600,
-        sales69_tn_1_5: 280,
-        sales69_tn_6: 60,
-        sales69_cks: 90,
-        sales69_val: 223600,
-        stock_pc: 25,
-        stock_kr: 15,
-        stock_cyp: 8,
-        stock_cks: 12,
-        stock_val: 31200,
-        orderBigQty: 20,
-        freeBigQty: 1,
-        notes: 'เตรียมรับฤดูกาลใหม่',
-        suggestion: 'สต็อคต่ำกว่าเกณฑ์ 1 เดือน แนะนำสั่ง 20 ลัง'
-      },
-      {
-        id: 'P-002',
-        name: 'โกรแคล เอ็มจีบี 1 ลิตร 1*20',
-        genericName: 'แคลเซียม+โบรอน+แมกนีเซียม',
-        category: 'ฮอร์โมนอาหารเสริม',
-        supplier: 'อะโกร ไบโอไซเอนซ์',
-        unitSub: 'ขวด',
-        unitBig: 'ลัง',
-        unitMultiplier: 20,
-        unitPrice: 280,
-        isDiscontinued: false,
-        sales68_tn_1_5: 310,
-        sales68_tn_6: 45,
-        sales68_cks: 95,
-        sales68_val: 126000,
-        sales69_tn_1_5: 220,
-        sales69_tn_6: 30,
-        sales69_cks: 70,
-        sales69_val: 89600,
-        stock_pc: 120,
-        stock_kr: 80,
-        stock_cyp: 60,
-        stock_cks: 102,
-        stock_val: 101360,
-        orderBigQty: 0,
-        freeBigQty: 0,
-        notes: '',
-        suggestion: 'สต็อคเพียงพอสำหรับ 3 เดือน ชะลอการสั่ง'
-      },
-      {
-        id: 'P-003',
-        name: 'ปูนเปลือกหอยนางรม 1 กก.',
-        genericName: 'แคลเซียมออกไซด์',
-        category: 'สารปรับสภาพดิน,น้ำ',
-        supplier: 'ซินเจนทา ครอป',
-        unitSub: 'ถุง (1 กก.)',
-        unitBig: 'กระสอบ',
-        unitMultiplier: 25,
-        unitPrice: 18,
-        isDiscontinued: false,
-        sales68_tn_1_5: 600,
-        sales68_tn_6: 120,
-        sales68_cks: 350,
-        sales68_val: 19260,
-        sales69_tn_1_5: 450,
-        sales69_tn_6: 90,
-        sales69_cks: 240,
-        sales69_val: 14040,
-        stock_pc: 15,
-        stock_kr: 10,
-        stock_cyp: 5,
-        stock_cks: 8,
-        stock_val: 684,
-        orderBigQty: 4,
-        freeBigQty: 0.5,
-        notes: 'สั่งตรงโรงงาน',
-        suggestion: 'สั่งด่วน สินค้าใกล้หมดทุกคลัง'
-      },
-      {
-        id: 'P-004',
-        name: '*****กันน์ 20 100 ซีซี 1*48',
-        genericName: '',
-        category: 'ยาโรค/เชื้อรา',
-        supplier: 'อะโกร ไบโอไซเอนซ์',
-        unitSub: 'ขวด',
-        unitBig: 'ลัง',
-        unitMultiplier: 48,
-        unitPrice: 95,
-        isDiscontinued: true,
-        sales68_tn_1_5: 50,
-        sales68_tn_6: 10,
-        sales68_cks: 20,
-        sales68_val: 7600,
-        sales69_tn_1_5: 0,
-        sales69_tn_6: 0,
-        sales69_cks: 0,
-        sales69_val: 0,
-        stock_pc: 0,
-        stock_kr: 0,
-        stock_cyp: 0,
-        stock_cks: 0,
-        stock_val: 0,
-        orderBigQty: 0,
-        freeBigQty: 0,
-        notes: 'ยกเลิกการจำหน่ายแล้ว',
-        suggestion: 'สินค้าเลิกขาย ห้ามสั่งซื้อเพิ่ม'
-      }
-    ];
-
     function getCleanUnitName(unit) {
       if (!unit) return '';
-      return unit.replace(/\s*\([^)]*\)/g, '').trim();
+      return String(unit).replace(/\s*\([^)]*\)/g, '').trim();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      rawProducts = [...initialDataset];
       initFilters();
       renderDynamicForecastHeaders();
       updateDateTimeLabels();
-      applyFilters();
-
-      if (GOOGLE_SHEET_ID) {
-        fetchGoogleSheetData();
-      }
+      
+      // ดึงข้อมูลจริงจาก Google Sheets
+      fetchGoogleSheetData();
     });
 
     function updateDateTimeLabels() {
@@ -837,7 +709,7 @@ const GOOGLE_SHEET_NAME = "Forecast";"; // วาง Sheet ID ที่นี่
       return { label: '🟢 ปกติ', badge: 'bg-leaf-50 text-leaf-800 border border-leaf-200', code: 'OPTIMAL' };
     }
 
-    // Render Table
+    // Render Data Grid
     function renderTable() {
       const tbody = document.getElementById('tableBody');
       if (currentFiltered.length === 0) {
@@ -979,8 +851,8 @@ const GOOGLE_SHEET_NAME = "Forecast";"; // วาง Sheet ID ที่นี่
       });
 
       tbody.innerHTML = html;
-      document.getElementById('filteredRowCount').innerText = currentFiltered.length;
-      document.getElementById('totalRowCount').innerText = rawProducts.length;
+      document.getElementById('filteredRowCount').innerText = currentFiltered.length.toLocaleString();
+      document.getElementById('totalRowCount').innerText = rawProducts.length.toLocaleString();
     }
 
     function updateOrderItem(id, field, val) {
@@ -1092,14 +964,14 @@ const GOOGLE_SHEET_NAME = "Forecast";"; // วาง Sheet ID ที่นี่
           'ยอดขาย68(บ.)': p.sales68_val || 0,
           'ขาย69_TN(1-5)': p.sales69_tn_1_5,
           'ขาย69_TN(6)': p.sales69_tn_6,
-          'ขาย69_ชาวเกษตร(47สาขา)': p.sales69_cks,
+          'ขาย69_ชาวเกษตร(37สาขา)': p.sales69_cks,
           'รวมขาย69(ย่อย)': tot69Sub,
           'รวมขาย69(ใหญ่)': Math.ceil(tot69Sub / mul),
           'ยอดขาย69(บ.)': p.sales69_val || 0,
           'คลังปากช่อง': p.stock_pc,
           'คลังโคราช': p.stock_kr,
           'คลังชัยภูมิ': p.stock_cyp,
-          'คลังชาวเกษตร(47สาขา)': p.stock_cks,
+          'คลังชาวเกษตร(41สาขา)': p.stock_cks,
           'รวมคงเหลือ(ย่อย)': totStockSub,
           'รวมคงเหลือ(ใหญ่)': Math.ceil(totStockSub / mul),
           'มูลค่าคงเหลือ': p.stock_val || 0,
@@ -1118,24 +990,20 @@ const GOOGLE_SHEET_NAME = "Forecast";"; // วาง Sheet ID ที่นี่
     }
 
     /**
-     * ดึงข้อมูลจริงจาก Google Sheets (รองรับครบทั้ง 3,609 SKU)
+     * ดึงข้อมูลจริงจาก Google Sheets แบบสมบูรณ์ครบ 3,609 SKU
      */
     async function fetchGoogleSheetData() {
-      if (!GOOGLE_SHEET_ID) {
-        alert("ยังไม่ได้ระบุ GOOGLE_SHEET_ID ในโค้ด กรุณาใส่ ID ของชีทเพื่อเชื่อมต่อข้อมูลจริง");
-        return;
-      }
-
       const syncBadge = document.getElementById('syncBadge');
       const syncText = document.getElementById('syncStatusText');
       syncBadge.classList.remove('hidden');
       syncBadge.classList.add('flex');
-      syncText.innerText = "กำลังซิงค์ข้อมูลจาก Google Sheets...";
+      syncText.innerText = "กำลังดึงข้อมูลจาก Google Sheets...";
 
       const url = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME)}`;
 
       try {
         const res = await fetch(url);
+        if (!res.ok) throw new Error("Network response was not ok");
         const text = await res.text();
         const json = JSON.parse(text.substring(47).slice(0, -2));
         const rows = json.table.rows;
@@ -1143,44 +1011,59 @@ const GOOGLE_SHEET_NAME = "Forecast";"; // วาง Sheet ID ที่นี่
         // ดึงวันที่และเวลาจาก Row 0
         if (rows.length > 0) {
           const r0 = rows[0].c;
-          if (r0 && r0[21] && r0[21].v) sales69DateTime = String(r0[21].v);
-          if (r0 && r0[30] && r0[30].v) stockDateTime = String(r0[30].v);
+          if (r0 && r0[5] && r0[5].v) sales69DateTime = String(r0[5].v);
+          if (r0 && r0[6] && r0[6].v) stockDateTime = String(r0[6].v);
           updateDateTimeLabels();
         }
 
-        // แปลงแถวสินค้าทั้งหมด (ครบถ้วนทุกแถว)
+        // แปลงแถวสินค้าทั้งหมด (ตั้งแต่แถวที่ 5 เป็นต้นไป)
         const parsedProducts = [];
-        for (let i = 4; i < rows.length; i++) {
+        for (let i = 5; i < rows.length; i++) {
           const c = rows[i].c;
-          if (!c || !c[5] || !c[5].v || c[5].v === '0') continue;
+          if (!c) continue;
 
-          const name = String(c[5].v).trim();
-          const isDisc = name.includes('*') || name.includes('เลิก');
+          // ชื่อสินค้า (คอลัมน์ F -> Index 5)
+          const nameVal = (c[5] && c[5].v !== null && c[5].v !== undefined) ? String(c[5].v).trim() : '';
+          if (!nameVal || nameVal === '0') continue;
+
+          const isDisc = nameVal.includes('*') || nameVal.includes('เลิก');
+
+          // Helper ดึงตัวเลขจากเซลล์อย่างปลอดภัย
+          const num = (idx) => {
+            if (!c[idx] || c[idx].v === null || c[idx].v === undefined) return 0;
+            const val = parseFloat(String(c[idx].v).replace(/,/g, ''));
+            return isNaN(val) ? 0 : val;
+          };
+
+          const str = (idx, fallback = '') => {
+            if (!c[idx] || c[idx].v === null || c[idx].v === undefined) return fallback;
+            return String(c[idx].v).trim();
+          };
 
           parsedProducts.push({
             id: `P-${i}`,
-            name: name,
-            supplier: c[95] && c[95].v ? String(c[95].v).trim() : 'ทั่วไป',
-            genericName: c[96] && c[96].v ? String(c[96].v).trim() : '',
+            name: nameVal,
+            supplier: str(95, 'ทั่วไป'),
+            genericName: str(96, ''),
             category: 'สินค้าเกษตร',
-            unitMultiplier: c[3] && c[3].v ? parseFloat(c[3].v) : 1,
-            unitBig: c[4] && c[4].v ? String(c[4].v).trim() : 'หน่วย',
-            unitSub: c[7] && c[7].v ? String(c[7].v).trim() : 'ย่อย',
+            unitMultiplier: num(3) || 1,
+            unitBig: str(4, 'ลัง'),
+            unitSub: str(7, 'ย่อย'),
             unitPrice: 100,
             isDiscontinued: isDisc,
-            sales68_tn_1_5: c[11] && c[11].v ? parseFloat(c[11].v) : 0,
-            sales68_tn_6: c[12] && c[12].v ? parseFloat(c[12].v) : 0,
-            sales68_cks: c[13] && c[13].v ? parseFloat(c[13].v) : 0,
-            sales68_val: c[19] && c[19].v ? parseFloat(c[19].v) : 0,
-            sales69_tn_1_5: c[21] && c[21].v ? parseFloat(c[21].v) : 0,
-            sales69_tn_6: c[22] && c[22].v ? parseFloat(c[22].v) : 0,
-            sales69_cks: c[23] && c[23].v ? parseFloat(c[23].v) : 0,
-            sales69_val: c[29] && c[29].v ? parseFloat(c[29].v) : 0,
-            stock_pc: c[30] && c[30].v ? parseFloat(c[30].v) : 0,
-            stock_kr: c[31] && c[31].v ? parseFloat(c[31].v) : 0,
-            stock_cyp: c[32] && c[32].v ? parseFloat(c[32].v) : 0,
-            stock_cks: c[33] && c[33].v ? parseFloat(c[33].v) : 0,
-            stock_val: c[40] && c[40].v ? parseFloat(c[40].v) : 0,
+            sales68_tn_1_5: num(11),
+            sales68_tn_6: num(12),
+            sales68_cks: num(13),
+            sales68_val: num(19),
+            sales69_tn_1_5: num(21),
+            sales69_tn_6: num(22),
+            sales69_cks: num(23),
+            sales69_val: num(29),
+            stock_pc: num(30),
+            stock_kr: num(31),
+            stock_cyp: num(32),
+            stock_cks: num(33),
+            stock_val: num(40),
             orderBigQty: 0,
             freeBigQty: 0,
             notes: '',
@@ -1192,11 +1075,13 @@ const GOOGLE_SHEET_NAME = "Forecast";"; // วาง Sheet ID ที่นี่
           rawProducts = parsedProducts;
           initFilters();
           applyFilters();
-          syncText.innerText = `ซิงค์แล้ว (${parsedProducts.length.toLocaleString()} รายการ)`;
+          syncText.innerText = `เชื่อมต่อสำเร็จ: ดึงข้อมูลครบ ${parsedProducts.length.toLocaleString()} SKU`;
+          syncBadge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-800 border border-leaf-300";
         }
       } catch (err) {
         console.error("Error fetching Google Sheets:", err);
-        syncText.innerText = "เชื่อมต่อชีทไม่สำเร็จ (ตรวจสอบสิทธิ์แชร์ชีท)";
+        syncText.innerText = "เชื่อมต่อชีทไม่สำเร็จ (กรุณาเปิดแชร์ชีทเป็น สาธารณะ/Anyone with link)";
+        syncBadge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-red-50 text-red-700 border border-red-200";
       }
     }
   </script>
