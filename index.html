@@ -118,19 +118,15 @@
   <header class="bg-white border-b border-cream-300 shadow-sm sticky top-0 z-50 no-print">
     <div class="max-w-[1920px] mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-4">
       
-      <!-- โลโก้จริงของบริษัท ตังนำเกษตร แบบฝังในตัว ไม่พึ่งพาไฟล์ภายนอก -->
+      <!-- โลโก้จริงของบริษัท ตังนำเกษตร -->
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-2.5">
           <svg class="h-10 w-auto" viewBox="0 0 350 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- ปีกใบไม้ซ้าย -->
             <path d="M165 95C140 40 85 20 25 35C20 90 70 125 155 105C160 100 163 98 165 95Z" fill="#8CB33E"/>
             <path d="M165 95C135 60 90 45 40 50C35 85 75 110 145 98" stroke="#FAF8F5" stroke-width="5" stroke-linecap="round"/>
-            <!-- ปีกใบไม้ขวา -->
             <path d="M185 95C210 40 265 20 325 35C330 90 280 125 195 105C190 100 187 98 185 95Z" fill="#8CB33E"/>
             <path d="M185 95C215 60 260 45 310 50C315 85 275 110 205 98" stroke="#FAF8F5" stroke-width="5" stroke-linecap="round"/>
-            <!-- ลายเส้นก้านใบตรงกลาง -->
             <path d="M175 100V120" stroke="#8CB33E" stroke-width="6" stroke-linecap="round"/>
-            <!-- ข้อความ Tangnam -->
             <text x="175" y="165" font-family="'Prompt', cursive, sans-serif" font-weight="700" font-size="52" fill="#6C584C" text-anchor="middle" letter-spacing="-1">Tangnam</text>
             <text x="280" y="185" font-family="'Prompt', sans-serif" font-weight="500" font-size="16" fill="#6C584C" text-anchor="middle">Tangnam kaset</text>
           </svg>
@@ -151,7 +147,6 @@
 
       <!-- Action Controls & Exports -->
       <div class="flex flex-wrap items-center gap-2">
-        <!-- View Mode Switcher -->
         <div class="bg-cream-200 p-1 rounded-lg flex items-center border border-cream-300">
           <button id="btnModeStock" onclick="setViewMode('stock')" class="px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-sm bg-white text-earth-900">
             ดูสต็อคอย่างเดียว
@@ -161,25 +156,21 @@
           </button>
         </div>
 
-        <!-- Refresh Button -->
         <button onclick="fetchGoogleSheetData()" title="รีเฟรชข้อมูลจากระบบ" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 hover:bg-cream-100 text-xs font-semibold transition-all">
           <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
           <span>รีเฟรช</span>
         </button>
 
-        <!-- Print Button -->
         <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 hover:bg-cream-100 text-xs font-semibold transition-all">
           <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
           <span>พิมพ์</span>
         </button>
 
-        <!-- Export Excel -->
         <button onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-leaf-600 bg-leaf-700 text-white hover:bg-leaf-800 text-xs font-semibold transition-all shadow-sm">
           <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
           <span>ส่งออก Excel</span>
         </button>
 
-        <!-- Preview APO Sheet -->
         <button id="btnOpenAPO" onclick="openAPOModal()" class="hidden items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-earth-700 bg-earth-900 text-cream-50 hover:bg-black text-xs font-semibold transition-all shadow-sm">
           <span>ใบขออนุมัติสั่งซื้อ (APO)</span>
           <span id="badgeAPOCount" class="px-1.5 py-0.2 rounded-full bg-leaf-500 text-white text-[10px]">0</span>
@@ -188,16 +179,68 @@
     </div>
   </header>
 
+  <!-- ================= TOP FINANCIAL KPI CARDS (แสดงมูลค่าชัดเจน) ================= -->
+  <section class="max-w-[1920px] w-full mx-auto px-4 pt-3 no-print">
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2.5">
+      
+      <!-- 1. มูลค่ารวมยอดขายปี 2568 -->
+      <div class="col-span-1 md:col-span-2 bg-gradient-to-br from-amber-50 to-orange-50/40 p-3 rounded-xl border border-amber-200 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-amber-900">มูลค่ารวมยอดขายปี 2568</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">TN + CKS</span>
+        </div>
+        <div class="mt-1 flex items-baseline gap-1">
+          <span id="kpiSales68TotalVal" class="text-xl lg:text-2xl font-bold font-prompt text-amber-950">0</span>
+          <span class="text-xs text-amber-800">บาท</span>
+        </div>
+      </div>
+
+      <!-- 2. มูลค่ารวมยอดขายปี 2569 -->
+      <div class="col-span-1 md:col-span-2 bg-gradient-to-br from-leaf-50 to-emerald-50/50 p-3 rounded-xl border border-leaf-300 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-leaf-900">มูลค่ารวมยอดขายปี 2569</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-leaf-100 text-leaf-800 font-medium">TN + CKS</span>
+        </div>
+        <div class="mt-1 flex items-baseline gap-1">
+          <span id="kpiSales69TotalVal" class="text-xl lg:text-2xl font-bold font-prompt text-leaf-800">0</span>
+          <span class="text-xs text-leaf-800">บาท</span>
+        </div>
+      </div>
+
+      <!-- 3. มูลค่าสินค้าคงคลังรวมทั้งหมด -->
+      <div class="col-span-2 md:col-span-2 lg:col-span-2 bg-gradient-to-br from-cream-100 to-amber-100/40 p-3 rounded-xl border border-earth-600/30 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-earth-900">มูลค่าสินค้าคงคลังรวม (ทุกคลัง)</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-cream-300 text-earth-900 font-medium">4 คลังสินค้า</span>
+        </div>
+        <div class="mt-1 flex items-baseline gap-1">
+          <span id="kpiTotalStockValue" class="text-xl lg:text-2xl font-bold font-prompt text-earth-900">0</span>
+          <span class="text-xs text-earth-700">บาท</span>
+        </div>
+      </div>
+
+      <!-- 4. สรุปสถานะสต็อคสินค้าด่วน -->
+      <div class="col-span-2 md:col-span-2 lg:col-span-1 bg-white p-2.5 rounded-xl border border-cream-300 shadow-xs flex flex-col justify-between">
+        <span class="text-[11px] font-semibold text-earth-700">สถานะสต็อค</span>
+        <div class="grid grid-cols-2 gap-1 text-[11px] font-medium mt-1">
+          <div class="text-red-600">🔴 ด่วน: <span id="kpiCriticalCount" class="font-bold">0</span></div>
+          <div class="text-amber-700">🟡 สั่ง: <span id="kpiReorderCount" class="font-bold">0</span></div>
+          <div class="text-leaf-700">🟢 ปกติ: <span id="kpiOptimalCount" class="font-bold">0</span></div>
+          <div class="text-blue-600">🔵 ล้น: <span id="kpiOverstockCount" class="font-bold">0</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
   <!-- ================= CONTROLS & TOOLBAR ================= -->
   <main class="flex-1 max-w-[1920px] w-full mx-auto px-4 py-3 flex flex-col gap-3">
     
     <!-- Controls Section -->
-    <div class="bg-white p-3.5 rounded-xl border border-cream-300 shadow-sm flex flex-col gap-3 no-print">
+    <div class="bg-white p-3 rounded-xl border border-cream-300 shadow-sm flex flex-col gap-2.5 no-print">
       
       <!-- Top Filters Row -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2.5">
-        
-        <!-- Universal Global Search -->
         <div class="lg:col-span-2 relative">
           <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-earth-600">
             <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -205,28 +248,24 @@
           <input type="text" id="globalSearchInput" oninput="applyFilters()" placeholder="ค้นหาได้ทุกอย่าง (ชื่อสินค้า, สามัญ, คู่ค้า, สต็อค)..." class="w-full pl-8 pr-3 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 placeholder-earth-600 focus:outline-none focus:ring-1 focus:ring-leaf-600">
         </div>
 
-        <!-- Supplier Filter -->
         <div>
           <select id="supplierFilter" onchange="applyFilters()" class="w-full px-2.5 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 focus:outline-none focus:ring-1 focus:ring-leaf-600">
             <option value="ALL">บริษัทคู่ค้า (ทั้งหมด)</option>
           </select>
         </div>
 
-        <!-- Category Filter -->
         <div>
           <select id="categoryFilter" onchange="applyFilters()" class="w-full px-2.5 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 focus:outline-none focus:ring-1 focus:ring-leaf-600">
             <option value="ALL">ประเภทสินค้า (ทั้งหมด)</option>
           </select>
         </div>
 
-        <!-- Generic Name Filter -->
         <div>
           <select id="genericFilter" onchange="applyFilters()" class="w-full px-2.5 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 focus:outline-none focus:ring-1 focus:ring-leaf-600">
             <option value="ALL">ชื่อสามัญ (ทั้งหมด)</option>
           </select>
         </div>
 
-        <!-- Stock Status Filter -->
         <div>
           <select id="statusFilter" onchange="applyFilters()" class="w-full px-2.5 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 focus:outline-none focus:ring-1 focus:ring-leaf-600">
             <option value="ALL">สถานะสต็อค (ทั้งหมด)</option>
@@ -240,8 +279,6 @@
 
       <!-- Second Row: Company Views & Forecast Selector -->
       <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-cream-200">
-        
-        <!-- Company Toggle Buttons -->
         <div class="flex items-center gap-2">
           <span class="text-xs font-semibold text-earth-700">มุมมองบริษัท:</span>
           <div class="bg-cream-100 p-0.5 rounded-lg border border-cream-300 flex items-center gap-1">
@@ -251,7 +288,6 @@
           </div>
         </div>
 
-        <!-- Multi-select Forecast Toggles -->
         <div class="flex items-center gap-2">
           <span class="text-xs font-semibold text-earth-700">ช่วงเดือน Forecast:</span>
           <div class="flex items-center gap-1.5">
@@ -262,7 +298,6 @@
           </div>
         </div>
 
-        <!-- Hide Discontinued Checkbox (ค่าเริ่มต้น: ไม่ติ๊ก เพื่อให้แสดงสินค้าครบ) -->
         <div class="flex items-center gap-2">
           <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs text-earth-700">
             <input type="checkbox" id="hideDiscontinued" onchange="applyFilters()" class="rounded border-cream-300 text-leaf-600 focus:ring-0">
@@ -274,7 +309,7 @@
 
     <!-- ================= DATA GRID ================= -->
     <div class="bg-white rounded-xl border border-cream-300 shadow-sm overflow-hidden flex-1 flex flex-col">
-      <div class="overflow-x-auto flex-1 max-h-[72vh]">
+      <div class="overflow-x-auto flex-1 max-h-[70vh]">
         <table class="grid-table w-full text-left border-collapse text-xs whitespace-nowrap">
           
           <!-- Layer 1: Header Categories with Datetime -->
@@ -393,7 +428,7 @@
       <!-- Table Footer / Row counter -->
       <div class="px-4 py-2 border-t border-cream-300 bg-cream-100 flex items-center justify-between text-xs text-earth-700">
         <div>แสดงผล <span id="filteredRowCount" class="font-bold text-earth-900">0</span> จากทั้งหมด <span id="totalRowCount">0</span> รายการ</div>
-        <div class="text-[11px] text-earth-600">* จำนวนหน่วยใหญ่ปัดเศษทศนิยมขึ้นเป็นจำนวนเต็มทั้งหมด (Ceil) | สกุลเงินไม่แสดงเครื่องหมาย</div>
+        <div class="text-[11px] text-earth-600">* ค่าที่เป็น 0 แสดงเป็นช่องว่าง | จำนวนหน่วยใหญ่ปัดเศษทศนิยมขึ้นเป็นจำนวนเต็ม (Ceil) | สกุลเงินไม่แสดงเครื่องหมาย</div>
       </div>
     </div>
   </main>
@@ -471,7 +506,7 @@
               <th class="p-2 border-b border-r border-cream-300 text-right">จำนวนย่อย</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">แถม (ใหญ่)</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">มูลค่ารวม</th>
-              <th class="p-2 border-b border-cream-300">หมายเหตุ</th>
+              <th class="p-2 border-b border-r border-cream-300">หมายเหตุ</th>
             </tr>
           </thead>
           <tbody id="apoTableBody" class="divide-y divide-cream-200"></tbody>
@@ -524,6 +559,14 @@
     let activeViewMode = 'stock';
     let activeCompanyFilter = 'ALL';
     let activeForecastMonths = ['1', '2'];
+
+    // ฟังก์ชันช่วย: ถ้าค่าเป็น 0 ให้ส่งกลับเป็นช่องว่าง ''
+    function fmtZero(val) {
+      if (val === null || val === undefined) return '';
+      const num = typeof val === 'number' ? val : parseFloat(String(val).replace(/,/g, ''));
+      if (isNaN(num) || num === 0) return '';
+      return num.toLocaleString();
+    }
 
     function getCleanUnitName(unit) {
       if (!unit) return '';
@@ -692,6 +735,7 @@
       });
 
       renderTable();
+      updateKPICards();
     }
 
     function calculateStatus(p) {
@@ -713,7 +757,44 @@
       return { label: '🟢 ปกติ', badge: 'bg-leaf-50 text-leaf-800 border border-leaf-200', code: 'OPTIMAL' };
     }
 
-    // Render Data Grid
+    // คำนวณสรุปการ์ดด้านบน (มูลค่ารวมยอดขาย 68, 69 และมูลค่าสต็อค)
+    function updateKPICards() {
+      let sales68Total = 0;
+      let sales69Total = 0;
+      let stockTotal = 0;
+      let critCount = 0;
+      let reorderCount = 0;
+      let optimalCount = 0;
+      let overstockCount = 0;
+      let orderItemsCount = 0;
+
+      // คำนวณจากสินค้าทั้งหมดที่แสดงผลอยู่
+      currentFiltered.forEach(p => {
+        sales68Total += p.sales68_val || 0;
+        sales69Total += p.sales69_val || 0;
+        stockTotal += p.stock_val || 0;
+
+        const st = calculateStatus(p);
+        if (st.code === 'CRITICAL') critCount++;
+        else if (st.code === 'REORDER') reorderCount++;
+        else if (st.code === 'OPTIMAL') optimalCount++;
+        else if (st.code === 'OVERSTOCK') overstockCount++;
+
+        if ((p.orderBigQty || 0) > 0) orderItemsCount++;
+      });
+
+      document.getElementById('kpiSales68TotalVal').innerText = Math.round(sales68Total).toLocaleString();
+      document.getElementById('kpiSales69TotalVal').innerText = Math.round(sales69Total).toLocaleString();
+      document.getElementById('kpiTotalStockValue').innerText = Math.round(stockTotal).toLocaleString();
+
+      document.getElementById('kpiCriticalCount').innerText = critCount.toLocaleString();
+      document.getElementById('kpiReorderCount').innerText = reorderCount.toLocaleString();
+      document.getElementById('kpiOptimalCount').innerText = optimalCount.toLocaleString();
+      document.getElementById('kpiOverstockCount').innerText = overstockCount.toLocaleString();
+      document.getElementById('badgeAPOCount').innerText = orderItemsCount;
+    }
+
+    // Render Data Grid (ซ่อนเลข 0 ให้เป็นช่องว่าง)
     function renderTable() {
       const tbody = document.getElementById('tableBody');
       if (currentFiltered.length === 0) {
@@ -758,57 +839,57 @@
               </div>
             </td>
 
-            <!-- 2. จำนวนขายปี 68 -->
-            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${p.sales68_tn_1_5.toLocaleString()}</td>
-            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${p.sales68_tn_6.toLocaleString()}</td>
-            <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${p.sales68_cks.toLocaleString()}</td>
-            <td class="px-2 py-1.5 text-right font-mono font-medium text-earth-900">${tot68Sub.toLocaleString()}</td>
+            <!-- 2. จำนวนขายปี 68 (ถ้าเป็น 0 แสดงช่องว่าง) -->
+            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales68_tn_1_5)}</td>
+            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales68_tn_6)}</td>
+            <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales68_cks)}</td>
+            <td class="px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(tot68Sub)}</td>
             
             <!-- รวมขาย 68 (หน่วยใหญ่ ปัดเศษขึ้น) -->
             <td class="px-2 py-1.5 text-right bg-amber-50/80 border-r-2 border-cream-400">
-              <div class="font-extrabold text-earth-900 text-xs">${tot68Big.toLocaleString()}</div>
-              <div class="text-[10px] text-earth-600">${p.unitBig}</div>
+              <div class="font-extrabold text-earth-900 text-xs">${fmtZero(tot68Big)}</div>
+              <div class="text-[10px] text-earth-600">${tot68Big > 0 ? p.unitBig : ''}</div>
             </td>
             <!-- รวมขาย 68 (บาท ไม่มีสัญลักษณ์เงิน) -->
-            <td class="px-2 py-1.5 text-right font-mono text-earth-900">${(p.sales68_val || 0).toLocaleString()}</td>
+            <td class="px-2 py-1.5 text-right font-mono text-earth-900">${fmtZero(p.sales68_val)}</td>
 
-            <!-- 3. จำนวนขายปี 69 -->
-            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${p.sales69_tn_1_5.toLocaleString()}</td>
-            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${p.sales69_tn_6.toLocaleString()}</td>
-            <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${p.sales69_cks.toLocaleString()}</td>
-            <td class="px-2 py-1.5 text-right font-mono font-medium text-earth-900">${tot69Sub.toLocaleString()}</td>
+            <!-- 3. จำนวนขายปี 69 (ถ้าเป็น 0 แสดงช่องว่าง) -->
+            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales69_tn_1_5)}</td>
+            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales69_tn_6)}</td>
+            <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.sales69_cks)}</td>
+            <td class="px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(tot69Sub)}</td>
             
             <!-- รวมขาย 69 (หน่วยใหญ่ ปัดเศษขึ้น) -->
             <td class="px-2 py-1.5 text-right bg-amber-50/80 border-r-2 border-cream-400">
-              <div class="font-extrabold text-earth-900 text-xs">${tot69Big.toLocaleString()}</div>
-              <div class="text-[10px] text-earth-600">${p.unitBig}</div>
+              <div class="font-extrabold text-earth-900 text-xs">${fmtZero(tot69Big)}</div>
+              <div class="text-[10px] text-earth-600">${tot69Big > 0 ? p.unitBig : ''}</div>
             </td>
             <!-- รวมขาย 69 (บาท ไม่มีสัญลักษณ์เงิน) -->
-            <td class="px-2 py-1.5 text-right font-mono text-earth-900">${(p.sales69_val || 0).toLocaleString()}</td>
+            <td class="px-2 py-1.5 text-right font-mono text-earth-900">${fmtZero(p.sales69_val)}</td>
 
-            <!-- 4. คลังสินค้าคงเหลือ -->
-            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${p.stock_pc.toLocaleString()}</td>
-            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${p.stock_kr.toLocaleString()}</td>
-            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${p.stock_cyp.toLocaleString()}</td>
-            <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${p.stock_cks.toLocaleString()}</td>
-            <td class="px-2 py-1.5 text-right font-mono font-medium text-earth-900">${totStockSub.toLocaleString()}</td>
+            <!-- 4. คลังสินค้าคงเหลือ (ถ้าเป็น 0 แสดงช่องว่าง) -->
+            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.stock_pc)}</td>
+            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.stock_kr)}</td>
+            <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.stock_cyp)}</td>
+            <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${fmtZero(p.stock_cks)}</td>
+            <td class="px-2 py-1.5 text-right font-mono font-medium text-earth-900">${fmtZero(totStockSub)}</td>
             
             <!-- รวมคงเหลือ (หน่วยใหญ่ ปัดเศษขึ้น) -->
             <td class="px-2 py-1.5 text-right bg-leaf-100/80 border-r-2 border-leaf-400">
-              <div class="font-extrabold text-leaf-900 text-xs">${totStockBig.toLocaleString()}</div>
-              <div class="text-[10px] text-leaf-800 font-medium">${p.unitBig}</div>
+              <div class="font-extrabold text-leaf-900 text-xs">${fmtZero(totStockBig)}</div>
+              <div class="text-[10px] text-leaf-800 font-medium">${totStockBig > 0 ? p.unitBig : ''}</div>
             </td>
             <!-- มูลค่าคงเหลือ (บาท ไม่มีสัญลักษณ์เงิน) -->
-            <td class="px-2 py-1.5 text-right font-mono text-earth-900">${(p.stock_val || 0).toLocaleString()}</td>
+            <td class="px-2 py-1.5 text-right font-mono text-earth-900">${fmtZero(p.stock_val)}</td>
 
             <!-- 5. Forecasts Dynamic Columns -->
             ${activeForecastMonths.map(m => {
-              const runRate = ((tot69Sub / 10) || 1) * parseFloat(m);
+              const runRate = ((tot69Sub / 10) || 0) * parseFloat(m);
               const fcBig = Math.ceil(runRate / mul);
               return `
                 <td class="px-2 py-1.5 text-right border-r border-cream-300">
-                  <div class="font-semibold text-earth-900">${fcBig.toLocaleString()}</div>
-                  <div class="text-[10px] text-earth-600">${p.unitBig}</div>
+                  <div class="font-semibold text-earth-900">${fmtZero(fcBig)}</div>
+                  <div class="text-[10px] text-earth-600">${fcBig > 0 ? p.unitBig : ''}</div>
                 </td>
               `;
             }).join('')}
@@ -821,22 +902,22 @@
             <!-- 6. แถบสั่งซื้อ (แสดงเฉพาะ PO Mode) -->
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 text-center">
               <div class="flex items-center justify-center gap-1">
-                <input type="number" min="0" step="any" value="${p.orderBigQty || ''}" onchange="updateOrderItem('${p.id}', 'order', this.value)" class="w-16 px-1.5 py-1 text-center font-bold text-xs border border-cream-300 rounded focus:border-leaf-600 focus:outline-none bg-amber-50/40">
+                <input type="number" min="0" step="any" value="${p.orderBigQty > 0 ? p.orderBigQty : ''}" placeholder="" onchange="updateOrderItem('${p.id}', 'order', this.value)" class="w-16 px-1.5 py-1 text-center font-bold text-xs border border-cream-300 rounded focus:border-leaf-600 focus:outline-none bg-amber-50/40">
                 <span class="text-[11px] text-earth-700">${p.unitBig}</span>
               </div>
-              <div class="text-[10px] text-earth-600 mt-0.5">${orderSub.toLocaleString()} ${cleanSubUnit}</div>
+              <div class="text-[10px] text-earth-600 mt-0.5">${orderSub > 0 ? `${orderSub.toLocaleString()} ${cleanSubUnit}` : ''}</div>
             </td>
 
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 text-center">
               <div class="flex items-center justify-center gap-1">
-                <input type="number" min="0" step="any" value="${p.freeBigQty || ''}" onchange="updateOrderItem('${p.id}', 'free', this.value)" class="w-14 px-1.5 py-1 text-center font-bold text-xs border border-cream-300 rounded focus:border-leaf-600 focus:outline-none bg-amber-50/40">
+                <input type="number" min="0" step="any" value="${p.freeBigQty > 0 ? p.freeBigQty : ''}" placeholder="" onchange="updateOrderItem('${p.id}', 'free', this.value)" class="w-14 px-1.5 py-1 text-center font-bold text-xs border border-cream-300 rounded focus:border-leaf-600 focus:outline-none bg-amber-50/40">
                 <span class="text-[11px] text-earth-700">${p.unitBig}</span>
               </div>
-              <div class="text-[10px] text-earth-600 mt-0.5">${freeSub.toLocaleString()} ${cleanSubUnit}</div>
+              <div class="text-[10px] text-earth-600 mt-0.5">${freeSub > 0 ? `${freeSub.toLocaleString()} ${cleanSubUnit}` : ''}</div>
             </td>
 
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 text-right font-mono text-leaf-800 font-semibold">
-              ${orderVal.toLocaleString()}
+              ${fmtZero(orderVal)}
             </td>
 
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 text-left">
@@ -889,10 +970,10 @@
         html += `
           <tr>
             <td class="px-3 py-1.5 font-medium text-earth-900">${m} 2569</td>
-            <td class="px-3 py-1.5 text-right font-mono">${tn1.toLocaleString()}</td>
-            <td class="px-3 py-1.5 text-right font-mono">${tn6.toLocaleString()}</td>
-            <td class="px-3 py-1.5 text-right font-mono">${cks.toLocaleString()}</td>
-            <td class="px-3 py-1.5 text-right font-mono font-bold text-leaf-800">${tot.toLocaleString()}</td>
+            <td class="px-3 py-1.5 text-right font-mono">${fmtZero(tn1)}</td>
+            <td class="px-3 py-1.5 text-right font-mono">${fmtZero(tn6)}</td>
+            <td class="px-3 py-1.5 text-right font-mono">${fmtZero(cks)}</td>
+            <td class="px-3 py-1.5 text-right font-mono font-bold text-leaf-800">${fmtZero(tot)}</td>
           </tr>
         `;
       });
@@ -960,29 +1041,29 @@
           'หน่วยย่อย': getCleanUnitName(p.unitSub),
           'หน่วยใหญ่': p.unitBig,
           'หน่วยคูณ': mul,
-          'ขาย68_TN(1-5)': p.sales68_tn_1_5,
-          'ขาย68_TN(6)': p.sales68_tn_6,
-          'ขาย68_ชาวเกษตร(30สาขา)': p.sales68_cks,
-          'รวมขาย68(ย่อย)': tot68Sub,
-          'รวมขาย68(ใหญ่)': Math.ceil(tot68Sub / mul),
-          'ยอดขาย68(บ.)': p.sales68_val || 0,
-          'ขาย69_TN(1-5)': p.sales69_tn_1_5,
-          'ขาย69_TN(6)': p.sales69_tn_6,
-          'ขาย69_ชาวเกษตร(37สาขา)': p.sales69_cks,
-          'รวมขาย69(ย่อย)': tot69Sub,
-          'รวมขาย69(ใหญ่)': Math.ceil(tot69Sub / mul),
-          'ยอดขาย69(บ.)': p.sales69_val || 0,
-          'คลังปากช่อง': p.stock_pc,
-          'คลังโคราช': p.stock_kr,
-          'คลังชัยภูมิ': p.stock_cyp,
-          'คลังชาวเกษตร(41สาขา)': p.stock_cks,
-          'รวมคงเหลือ(ย่อย)': totStockSub,
-          'รวมคงเหลือ(ใหญ่)': Math.ceil(totStockSub / mul),
-          'มูลค่าคงเหลือ': p.stock_val || 0,
+          'ขาย68_TN(1-5)': p.sales68_tn_1_5 || '',
+          'ขาย68_TN(6)': p.sales68_tn_6 || '',
+          'ขาย68_ชาวเกษตร(30สาขา)': p.sales68_cks || '',
+          'รวมขาย68(ย่อย)': tot68Sub || '',
+          'รวมขาย68(ใหญ่)': Math.ceil(tot68Sub / mul) || '',
+          'ยอดขาย68(บ.)': p.sales68_val || '',
+          'ขาย69_TN(1-5)': p.sales69_tn_1_5 || '',
+          'ขาย69_TN(6)': p.sales69_tn_6 || '',
+          'ขาย69_ชาวเกษตร(37สาขา)': p.sales69_cks || '',
+          'รวมขาย69(ย่อย)': tot69Sub || '',
+          'รวมขาย69(ใหญ่)': Math.ceil(tot69Sub / mul) || '',
+          'ยอดขาย69(บ.)': p.sales69_val || '',
+          'คลังปากช่อง': p.stock_pc || '',
+          'คลังโคราช': p.stock_kr || '',
+          'คลังชัยภูมิ': p.stock_cyp || '',
+          'คลังชาวเกษตร(41สาขา)': p.stock_cks || '',
+          'รวมคงเหลือ(ย่อย)': totStockSub || '',
+          'รวมคงเหลือ(ใหญ่)': Math.ceil(totStockSub / mul) || '',
+          'มูลค่าคงเหลือ': p.stock_val || '',
           'สถานะสต็อค': st.label,
-          'จำนวนสั่ง(ใหญ่)': p.orderBigQty || 0,
-          'จำนวนแถม(ใหญ่)': p.freeBigQty || 0,
-          'มูลค่าสั่งซื้อ': (p.orderBigQty || 0) * mul * (p.unitPrice || 0),
+          'จำนวนสั่ง(ใหญ่)': p.orderBigQty || '',
+          'จำนวนแถม(ใหญ่)': p.freeBigQty || '',
+          'มูลค่าสั่งซื้อ': ((p.orderBigQty || 0) * mul * (p.unitPrice || 0)) || '',
           'หมายเหตุ': p.notes || ''
         };
       });
@@ -994,7 +1075,7 @@
     }
 
     /**
-     * ดึงข้อมูลจริงจาก Google Sheets ครบถ้วนทุกแถว (รองรับ 3,600+ แถว)
+     * ดึงข้อมูลจริงจาก Google Sheets แบบสมบูรณ์
      */
     async function fetchGoogleSheetData() {
       const syncBadge = document.getElementById('syncBadge');
@@ -1003,7 +1084,6 @@
       syncBadge.classList.add('flex');
       syncText.innerText = "กำลังดึงข้อมูลทั้งหมดจาก Google Sheets...";
 
-      // ดึงข้อมูลผ่าน Google Visualization API
       const url = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME)}`;
 
       try {
@@ -1031,13 +1111,11 @@
 
         const parsedProducts = [];
         
-        // วนอ่านทุกแถว ไม่หยุดกลางคันแม้เจอแถวว่างหรือสูตร 0
         for (let i = 4; i < rows.length; i++) {
           const rowObj = rows[i];
           if (!rowObj || !rowObj.c) continue;
           const c = rowObj.c;
 
-          // Helper ปลอดภัยในการดึงข้อมูล
           const getVal = (idx) => {
             if (!c[idx] || c[idx].v === null || c[idx].v === undefined) return '';
             return String(c[idx].v).trim();
@@ -1050,27 +1128,21 @@
             return isNaN(val) ? 0 : val;
           };
 
-          // ชื่อสินค้า (คอลัมน์ F -> Index 5)
           let nameVal = getVal(5);
-          
-          // ถ้า F ว่าง ลองดูคอลัมน์ใกล้เคียงเพื่อป้องกันแถวตกหล่น
           if (!nameVal || nameVal === '0' || nameVal === 'ชื่อสินค้า') {
             continue;
           }
 
           const isDisc = nameVal.includes('*') || nameVal.includes('เลิก');
 
-          // ดึงคู่ค้า (Supplier คอลัมน์ CR -> 95 หรือ fallback)
           let supplierVal = getVal(95);
           if (!supplierVal || supplierVal === '0' || supplierVal === '.') {
             supplierVal = 'ทั่วไป';
           }
 
-          // ดึงชื่อสามัญ (คอลัมน์ CS -> 96)
           let genericVal = getVal(96);
           if (genericVal === '0' || genericVal === '.') genericVal = '';
 
-          // หมวดหมู่
           let catVal = getVal(97) || 'สินค้าเกษตร';
           if (catVal === '0' || catVal === '.') catVal = 'สินค้าเกษตร';
 
