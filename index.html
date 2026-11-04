@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบบริหารสต็อคสินค้าและพยากรณ์ขาย | ตังนำเกษตร & ชาวเกษตร</title>
   
-  <!-- Google Fonts: Sarabun & Prompt -->
+  <!-- Fonts: Sarabun & Prompt -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -116,30 +116,24 @@
 
   <!-- ================= TOP HEADER ================= -->
   <header class="bg-white border-b border-cream-300 shadow-sm sticky top-0 z-50 no-print">
-    <div class="max-w-[1920px] mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-4">
+    <div class="max-w-[1920px] mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-4">
       
-      <!-- Logo & Company Branding -->
+      <!-- โลโก้จริงของบริษัท ตังนำเกษตร -->
       <div class="flex items-center gap-3">
-        <div class="flex items-center gap-2">
-          <!-- Logo ตังนำเกษตร -->
-          <svg class="w-9 h-9" viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M15 65C10 35 35 10 75 10C75 45 50 65 15 65Z" fill="#8CB33E" />
-            <path d="M85 65C90 35 65 10 25 10C25 45 50 65 85 65Z" fill="#A4C639" opacity="0.85" />
-            <path d="M48 68C48 40 50 20 52 10" stroke="#FAF8F5" stroke-width="4" stroke-linecap="round"/>
-          </svg>
-          <div>
-            <div class="font-prompt font-bold text-lg leading-tight text-earth-900 tracking-tight flex items-center gap-1.5">
-              <span>Tangnam</span>
-              <span class="text-xs px-2 py-0.5 rounded-full bg-leaf-100 text-leaf-800 font-semibold border border-leaf-200">ระบบบริหารสต็อค</span>
+        <div class="flex items-center gap-2.5">
+          <img src="TN.PNG1_2.png" alt="โลโก้ ตังนำเกษตร" class="h-10 w-auto object-contain" onerror="this.onerror=null; this.src='logo.png';">
+          <div class="border-l border-cream-300 pl-2.5">
+            <div class="font-prompt font-bold text-sm text-earth-900 leading-tight">
+              ระบบสต็อคสินค้าและพยากรณ์ขาย
             </div>
-            <div class="text-[11px] text-earth-700 tracking-wider font-medium">ตังนำเกษตร & ชาวเกษตร</div>
+            <div class="text-[11px] text-earth-600 font-medium">ตังนำเกษตร & ชาวเกษตร</div>
           </div>
         </div>
 
         <!-- Google Sheets Sync Indicator -->
         <div id="syncBadge" class="hidden items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-700 border border-leaf-200">
           <span class="w-2 h-2 rounded-full bg-leaf-500 animate-pulse"></span>
-          <span id="syncStatusText">เชื่อมต่อ Google Sheets เรียบร้อย</span>
+          <span id="syncStatusText">เชื่อมต่อ Google Sheets</span>
         </div>
       </div>
 
@@ -158,7 +152,7 @@
         <!-- Refresh Button -->
         <button onclick="fetchGoogleSheetData()" title="รีเฟรชข้อมูลจากระบบ" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 hover:bg-cream-100 text-xs font-semibold transition-all">
           <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-          <span>รีเฟรชข้อมูล</span>
+          <span>รีเฟรช</span>
         </button>
 
         <!-- Print Button -->
@@ -173,7 +167,7 @@
           <span>ส่งออก Excel</span>
         </button>
 
-        <!-- Preview APO Sheet (Only in PO mode) -->
+        <!-- Preview APO Sheet -->
         <button id="btnOpenAPO" onclick="openAPOModal()" class="hidden items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-earth-700 bg-earth-900 text-cream-50 hover:bg-black text-xs font-semibold transition-all shadow-sm">
           <span>ใบขออนุมัติสั่งซื้อ (APO)</span>
           <span id="badgeAPOCount" class="px-1.5 py-0.2 rounded-full bg-leaf-500 text-white text-[10px]">0</span>
@@ -196,7 +190,7 @@
           <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-earth-600">
             <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </div>
-          <input type="text" id="globalSearchInput" oninput="handleSearchChange()" placeholder="ค้นหาได้ทุกอย่าง (ชื่อสินค้า, สามัญ, คู่ค้า, หมวดหมู่, สต็อค)..." class="w-full pl-8 pr-3 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 placeholder-earth-600 focus:outline-none focus:ring-1 focus:ring-leaf-600">
+          <input type="text" id="globalSearchInput" oninput="handleSearchChange()" placeholder="ค้นหาได้ทุกอย่าง (ชื่อสินค้า, สามัญ, คู่ค้า, สต็อค)..." class="w-full pl-8 pr-3 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs text-earth-900 placeholder-earth-600 focus:outline-none focus:ring-1 focus:ring-leaf-600">
         </div>
 
         <!-- Supplier Filter -->
@@ -274,10 +268,10 @@
           <!-- Layer 1: Header Categories with Datetime -->
           <thead>
             <tr class="bg-earth-900 text-cream-50 text-[11px] font-semibold sticky-header-top">
-              <th rowspan="2" class="sticky-corner-1 bg-earth-900 px-3 py-2 border-r border-earth-700 min-w-[260px] text-center">
-                รายการสินค้า & หน่วยขาย
+              <!-- รวมชื่อสินค้า คู่ค้า และหน่วยขาย ไว้ในคอลัมน์แรกเพื่อประหยัดพื้นที่ -->
+              <th rowspan="2" class="sticky-corner-1 bg-earth-900 px-3 py-2 border-r border-earth-700 min-w-[280px] text-center">
+                รายการสินค้า / คู่ค้า / หน่วยขาย
               </th>
-              <th rowspan="2" class="px-2.5 py-2 border-r border-earth-700 min-w-[120px] text-center">คู่ค้า</th>
 
               <!-- Sales 2568 Category -->
               <th id="hdrSales68Group" colspan="4" class="px-2 py-1.5 border-r border-earth-700 text-center bg-earth-800 text-cream-100">
@@ -330,25 +324,34 @@
               <th rowspan="2" class="px-2 py-1.5 text-center bg-earth-900 min-w-[80px]">ประวัติ</th>
             </tr>
 
-            <!-- Layer 2: Sub-headers -->
+            <!-- Layer 2: Sub-headers (จัดจำนวนสาขาลงบรรทัดล่าง) -->
             <tr class="bg-earth-800 text-cream-200 text-[10px] sticky-header">
               <!-- Sales 68 Sub-headers -->
               <th class="col-tn px-2 py-1 text-right border-r border-earth-700">TN (1-5)</th>
               <th class="col-tn px-2 py-1 text-right border-r border-earth-700">TN (6)</th>
-              <th class="col-cks px-2 py-1 text-right border-r border-earth-700">ชาวเกษตร (30 สาขา)</th>
+              <th class="col-cks px-2 py-1 text-right border-r border-earth-700">
+                <div>ชาวเกษตร</div>
+                <div class="text-[9px] text-cream-300 font-normal">(30 สาขา)</div>
+              </th>
               <th class="px-2 py-1 text-right font-bold border-r border-earth-700">รวม (ย่อย)</th>
 
               <!-- Sales 69 Sub-headers -->
               <th class="col-tn px-2 py-1 text-right border-r border-earth-700">TN (1-5)</th>
               <th class="col-tn px-2 py-1 text-right border-r border-earth-700">TN (6)</th>
-              <th class="col-cks px-2 py-1 text-right border-r border-earth-700">ชาวเกษตร (37 สาขา)</th>
+              <th class="col-cks px-2 py-1 text-right border-r border-earth-700">
+                <div>ชาวเกษตร</div>
+                <div class="text-[9px] text-cream-300 font-normal">(37 สาขา)</div>
+              </th>
               <th class="px-2 py-1 text-right font-bold border-r border-earth-700">รวม (ย่อย)</th>
 
               <!-- Stock Sub-headers -->
               <th class="col-tn px-2 py-1 text-right border-r border-earth-700">ปากช่อง</th>
               <th class="col-tn px-2 py-1 text-right border-r border-earth-700">โคราช</th>
               <th class="col-tn px-2 py-1 text-right border-r border-earth-700">ชัยภูมิ</th>
-              <th class="col-cks px-2 py-1 text-right border-r border-earth-700">ชาวเกษตร (41 สาขา)</th>
+              <th class="col-cks px-2 py-1 text-right border-r border-earth-700">
+                <div>ชาวเกษตร</div>
+                <div class="text-[9px] text-cream-300 font-normal">(41 สาขา)</div>
+              </th>
               <th class="px-2 py-1 text-right font-bold border-r border-earth-700">รวม (ย่อย)</th>
 
               <!-- Dynamic Forecast Sub-headers (Container) -->
@@ -367,7 +370,6 @@
 
           <!-- Table Body Rendered by JS -->
           <tbody id="tableBody" class="divide-y divide-cream-300">
-            <!-- Loading Indicator -->
             <tr>
               <td colspan="30" class="text-center py-12 text-earth-600">
                 กำลังโหลดข้อมูล...
@@ -404,7 +406,6 @@
           <span class="text-xs text-earth-600">หน่วยนับ: ย่อย</span>
         </div>
 
-        <!-- Monthly Grid Table -->
         <div class="border border-cream-300 rounded-xl overflow-hidden">
           <table class="w-full text-xs text-left">
             <thead class="bg-cream-200 text-earth-900 font-semibold">
@@ -416,14 +417,11 @@
                 <th class="px-3 py-2 border-b border-cream-300 text-right font-bold text-leaf-800">รวมทั้งหมด</th>
               </tr>
             </thead>
-            <tbody id="modalMonthlyBody" class="divide-y divide-cream-200">
-              <!-- Rendered by JS -->
-            </tbody>
+            <tbody id="modalMonthlyBody" class="divide-y divide-cream-200"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- Modal Footer -->
       <div class="px-6 py-3 bg-cream-100 border-t border-cream-300 flex justify-end">
         <button onclick="closeMonthlyModal()" class="px-4 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 hover:bg-cream-200 text-xs font-semibold">
           ปิดหน้าต่าง
@@ -461,8 +459,7 @@
           <thead class="bg-cream-200 text-earth-900 font-semibold">
             <tr>
               <th class="p-2 border-b border-r border-cream-300 text-center">ลำดับ</th>
-              <th class="p-2 border-b border-r border-cream-300">รายการสินค้า</th>
-              <th class="p-2 border-b border-r border-cream-300 text-center">คู่ค้า</th>
+              <th class="p-2 border-b border-r border-cream-300">รายการสินค้า / คู่ค้า</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">จำนวนสั่ง (ใหญ่)</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">จำนวนย่อย</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">แถม (ใหญ่)</th>
@@ -470,12 +467,10 @@
               <th class="p-2 border-b border-cream-300">หมายเหตุ</th>
             </tr>
           </thead>
-          <tbody id="apoTableBody" class="divide-y divide-cream-200">
-            <!-- Rendered by JS -->
-          </tbody>
+          <tbody id="apoTableBody" class="divide-y divide-cream-200"></tbody>
           <tfoot class="bg-cream-100 font-bold">
             <tr>
-              <td colspan="6" class="p-2 text-right border-t border-cream-300">รวมมูลค่าขออนุมัติสั่งซื้อทั้งสิ้น:</td>
+              <td colspan="5" class="p-2 text-right border-t border-cream-300">รวมมูลค่าขออนุมัติสั่งซื้อทั้งสิ้น:</td>
               <td id="apoGrandTotal" class="p-2 text-right border-t border-cream-300 text-leaf-800 text-sm">0</td>
               <td class="border-t border-cream-300"></td>
             </tr>
@@ -499,7 +494,6 @@
         </div>
       </div>
 
-      <!-- APO Footer Buttons -->
       <div class="px-6 py-3 bg-cream-100 border-t border-cream-300 flex justify-end gap-2">
         <button onclick="window.print()" class="px-4 py-1.5 rounded-lg border border-leaf-600 bg-leaf-700 text-white hover:bg-leaf-800 text-xs font-semibold">
           พิมพ์ใบขออนุมัตินี้
@@ -514,25 +508,21 @@
   <!-- ================= JAVASCRIPT LOGIC ================= -->
   <script>
     /**
-     * ========================================================
      * ตั้งค่า Google Sheets ID ตรงนี้
-     * ========================================================
      */
-    const GOOGLE_SHEET_ID = "1zDgKpHuPoivBjUbR44ZgTG4p_wa6VyTi"; // วาง Google Sheets ID ที่นี่
-    const GOOGLE_SHEET_NAME = "Forecast"; // ชื่อชีทที่ดึงข้อมูล
+    const GOOGLE_SHEET_ID = "1zDgKpHuPoivBjUbR44ZgTG4p_wa6VyTi"; // วาง Sheet ID ที่นี่
+    const GOOGLE_SHEET_NAME = "Forecast";
 
-    // ตัวแปรวันที่และเวลา
     let sales69DateTime = "01/01 - 03/11/2569 10.14 น.";
     let stockDateTime = "03/11/2569 10.14 น.";
 
-    // State Variables
     let rawProducts = [];
     let currentFiltered = [];
-    let activeViewMode = 'stock'; // 'stock' or 'po'
-    let activeCompanyFilter = 'ALL'; // 'ALL', 'TN', 'CKS'
-    let activeForecastMonths = ['1', '2']; // Default show 1 and 2 months
+    let activeViewMode = 'stock';
+    let activeCompanyFilter = 'ALL';
+    let activeForecastMonths = ['1', '2'];
 
-    // Master Initial Sample Data
+    // Sample Data สำหรับแสดงผลเบื้องต้น
     const initialDataset = [
       {
         id: 'P-001',
@@ -545,23 +535,19 @@
         unitMultiplier: 20,
         unitPrice: 520,
         isDiscontinued: false,
-        // Sales 68
         sales68_tn_1_5: 420,
         sales68_tn_6: 80,
         sales68_cks: 130,
         sales68_val: 327600,
-        // Sales 69
         sales69_tn_1_5: 280,
         sales69_tn_6: 60,
         sales69_cks: 90,
         sales69_val: 223600,
-        // Warehouses
         stock_pc: 25,
         stock_kr: 15,
         stock_cyp: 8,
         stock_cks: 12,
         stock_val: 31200,
-        // Orders
         orderBigQty: 20,
         freeBigQty: 1,
         notes: 'เตรียมรับฤดูกาลใหม่',
@@ -656,13 +642,11 @@
       }
     ];
 
-    // Helper: ตัดขนาดในวงเล็บออกจากหน่วยขาย เช่น "ถุง (1 กก.)" -> "ถุง"
     function getCleanUnitName(unit) {
       if (!unit) return '';
       return unit.replace(/\s*\([^)]*\)/g, '').trim();
     }
 
-    // Initialize Application
     document.addEventListener('DOMContentLoaded', () => {
       rawProducts = [...initialDataset];
       initFilters();
@@ -682,7 +666,6 @@
       if (stockLbl) stockLbl.innerText = `สต็อค ณ วันที่: ${stockDateTime}`;
     }
 
-    // Populate Filter Options
     function initFilters() {
       const suppliers = [...new Set(rawProducts.map(p => p.supplier).filter(Boolean))];
       const categories = [...new Set(rawProducts.map(p => p.category).filter(Boolean))];
@@ -701,7 +684,6 @@
       });
     }
 
-    // Toggle Forecast Month Chips
     function toggleForecastMonth(month) {
       const idx = activeForecastMonths.indexOf(month);
       if (idx > -1) {
@@ -745,7 +727,6 @@
       document.getElementById('hdrForecastGroup').setAttribute('colspan', activeForecastMonths.length + 1);
     }
 
-    // Toggle View Mode (Stock vs PO)
     function setViewMode(mode) {
       activeViewMode = mode;
       const btnStock = document.getElementById('btnModeStock');
@@ -768,7 +749,6 @@
       }
     }
 
-    // Toggle Company Views (ALL, TN, CKS)
     function setCompanyFilter(comp) {
       activeCompanyFilter = comp;
       ['ALL', 'TN', 'CKS'].forEach(c => {
@@ -809,7 +789,6 @@
       applyFilters();
     }
 
-    // Apply Filters & Calculate Status
     function applyFilters() {
       const q = (document.getElementById('globalSearchInput').value || '').toLowerCase().trim();
       const sup = document.getElementById('supplierFilter').value;
@@ -824,7 +803,6 @@
         if (cat !== 'ALL' && p.category !== cat) return false;
         if (gen !== 'ALL' && p.genericName !== gen) return false;
 
-        // Global Search across all fields
         if (q) {
           const matchString = `${p.name} ${p.genericName} ${p.category} ${p.supplier} ${p.unitSub} ${p.unitBig} ${p.notes} ${p.suggestion}`.toLowerCase();
           if (!matchString.includes(q)) return false;
@@ -837,7 +815,6 @@
       });
 
       renderTable();
-      updateKPICards();
     }
 
     function calculateStatus(p) {
@@ -874,21 +851,17 @@
         const mul = p.unitMultiplier || 1;
         const cleanSubUnit = getCleanUnitName(p.unitSub);
 
-        // Sales 68 Calculations
         const tot68Sub = p.sales68_tn_1_5 + p.sales68_tn_6 + p.sales68_cks;
         const tot68Big = Math.ceil(tot68Sub / mul);
 
-        // Sales 69 Calculations
         const tot69Sub = p.sales69_tn_1_5 + p.sales69_tn_6 + p.sales69_cks;
         const tot69Big = Math.ceil(tot69Sub / mul);
 
-        // Inventory Stocks
         const totStockSub = p.stock_pc + p.stock_kr + p.stock_cyp + p.stock_cks;
         const totStockBig = Math.ceil(totStockSub / mul);
 
         const st = calculateStatus(p);
 
-        // Order Sub Calculations
         const orderSub = Math.round((p.orderBigQty || 0) * mul);
         const freeSub = Math.round((p.freeBigQty || 0) * mul);
         const orderVal = (p.orderBigQty || 0) * mul * (p.unitPrice || 0);
@@ -897,20 +870,18 @@
 
         html += `
           <tr class="${rowClass}">
-            <!-- 1. รายการสินค้า & หน่วยขาย (ตรึงซ้าย) -->
+            <!-- 1. รายการสินค้า & คู่ค้า & หน่วยขาย (ตรึงซ้าย) -->
             <td class="sticky-col-1 bg-white px-3 py-2 border-r border-cream-300">
-              <div class="font-semibold text-earth-900">${p.name}</div>
-              <div class="flex items-center gap-1.5 mt-0.5 text-[11px] text-earth-700">
-                <span class="px-1.5 py-0.5 rounded bg-cream-200 border border-cream-300">${cleanSubUnit}</span>
+              <div class="font-semibold text-earth-900 leading-tight">${p.name}</div>
+              <div class="flex flex-wrap items-center gap-1.5 mt-1 text-[11px] text-earth-700">
+                <span class="px-1.5 py-0.2 rounded bg-leaf-50 text-leaf-800 border border-leaf-200 font-medium">${p.supplier}</span>
+                <span class="px-1.5 py-0.2 rounded bg-cream-200 border border-cream-300">${cleanSubUnit}</span>
                 <span class="text-earth-600">(1*${mul} ${p.unitBig})</span>
-                ${p.genericName ? `<span class="text-leaf-800 font-medium">| ${p.genericName}</span>` : ''}
+                ${p.genericName ? `<span class="text-earth-600">| ${p.genericName}</span>` : ''}
               </div>
             </td>
 
-            <!-- 2. คู่ค้า -->
-            <td class="px-2.5 py-2 text-earth-800">${p.supplier}</td>
-
-            <!-- 3. จำนวนขายปี 68 -->
+            <!-- 2. จำนวนขายปี 68 -->
             <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${p.sales68_tn_1_5.toLocaleString()}</td>
             <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${p.sales68_tn_6.toLocaleString()}</td>
             <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${p.sales68_cks.toLocaleString()}</td>
@@ -924,7 +895,7 @@
             <!-- รวมขาย 68 (บาท ไม่มีสัญลักษณ์เงิน) -->
             <td class="px-2 py-1.5 text-right font-mono text-earth-900">${(p.sales68_val || 0).toLocaleString()}</td>
 
-            <!-- 4. จำนวนขายปี 69 -->
+            <!-- 3. จำนวนขายปี 69 -->
             <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${p.sales69_tn_1_5.toLocaleString()}</td>
             <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${p.sales69_tn_6.toLocaleString()}</td>
             <td class="col-cks px-2 py-1.5 text-right font-mono text-earth-800">${p.sales69_cks.toLocaleString()}</td>
@@ -938,7 +909,7 @@
             <!-- รวมขาย 69 (บาท ไม่มีสัญลักษณ์เงิน) -->
             <td class="px-2 py-1.5 text-right font-mono text-earth-900">${(p.sales69_val || 0).toLocaleString()}</td>
 
-            <!-- 5. คลังสินค้าคงเหลือ -->
+            <!-- 4. คลังสินค้าคงเหลือ -->
             <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${p.stock_pc.toLocaleString()}</td>
             <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${p.stock_kr.toLocaleString()}</td>
             <td class="col-tn px-2 py-1.5 text-right font-mono text-earth-800">${p.stock_cyp.toLocaleString()}</td>
@@ -953,7 +924,7 @@
             <!-- มูลค่าคงเหลือ (บาท ไม่มีสัญลักษณ์เงิน) -->
             <td class="px-2 py-1.5 text-right font-mono text-earth-900">${(p.stock_val || 0).toLocaleString()}</td>
 
-            <!-- 6. Forecasts Dynamic Columns -->
+            <!-- 5. Forecasts Dynamic Columns -->
             ${activeForecastMonths.map(m => {
               const runRate = ((tot69Sub / 10) || 1) * parseFloat(m);
               const fcBig = Math.ceil(runRate / mul);
@@ -970,7 +941,7 @@
               <span class="inline-block px-2 py-0.5 rounded text-[11px] font-semibold ${st.badge}">${st.label}</span>
             </td>
 
-            <!-- 7. แถบสั่งซื้อ (แสดงเฉพาะ PO Mode) -->
+            <!-- 6. แถบสั่งซื้อ (แสดงเฉพาะ PO Mode) -->
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 text-center">
               <div class="flex items-center justify-center gap-1">
                 <input type="number" min="0" step="any" value="${p.orderBigQty || ''}" onchange="updateOrderItem('${p.id}', 'order', this.value)" class="w-16 px-1.5 py-1 text-center font-bold text-xs border border-cream-300 rounded focus:border-leaf-600 focus:outline-none bg-amber-50/40">
@@ -996,7 +967,7 @@
               ${p.suggestion ? `<div class="text-[10px] text-earth-600 mt-0.5 leading-tight">💡 ${p.suggestion}</div>` : ''}
             </td>
 
-            <!-- 8. ดูประวัติรายเดือน -->
+            <!-- 7. ดูประวัติรายเดือน -->
             <td class="px-2 py-1.5 text-center">
               <button onclick="openMonthlyModal('${p.id}')" class="px-2 py-1 rounded bg-cream-200 hover:bg-cream-300 text-earth-800 text-[11px] font-semibold transition-all">
                 📊 ดูรายเดือน
@@ -1011,55 +982,16 @@
       document.getElementById('totalRowCount').innerText = rawProducts.length;
     }
 
-    // Update Purchase Inputs
     function updateOrderItem(id, field, val) {
       const item = rawProducts.find(p => p.id === id);
       if (!item) return;
 
-      if (field === 'order') {
-        item.orderBigQty = parseFloat(val) || 0;
-      } else if (field === 'free') {
-        item.freeBigQty = parseFloat(val) || 0;
-      } else if (field === 'notes') {
-        item.notes = val;
-      }
+      if (field === 'order') item.orderBigQty = parseFloat(val) || 0;
+      else if (field === 'free') item.freeBigQty = parseFloat(val) || 0;
+      else if (field === 'notes') item.notes = val;
       applyFilters();
     }
 
-    // Update Top Metric Cards
-    function updateKPICards() {
-      let totalStockVal = 0;
-      let critCount = 0;
-      let reorderCount = 0;
-      let optimalCount = 0;
-      let overstockCount = 0;
-      let orderTotalVal = 0;
-      let orderItemsCount = 0;
-
-      rawProducts.forEach(p => {
-        totalStockVal += p.stock_val || 0;
-        const st = calculateStatus(p);
-        if (st.code === 'CRITICAL') critCount++;
-        else if (st.code === 'REORDER') reorderCount++;
-        else if (st.code === 'OPTIMAL') optimalCount++;
-        else if (st.code === 'OVERSTOCK') overstockCount++;
-
-        const mul = p.unitMultiplier || 1;
-        const val = (p.orderBigQty || 0) * mul * (p.unitPrice || 0);
-        orderTotalVal += val;
-        if ((p.orderBigQty || 0) > 0) orderItemsCount++;
-      });
-
-      document.getElementById('kpiTotalStockValue').innerText = totalStockVal.toLocaleString();
-      document.getElementById('kpiCriticalCount').innerText = `${critCount} รายการ`;
-      document.getElementById('kpiReorderCount').innerText = `${reorderCount} รายการ`;
-      document.getElementById('kpiOptimalCount').innerText = `${optimalCount} รายการ`;
-      document.getElementById('kpiOverstockCount').innerText = `${overstockCount} รายการ`;
-      document.getElementById('kpiOrderTotalValue').innerText = orderTotalVal.toLocaleString();
-      document.getElementById('badgeAPOCount').innerText = orderItemsCount;
-    }
-
-    // Modal: Monthly Sales Drilldown
     function openMonthlyModal(productId) {
       const p = rawProducts.find(item => item.id === productId);
       if (!p) return;
@@ -1096,14 +1028,13 @@
       document.getElementById('monthlyModal').classList.add('hidden');
     }
 
-    // Modal: Purchase Approval (APO) Preview
     function openAPOModal() {
       const itemsToOrder = rawProducts.filter(p => (p.orderBigQty || 0) > 0);
       const tbody = document.getElementById('apoTableBody');
       let grandTotal = 0;
 
       if (itemsToOrder.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-earth-600">ยังไม่มีรายการที่กรอกจำนวนสั่งซื้อ</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-earth-600">ยังไม่มีรายการที่กรอกจำนวนสั่งซื้อ</td></tr>`;
       } else {
         let html = '';
         itemsToOrder.forEach((p, idx) => {
@@ -1116,8 +1047,7 @@
           html += `
             <tr>
               <td class="p-2 text-center">${idx + 1}</td>
-              <td class="p-2 font-medium">${p.name}</td>
-              <td class="p-2 text-center">${p.supplier}</td>
+              <td class="p-2 font-medium">${p.name} <span class="text-[11px] text-earth-600">(${p.supplier})</span></td>
               <td class="p-2 text-right font-bold">${p.orderBigQty} ${p.unitBig}</td>
               <td class="p-2 text-right">${subQty.toLocaleString()} ${cleanSub}</td>
               <td class="p-2 text-right">${p.freeBigQty || 0} ${p.unitBig}</td>
@@ -1137,7 +1067,6 @@
       document.getElementById('apoModal').classList.add('hidden');
     }
 
-    // Export to Excel using SheetJS
     function exportToExcel() {
       const exportData = currentFiltered.map(p => {
         const mul = p.unitMultiplier || 1;
@@ -1162,14 +1091,14 @@
           'ยอดขาย68(บ.)': p.sales68_val || 0,
           'ขาย69_TN(1-5)': p.sales69_tn_1_5,
           'ขาย69_TN(6)': p.sales69_tn_6,
-          'ขาย69_ชาวเกษตร(37สาขา)': p.sales69_cks,
+          'ขาย69_ชาวเกษตร(47สาขา)': p.sales69_cks,
           'รวมขาย69(ย่อย)': tot69Sub,
           'รวมขาย69(ใหญ่)': Math.ceil(tot69Sub / mul),
           'ยอดขาย69(บ.)': p.sales69_val || 0,
           'คลังปากช่อง': p.stock_pc,
           'คลังโคราช': p.stock_kr,
           'คลังชัยภูมิ': p.stock_cyp,
-          'คลังชาวเกษตร(41สาขา)': p.stock_cks,
+          'คลังชาวเกษตร(47สาขา)': p.stock_cks,
           'รวมคงเหลือ(ย่อย)': totStockSub,
           'รวมคงเหลือ(ใหญ่)': Math.ceil(totStockSub / mul),
           'มูลค่าคงเหลือ': p.stock_val || 0,
@@ -1188,7 +1117,7 @@
     }
 
     /**
-     * ดึงข้อมูลตรงจาก Google Sheets API
+     * ดึงข้อมูลจริงจาก Google Sheets (รองรับครบทั้ง 3,609 SKU)
      */
     async function fetchGoogleSheetData() {
       if (!GOOGLE_SHEET_ID) {
@@ -1210,7 +1139,7 @@
         const json = JSON.parse(text.substring(47).slice(0, -2));
         const rows = json.table.rows;
 
-        // ดึงวันที่และเวลาจากแถวบนสุด (Row 0)
+        // ดึงวันที่และเวลาจาก Row 0
         if (rows.length > 0) {
           const r0 = rows[0].c;
           if (r0 && r0[21] && r0[21].v) sales69DateTime = String(r0[21].v);
@@ -1218,7 +1147,7 @@
           updateDateTimeLabels();
         }
 
-        // แปลงข้อมูลแถวสินค้า (เริ่มจาก Row 5 เป็นต้นไป)
+        // แปลงแถวสินค้าทั้งหมด (ครบถ้วนทุกแถว)
         const parsedProducts = [];
         for (let i = 4; i < rows.length; i++) {
           const c = rows[i].c;
@@ -1262,7 +1191,7 @@
           rawProducts = parsedProducts;
           initFilters();
           applyFilters();
-          syncText.innerText = `อัปเดตแล้ว: ${new Date().toLocaleTimeString('th-TH')}`;
+          syncText.innerText = `ซิงค์แล้ว (${parsedProducts.length.toLocaleString()} รายการ)`;
         }
       } catch (err) {
         console.error("Error fetching Google Sheets:", err);
