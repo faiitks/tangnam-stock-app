@@ -71,7 +71,7 @@
       border-bottom: 1px solid #E8E3D7;
     }
 
-    /* ตัวเร่งความเร็วการ Scroll บนมือถือ (GPU Hardware Acceleration) */
+    /* ตัวเร่งความเร็วการ Scroll บนมือถือและเดสก์ท็อป (GPU Hardware Acceleration) */
     .table-scroll-container {
       overflow-x: auto;
       overflow-y: auto;
@@ -110,7 +110,7 @@
       transform: translateZ(0);
     }
 
-    /* วาดเฉพาะส่วนที่มองเห็น */
+    /* วาดเฉพาะส่วนที่มองเห็นบนหน้าจอ */
     .grid-table tbody tr {
       content-visibility: auto;
       contain-intrinsic-size: 0 45px;
@@ -164,13 +164,13 @@
         </div>
       </div>
 
-      <!-- Action Controls & Exports -->
+      <!-- ปุ่มควบคุมมุมมองและการส่งออก -->
       <div class="flex flex-wrap items-center gap-2">
         <div class="bg-cream-200 p-1 rounded-lg flex items-center border border-cream-300">
-          <button id="btnModeStock" onclick="setViewMode('stock')" class="px-3 py-1.5 rounded-md text-xs font-semibold transition-all shadow-sm bg-white text-earth-900">
+          <button id="btnModeStock" onclick="setViewMode('stock')" class="px-3 py-1.5 rounded-md text-xs font-semibold shadow-sm bg-white text-earth-900">
             ดูสต็อคอย่างเดียว
           </button>
-          <button id="btnModePO" onclick="setViewMode('po')" class="px-3 py-1.5 rounded-md text-xs font-semibold text-earth-700 hover:text-earth-900 transition-all">
+          <button id="btnModePO" onclick="setViewMode('po')" class="px-3 py-1.5 rounded-md text-xs font-semibold text-earth-700 hover:text-earth-900">
             ขออนุมัติสั่งซื้อ
           </button>
         </div>
@@ -252,7 +252,7 @@
     
     <div class="bg-white p-3 rounded-xl border border-cream-300 shadow-sm flex flex-col gap-2.5 no-print">
       
-      <!-- Top Filters Row -->
+      <!-- แถวตัวกรองด้านบน -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2.5">
         <div class="lg:col-span-2 relative">
           <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-earth-600">
@@ -291,7 +291,7 @@
         </div>
       </div>
 
-      <!-- Second Row: Company Views & Forecast Selector -->
+      <!-- แถวที่สอง: มุมมองบริษัท และช่วง Forecast -->
       <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-cream-200">
         <div class="flex items-center gap-2">
           <span class="text-xs font-semibold text-earth-700">มุมมอง:</span>
@@ -321,7 +321,7 @@
       </div>
     </div>
 
-    <!-- ================= DATA GRID (OPTIMIZED FOR MOBILE) ================= -->
+    <!-- ================= DATA GRID ================= -->
     <div class="bg-white rounded-xl border border-cream-300 shadow-sm overflow-hidden flex-1 flex flex-col">
       <div class="table-scroll-container flex-1 max-h-[68vh]">
         <table class="grid-table w-full text-left border-collapse text-xs whitespace-nowrap">
@@ -430,7 +430,7 @@
         </table>
       </div>
       
-      <!-- Footer & Load More Buttons (ช่วยให้มือถือเบาเครื่อง) -->
+      <!-- Footer & ปุ่มโหลดเพิ่มเติม -->
       <div class="px-4 py-2 border-t border-cream-300 bg-cream-100 flex flex-wrap items-center justify-between gap-2 text-xs text-earth-700">
         <div>แสดงผล <span id="filteredRowCount" class="font-bold text-earth-900">0</span> รายการ</div>
         <div id="loadMoreContainer" class="flex items-center gap-2">
@@ -556,8 +556,8 @@
     let activeCompanyFilter = 'ALL';
     let activeForecastMonths = ['1', '2'];
 
-    // ระบบควบคุมจำนวนแถวบนมือถือ (Virtual Pagination)
-    let visibleLimit = 80; // แสดงรอบละ 80 แถวเพื่อความลื่นไหลสูงสุดบนมือถือ
+    // ระบบควบคุมจำนวนแถว (Virtual Pagination) เพื่อความลื่นไหลสูงสุด
+    let visibleLimit = 80;
     const CHUNK_SIZE = 80;
 
     function fmtZero(val) {
@@ -587,7 +587,7 @@
 
     function initFilters() {
       const suppliers = [...new Set(rawProducts.map(p => p.supplier).filter(s => s && s !== 'ทั่วไป' && s !== '0'))].sort();
-      const categories = [...new Set(rawProducts.map(p => p.category).filter(Boolean))].sort();
+      const categories = [...new Set(rawProducts.map(p => p.category).filter(c => c && c !== 'ทั่วไป' && c !== '0'))].sort();
       const generics = [...new Set(rawProducts.map(p => p.genericName).filter(Boolean))].sort();
 
       populateDropdown('supplierFilter', suppliers, 'บริษัทคู่ค้า (ทั้งหมด)');
@@ -817,7 +817,6 @@
       document.getElementById('badgeAPOCount').innerText = orderItemsCount;
     }
 
-    // เรนเดอร์ตารางแบบเบาเครื่อง (แสดงผลเฉพาะแถวที่จำเป็น)
     function renderTable() {
       const tbody = document.getElementById('tableBody');
       const totalLen = currentFiltered.length;
@@ -952,12 +951,10 @@
         `;
       });
 
-      // เรนเดอร์ลงในตารางแบบลื่นไหล
       window.requestAnimationFrame(() => {
         tbody.innerHTML = html;
         document.getElementById('filteredRowCount').innerText = `${displayList.length.toLocaleString()} จาก ${totalLen.toLocaleString()}`;
 
-        // จัดการปุ่มโหลดเพิ่มเติม
         const btnLoadMore = document.getElementById('btnLoadMore');
         const btnLoadAll = document.getElementById('btnLoadAll');
         if (visibleLimit < totalLen) {
@@ -1104,6 +1101,9 @@
       XLSX.writeFile(wb, `รายงานสต็อค_ตังนำเกษตร_ชาวเกษตร_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
+    /**
+     * ดึงข้อมูลจริงจาก Google Sheets พร้อมตรวจหาตำแหน่งคอลัมน์อัตโนมัติ
+     */
     async function fetchGoogleSheetData() {
       const syncBadge = document.getElementById('syncBadge');
       const syncText = document.getElementById('syncStatusText');
@@ -1123,6 +1123,7 @@
         const json = JSON.parse(match[1]);
         const rows = json.table.rows;
 
+        // ดึงวันที่และเวลา
         if (rows.length > 0 && rows[0].c) {
           const r0 = rows[0].c;
           for (let k = 0; k < r0.length; k++) {
@@ -1134,6 +1135,34 @@
             }
           }
           updateDateTimeLabels();
+        }
+
+        // ==========================================
+        // ระบบตรวจหาตำแหน่งคอลัมน์อัตโนมัติจากชื่อหัวตาราง
+        // ==========================================
+        let categoryColIndex = 98; // ค่าเริ่มต้นถ้าหาไม่เจอ (CU)
+        let supplierColIndex = 95; // คอลัมน์ CR
+        let genericColIndex = 96;  // คอลัมน์ CS
+
+        if (rows.length > 4) {
+          [rows[3], rows[4]].forEach(headerRow => {
+            if (headerRow && headerRow.c) {
+              headerRow.c.forEach((cell, idx) => {
+                if (cell && cell.v) {
+                  const title = String(cell.v).trim();
+                  if (title.includes('ประเภท') || title.includes('หมวด')) {
+                    categoryColIndex = idx;
+                  }
+                  if (title.toLowerCase().includes('supplier') || title.includes('คู่ค้า')) {
+                    supplierColIndex = idx;
+                  }
+                  if (title.includes('สามัญ')) {
+                    genericColIndex = idx;
+                  }
+                }
+              });
+            }
+          });
         }
 
         const parsedProducts = [];
@@ -1155,14 +1184,14 @@
           const statusVal = getVal(52);
           const isDisc = statusVal.includes('เลิก');
 
-          let supplierVal = getVal(95);
+          let supplierVal = getVal(supplierColIndex) || 'ทั่วไป';
           if (!supplierVal || supplierVal === '0' || supplierVal === '.') supplierVal = 'ทั่วไป';
 
-          let genericVal = getVal(96);
+          let genericVal = getVal(genericColIndex);
           if (genericVal === '0' || genericVal === '.') genericVal = '';
 
-          let catVal = getVal(97) || 'สินค้าเกษตร';
-          if (catVal === '0' || catVal === '.') catVal = 'สินค้าเกษตร';
+          let catVal = getVal(categoryColIndex) || 'ทั่วไป';
+          if (catVal === '0' || catVal === '.') catVal = 'ทั่วไป';
 
           parsedProducts.push({
             id: `P-${i}`,
@@ -1205,13 +1234,8 @@
         }
       } catch (err) {
         console.error("Error fetching Google Sheets:", err);
-        syncText.innerText = "กำลังแสดงข้อมูลสำรอง";
-        syncBadge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-amber-50 text-amber-800 border border-amber-300";
-        if (rawProducts.length === 0) {
-          rawProducts = [...initialDataset];
-          initFilters();
-          resetAndFilter();
-        }
+        syncText.innerText = "เชื่อมต่อชีทไม่สำเร็จ (ตรวจสอบสิทธิ์แชร์ชีท)";
+        syncBadge.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-red-50 text-red-700 border border-red-200";
       }
     }
   </script>
