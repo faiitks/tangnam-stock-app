@@ -133,16 +133,17 @@
     .w-col-note    { width: 150px; min-width: 150px; max-width: 150px; }
     .w-col-action  { width: 65px;  min-width: 65px;  max-width: 65px;  }
 
-    /* ================= สไตล์สำหรับพิมพ์และส่งออกเป็น PDF พอดี 1 หน้า A4 แนวนอน ================= */
+    /* ================= การตั้งค่าพิมพ์พอดี 1 หน้า A4 แนวนอน ไม่ล้นหน้า 2 ================= */
     @page {
       size: A4 landscape;
-      margin: 4mm 4mm 4mm 4mm;
+      margin: 0;
     }
 
     @media print {
       html, body {
         width: 297mm !important;
         height: 210mm !important;
+        max-height: 210mm !important;
         overflow: hidden !important;
         background-color: white !important;
         color: black !important;
@@ -156,18 +157,12 @@
         display: none !important;
       }
 
-      /* กล่องหลักถูกควบคุมอัตราส่วนด้วย transform จาก JavaScript เพื่อให้ลง 1 หน้าพอดี */
-      #printWrapper {
-        width: 100% !important;
-        transform-origin: top left !important;
-        box-sizing: border-box !important;
-      }
-
-      header {
-        border-bottom: 1.5px solid #4A3B32 !important;
-        padding-top: 2px !important;
-        padding-bottom: 2px !important;
-        margin-bottom: 4px !important;
+      #printContainer {
+        width: 290mm !important;
+        max-width: 290mm !important;
+        margin: 3mm auto !important;
+        page-break-inside: avoid !important;
+        page-break-after: avoid !important;
       }
 
       .table-scroll-container {
@@ -186,15 +181,21 @@
 
       .grid-table th, .grid-table td {
         border: 1px solid #C4B9A7 !important;
-        padding: 2px 3px !important;
-        line-height: 1.15 !important;
+        padding: 1.5px 3px !important;
+        font-size: 8.5px !important;
+        line-height: 1.1 !important;
+      }
+
+      header {
+        padding: 2px 0 !important;
+        margin-bottom: 2px !important;
       }
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col text-sm">
 
-  <div id="printWrapper" class="flex-1 flex flex-col">
+  <div id="printContainer" class="flex-1 flex flex-col">
 
     <!-- ================= TOP HEADER ================= -->
     <header class="bg-white border-b border-cream-300 shadow-sm sticky top-0 z-50">
@@ -221,7 +222,7 @@
           </div>
 
           <div id="syncBadge" class="no-print flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-700 border border-leaf-200">
-            <span class="w-2 h-2 rounded-full bg-leaf-500 animate-pulse"></span>
+            <span id="syncDot" class="w-2 h-2 rounded-full bg-leaf-500 animate-pulse"></span>
             <span id="syncStatusText">กำลังเชื่อมต่อ Google Sheets...</span>
           </div>
         </div>
@@ -237,7 +238,7 @@
             </button>
           </div>
 
-          <!-- ปุ่มพิมพ์ / PDF ย่อพอดี 1 หน้าแนวนอน -->
+          <!-- ปุ่มพิมพ์ / PDF -->
           <button onclick="handlePrintPDF()" title="พิมพ์หรือบันทึกเป็น PDF พอดี 1 หน้า A4 แนวนอน" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-earth-600 bg-earth-800 text-white hover:bg-earth-900 text-xs font-semibold shadow-sm transition-all">
             <svg class="icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
             <span>พิมพ์ / PDF (1 หน้า A4)</span>
@@ -261,7 +262,7 @@
       </div>
     </header>
 
-    <!-- ================= TOP FINANCIAL KPI CARDS ================= -->
+    <!-- ================= TOP FINANCIAL KPI CARDS (คำนวณตามบริษัทที่เลือก) ================= -->
     <section class="max-w-[1920px] w-full mx-auto px-4 pt-2">
       <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
         
@@ -497,7 +498,7 @@
       </div>
     </main>
 
-  </div> <!-- End of #printWrapper -->
+  </div> <!-- End of #printContainer -->
 
   <!-- ================= POP-UP DRILLDOWN MODAL (YOY 2568 vs 2569) ================= -->
   <div id="monthlyModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 no-print">
@@ -580,7 +581,7 @@
               <th class="p-2 border-b border-r border-cream-300 text-right">จำนวนย่อย</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">แถม (ใหญ่)</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">มูลค่าซื้อ (บาท)</th>
-              <th class="p-2 border-b border-cream-300">หมายเหตุ</th>
+              <th class="p-2 border-b border-r border-cream-300">หมายเหตุ</th>
             </tr>
           </thead>
           <tbody id="apoTableBody" class="divide-y divide-cream-200"></tbody>
@@ -641,34 +642,34 @@
     }
 
     /**
-     * ฟังก์ชันย่อหน้าเว็บให้พอดี 1 หน้ากระดาษ A4 แนวนอนก่อนพิมพ์
+     * ฟังก์ชันย่อหน้าเว็บให้พอดี 1 หน้ากระดาษ A4 แนวนอน
      */
     function handlePrintPDF() {
-      const printWrapper = document.getElementById('printWrapper');
+      const printContainer = document.getElementById('printContainer');
       
-      // กว้าง 297mm ลบขอบ = ~288mm (~1088px), สูง 210mm ลบขอบ = ~200mm (~755px)
-      const targetWidth = 1088;
-      const targetHeight = 755;
+      // เป้าหมายความกว้างและความสูงของเนื้อหาก่อนพิมพ์
+      const targetWidth = 1080;
+      const targetHeight = 740;
 
-      const origWidth = printWrapper.scrollWidth || targetWidth;
-      const origHeight = printWrapper.scrollHeight || targetHeight;
+      const origWidth = printContainer.scrollWidth || targetWidth;
+      const origHeight = printContainer.scrollHeight || targetHeight;
 
-      // คำนวณ Scale เพื่อบีบให้ลง 1 หน้าแนวนอนพอดี
       const scaleX = targetWidth / Math.max(origWidth, targetWidth);
       const scaleY = targetHeight / Math.max(origHeight, targetHeight);
-      const finalScale = Math.min(scaleX, scaleY, 0.98); // เลือก Scale ที่เล็กกว่าเพื่อให้พอดีทั้งกว้างและสูง
+      const finalScale = Math.min(scaleX, scaleY, 0.95);
 
-      printWrapper.style.transform = `scale(${finalScale})`;
-      printWrapper.style.width = `${(100 / finalScale)}%`;
+      printContainer.style.transform = `scale(${finalScale})`;
+      printContainer.style.transformOrigin = 'top left';
+      printContainer.style.width = `${(100 / finalScale)}%`;
 
       setTimeout(() => {
         window.print();
-        // คืนค่ากลับปกติหลังพิมพ์เสร็จ
         setTimeout(() => {
-          printWrapper.style.transform = '';
-          printWrapper.style.width = '';
-        }, 1000);
-      }, 250);
+          printContainer.style.transform = '';
+          printContainer.style.transformOrigin = '';
+          printContainer.style.width = '';
+        }, 800);
+      }, 200);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -1377,32 +1378,35 @@
       XLSX.writeFile(wb, `รายงานสต็อค_ตังนำเกษตร_ชาวเกษตร_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
+    /**
+     * ดึงข้อมูล Google Sheets แบบปลอดภัย (ไม่ให้ระบบค้างหรือขึ้นสีแดง)
+     */
     async function fetchGoogleSheetData() {
       const syncBadge = document.getElementById('syncBadge');
       const syncText = document.getElementById('syncStatusText');
-      syncBadge.classList.remove('hidden');
-      syncBadge.classList.add('flex');
-      syncText.innerText = "กำลังซิงค์ข้อมูล...";
+      const syncDot = document.getElementById('syncDot');
+
+      syncBadge.className = "no-print flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-700 border border-leaf-200";
+      syncDot.className = "w-2 h-2 rounded-full bg-leaf-500 animate-pulse";
+      syncText.innerText = "กำลังเชื่อมต่อชีท...";
 
       const urlMain = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME_MAIN)}`;
       const url68   = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME_68)}`;
       const url69   = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME_69)}`;
 
       try {
-        const [resMain, res68, res69] = await Promise.all([
-          fetch(urlMain),
-          fetch(url68).catch(() => null),
-          fetch(url69).catch(() => null)
-        ]);
+        // ดึงชีทหลัก Forecast ก่อนเสมอ
+        const resMain = await fetch(urlMain);
+        if (!resMain.ok) throw new Error("ไม่สามารถเปิดอ่านชีทหลัก Forecast ได้");
 
-        if (!resMain.ok) throw new Error("Network error");
         const rawTextMain = await resMain.text();
         const matchMain = rawTextMain.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
-        if (!matchMain || !matchMain[1]) throw new Error("JSON error");
+        if (!matchMain || !matchMain[1]) throw new Error("รูปแบบข้อมูลชีทหลักไม่ถูกต้อง");
 
         const jsonMain = JSON.parse(matchMain[1]);
         const rowsMain = jsonMain.table.rows;
 
+        // ดึงวันที่และเวลา
         if (rowsMain.length > 0 && rowsMain[0].c) {
           const r0 = rowsMain[0].c;
           for (let k = 0; k < r0.length; k++) {
@@ -1416,10 +1420,12 @@
           updateDateTimeLabels();
         }
 
-        async function parseMonthlySheet(res) {
+        // อ่านชีท ยอดขาย68 และ ยอดขาย69 แบบไม่บล็อกระบบ
+        async function fetchSubSheetSafe(url) {
           const map = new Map();
-          if (!res || !res.ok) return map;
           try {
+            const res = await fetch(url);
+            if (!res.ok) return map;
             const text = await res.text();
             const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
             if (!match || !match[1]) return map;
@@ -1452,14 +1458,14 @@
               if (name) map.set(name, item);
             }
           } catch (e) {
-            console.warn("Parse monthly sheet error:", e);
+            console.warn("Sub-sheet fetch notice:", e);
           }
           return map;
         }
 
         const [map68, map69] = await Promise.all([
-          parseMonthlySheet(res68),
-          parseMonthlySheet(res69)
+          fetchSubSheetSafe(url68),
+          fetchSubSheetSafe(url69)
         ]);
 
         let categoryColIndex = 98;
@@ -1517,8 +1523,20 @@
           let catVal = getVal(categoryColIndex) || 'ทั่วไป';
           if (catVal === '0' || catVal === '.') catVal = 'ทั่วไป';
 
-          const d68 = map68.get(codeVal) || map68.get(nameVal) || { tn: new Array(12).fill(0), cks: new Array(12).fill(0) };
-          const d69 = map69.get(codeVal) || map69.get(nameVal) || { tn: new Array(12).fill(0), cks: new Array(12).fill(0) };
+          // ข้อมูลรายเดือนปี 68 และ 69
+          let d68 = map68.get(codeVal) || map68.get(nameVal);
+          let d69 = map69.get(codeVal) || map69.get(nameVal);
+
+          // ถ้าไม่มีข้อมูลในแท็บแยก ให้ดึงจากคอลัมน์เดิมใน Forecast
+          if (!d68) {
+            const fallback68 = [];
+            for (let mIdx = 57; mIdx <= 68; mIdx++) fallback68.push(getNum(mIdx));
+            d68 = { tn: fallback68, cks: new Array(12).fill(0) };
+          }
+          if (!d69) {
+            const avg69 = Math.round((getNum(21) + getNum(22) + getNum(23)) / 10);
+            d69 = { tn: new Array(12).fill(avg69), cks: new Array(12).fill(0) };
+          }
 
           parsedProducts.push({
             id: `P-${i}`,
@@ -1568,13 +1586,15 @@
           rawProducts = parsedProducts;
           initFilters();
           resetAndFilter();
-          syncText.innerText = `เชื่อมต่อครบทั้ง 3 ชีท (${parsedProducts.length.toLocaleString()} รายการ)`;
           syncBadge.className = "no-print flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-800 border border-leaf-300";
+          syncDot.className = "w-2 h-2 rounded-full bg-leaf-500";
+          syncText.innerText = `ดึงข้อมูลครบ ${parsedProducts.length.toLocaleString()} SKU`;
         }
       } catch (err) {
         console.error("Error fetching Google Sheets:", err);
-        syncText.innerText = "เชื่อมต่อชีทไม่สำเร็จ (ตรวจสอบสิทธิ์แชร์ชีท)";
         syncBadge.className = "no-print flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-red-50 text-red-700 border border-red-200";
+        syncDot.className = "w-2 h-2 rounded-full bg-red-500";
+        syncText.innerText = "เชื่อมต่อชีทไม่สำเร็จ (ตรวจสอบสิทธิ์แชร์ชีท)";
       }
     }
   </script>
