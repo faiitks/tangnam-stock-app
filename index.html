@@ -1361,22 +1361,27 @@
       XLSX.writeFile(wb, `รายงานสต็อค_ตังนำเกษตร_ชาวเกษตร_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
+    /**
+     * ดึงข้อมูล Google Sheets แบบเรียลไทม์ (แก้ปัญหาติดแคช และหาคอลัมน์สต็อคอัตโนมัติ)
+     */
     async function fetchGoogleSheetData() {
       const syncBadge = document.getElementById('syncBadge');
       const syncText = document.getElementById('syncStatusText');
       syncBadge.classList.remove('hidden');
       syncBadge.classList.add('flex');
-      syncText.innerText = "กำลังซิงค์ข้อมูล...";
+      syncText.innerText = "กำลังซิงค์ข้อมูลล่าสุดจาก Google Sheets...";
 
-      const urlMain = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME_MAIN)}`;
-      const url68   = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME_68)}`;
-      const url69   = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME_69)}`;
+      // 1. เพิ่ม &t=${Date.now()} เพื่อบังคับดึงข้อมูลสดใหม่เสมอ ไม่ติดแคชเดิม
+      const timestamp = Date.now();
+      const urlMain = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME_MAIN)}&t=${timestamp}`;
+      const url68   = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME_68)}&t=${timestamp}`;
+      const url69   = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(GOOGLE_SHEET_NAME_69)}&t=${timestamp}`;
 
       try {
         const [resMain, res68, res69] = await Promise.all([
-          fetch(urlMain),
-          fetch(url68).catch(() => null),
-          fetch(url69).catch(() => null)
+          fetch(urlMain, { cache: 'no-store' }),
+          fetch(url68, { cache: 'no-store' }).catch(() => null),
+          fetch(url69, { cache: 'no-store' }).catch(() => null)
         ]);
 
         if (!resMain.ok) throw new Error("Network error");
@@ -1387,18 +1392,185 @@
         const jsonMain = JSON.parse(matchMain[1]);
         const rowsMain = jsonMain.table.rows;
 
-        if (rowsMain.length > 0 && rowsMain[0].c) {
-          const r0 = rowsMain[0].c;
-          for (let k = 0; k < r0.length; k++) {
-            const val = r0[k] && r0[k].v ? String(r0[k].v) : '';
-            if (val.includes('01/01 -') || (val.includes('2569') && val.includes('-'))) {
+        // 2. สแกนหาวันที่และเวลาอย่างยืดหยุ่นใน 4 แถวแรก (ไม่ล็อคเฉพาะแถวแรก)
+        for (let r = 0; r < Math.min(4, rowsMain.length); r++) {
+          const rowC = rowsMain[r] && rowsMain[r].c ? rowsMain[r].c : [];
+          for (let k = 0; k < rowC.length; k++) {
+            const val = rowC[k] && rowC[k].v ? String(rowC[k].v).trim() : '';
+            if (val.includes('01/01 -') || (val.includes('-') && (val.includes('ข้อมูล') || val.includes('256')))) {
               sales69DateTime = val;
-            } else if (val.includes('น.') && val.includes('2569')) {
+            } else if (val.includes('สต็อค ณ') || (val.includes('น.') && val.includes('วันที่'))) {
               stockDateTime = val;
             }
           }
-          updateDateTimeLabels();
         }
+        updateDateTimeLabels();
+
+        // 3. ตรวจหาตำแหน่งคอลัมน์อัตโนมัติจากชื่อหัวตาราง
+        let categoryColIndex = 98;
+        let supplierColIndex = 95;
+        let genericColIndex = 96;
+        let stockValTotalCol = 40; // คอลัมน์รวมมูลค่าคงเหลือ
+        let stockValTnCol = 38;    // คอลัมน์มูลค่าคงเหลือ TN
+        let stockValCksCol = 39;   // คอลัมน์มูลค่าคงเหลือ CKS
+
+        if (rowsMain.length > 4) {
+          [rowsMain[1], rowsMain[2], rowsMain[3], rowsMain[4]].forEach(headerRow => {
+            if (headerRow && headerRow.c) {
+              headerRow.c.forEach((cell, idx) => {
+                if (cell && cell.v) {
+                  const title = String(cell.v).trim();
+                  if (title.includes('ประเภท') || title.includes('หมวด')) categoryColIndex = idx;
+                  if (title.toLowerCase().includes('supplier') || title.includes('คู่ค้า')) supplierColIndex = idx;
+                  if (title.includes('สามัญ')) genericColIndex = idx;
+                  
+                  // หาคอลัมน์มูลค่าคงเหลืออัตโนมัติ
+                  if (title.includes('มูลค่าคงเหลือ') || title.includes('มูลค่าสต็อค')) {
+                    if (title.includes('TN') || title.includes('ตังนำ')) stockValTnCol = idx;
+                    else if (title.includes('CKS') || title.includes('ชาวเกษตร')) stockValCksCol = idx;
+                    else stockValTotalCol = idx;
+                  }
+                }
+              });
+            }
+          });
+        }
+
+        // อ่านชีทรายเดือน (ยอดขาย68 / ยอดขาย69)
+        async function parseMonthlySheet(res) {
+          const map = new Map();
+          if (!res || !res.ok) return map;
+          try {
+            const text = await res.text();
+            const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
+            if (!match || !match[1]) return map;
+            const json = JSON.parse(match[1]);
+            const rows = json.table.rows;
+
+            for (let r = 1; r < rows.length; r++) {
+              const rObj = rows[r];
+              if (!rObj || !rObj.c) continue;
+              const mc = rObj.c;
+              const code = mc[0] && mc[0].v ? String(mc[0].v).trim() : '';
+              const name = mc[1] && mc[1].v ? String(mc[1].v).trim() : '';
+              if (!code && !name) continue;
+
+              const getMNum = (cIdx) => {
+                if (!mc[cIdx] || mc[cIdx].v === null || mc[cIdx].v === undefined) return 0;
+                const v = parseFloat(String(mc[cIdx].v).replace(/,/g, ''));
+                return isNaN(v) ? 0 : v;
+              };
+
+              const tnMonths = [];
+              for (let i = 2; i <= 13; i++) tnMonths.push(getMNum(i));
+              const cksMonths = [];
+              for (let i = 14; i <= 25; i++) cksMonths.push(getMNum(i));
+
+              const item = { tn: tnMonths, cks: cksMonths };
+              if (code) map.set(code, item);
+              if (name) map.set(name, item);
+            }
+          } catch (e) {
+            console.warn("Parse monthly sheet error:", e);
+          }
+          return map;
+        }
+
+        const [map68, map69] = await Promise.all([
+          parseMonthlySheet(res68),
+          parseMonthlySheet(res69)
+        ]);
+
+        const parsedProducts = [];
+        for (let i = 4; i < rowsMain.length; i++) {
+          const rowObj = rowsMain[i];
+          if (!rowObj || !rowObj.c) continue;
+          const c = rowObj.c;
+
+          const getVal = (idx) => (c[idx] && c[idx].v !== null && c[idx].v !== undefined) ? String(c[idx].v).trim() : '';
+          const getNum = (idx) => {
+            if (!c[idx] || c[idx].v === null || c[idx].v === undefined) return 0;
+            const val = parseFloat(String(c[idx].v).replace(/,/g, '').trim());
+            return isNaN(val) ? 0 : val;
+          };
+
+          let nameVal = getVal(5);
+          if (!nameVal || nameVal === '0' || nameVal === 'ชื่อสินค้า') continue;
+
+          let codeVal = getVal(2) || getVal(1) || '';
+          const statusVal = getVal(52);
+          const isDisc = statusVal.includes('เลิก');
+
+          let supplierVal = getVal(supplierColIndex) || 'ทั่วไป';
+          if (!supplierVal || supplierVal === '0' || supplierVal === '.') supplierVal = 'ทั่วไป';
+
+          let genericVal = getVal(genericColIndex);
+          if (genericVal === '0' || genericVal === '.') genericVal = '';
+
+          let catVal = getVal(categoryColIndex) || 'ทั่วไป';
+          if (catVal === '0' || catVal === '.') catVal = 'ทั่วไป';
+
+          const d68 = map68.get(codeVal) || map68.get(nameVal) || { tn: new Array(12).fill(0), cks: new Array(12).fill(0) };
+          const d69 = map69.get(codeVal) || map69.get(nameVal) || { tn: new Array(12).fill(0), cks: new Array(12).fill(0) };
+
+          parsedProducts.push({
+            id: `P-${i}`,
+            code: codeVal,
+            name: nameVal,
+            statusRaw: statusVal,
+            supplier: supplierVal,
+            genericName: genericVal,
+            category: catVal,
+            unitMultiplier: getNum(3) || 1,
+            unitBig: getVal(4) || 'ลัง',
+            unitSub: getVal(7) || 'ย่อย',
+            unitPrice: 100,
+            isDiscontinued: isDisc,
+            sales68_tn_1_5: getNum(11),
+            sales68_tn_6: getNum(12),
+            sales68_cks: getNum(13),
+            sales68_val_tn: getNum(17),
+            sales68_val_cks: getNum(18),
+            sales68_val: getNum(19),
+            sales69_tn_1_5: getNum(21),
+            sales69_tn_6: getNum(22),
+            sales69_cks: getNum(23),
+            sales69_val_tn: getNum(27),
+            sales69_val_cks: getNum(28),
+            sales69_val: getNum(29),
+            stock_pc: getNum(30),
+            stock_kr: getNum(31),
+            stock_cyp: getNum(32),
+            stock_cks: getNum(33),
+            // ดึงมูลค่าสต็อคตามตำแหน่งที่ตรวจพบ
+            stock_val_tn: getNum(stockValTnCol),
+            stock_val_cks: getNum(stockValCksCol),
+            stock_val: getNum(stockValTotalCol),
+            monthly68_tn: d68.tn,
+            monthly68_cks: d68.cks,
+            monthly69_tn: d69.tn,
+            monthly69_cks: d69.cks,
+            orderBigQty: 0,
+            freeBigQty: 0,
+            orderValManual: 0,
+            notes: '',
+            suggestion: ''
+          });
+        }
+
+        if (parsedProducts.length > 0) {
+          rawProducts = parsedProducts;
+          initFilters();
+          resetAndFilter();
+          syncBadge.className = "no-print flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-leaf-50 text-leaf-800 border border-leaf-300";
+          syncText.innerText = `เชื่อมต่อสำเร็จ: ดึงข้อมูลครบ ${parsedProducts.length.toLocaleString()} รายการ`;
+        }
+      } catch (err) {
+        console.error("Error fetching Google Sheets:", err);
+        syncBadge.className = "no-print flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-red-50 text-red-700 border border-red-200";
+        syncText.innerText = "เชื่อมต่อชีทไม่สำเร็จ (ตรวจสอบสิทธิ์แชร์ชีท)";
+      }
+    }
 
         async function parseMonthlySheet(res) {
           const map = new Map();
