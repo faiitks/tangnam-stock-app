@@ -352,18 +352,20 @@
                 <div class="text-[9px] font-normal text-amber-300">(ใหญ่ / บาท)</div>
               </th>
 
+              <!-- หัวตารางยอดขาย 69 แสดงช่วงวันที่จากช่อง B2 -->
               <th id="hdrSales69Group" colspan="4" class="px-2 py-1 border-r border-earth-700 text-center bg-earth-800 text-cream-100">
                 <div>จำนวนขายปี 2569 (หน่วยย่อย)</div>
-                <div id="lblSales69DateTime" class="text-[9.5px] font-normal text-amber-300">ข้อมูล: 01/01 - 03/11/2569 10.14 น.</div>
+                <div id="lblSales69DateTime" class="text-[9.5px] font-normal text-amber-300">ข้อมูล: กำลังโหลด...</div>
               </th>
               <th rowspan="2" class="w-col-summary px-2.5 py-1.5 border-r-2 border-cream-400 text-right bg-amber-950 text-amber-200">
                 <div>รวมขาย 69</div>
                 <div class="text-[9px] font-normal text-amber-300">(ใหญ่ / บาท)</div>
               </th>
 
+              <!-- หัวตารางสินค้าคงเหลือ แสดงวันที่และเวลาจาก B1 และ D1 -->
               <th id="hdrStockGroup" colspan="5" class="px-2 py-1 border-r border-earth-700 text-center bg-leaf-800 text-cream-100">
                 <div>สินค้าคงเหลือตามคลัง (หน่วยย่อย)</div>
-                <div id="lblStockDateTime" class="text-[9.5px] font-normal text-leaf-200">สต็อค ณ วันที่: 03/11/2569 10.14 น.</div>
+                <div id="lblStockDateTime" class="text-[9.5px] font-normal text-leaf-200">สต็อค ณ วันที่: กำลังโหลด...</div>
               </th>
               <th rowspan="2" class="w-col-summary px-2.5 py-1.5 border-r-2 border-leaf-400 text-right bg-leaf-900 text-leaf-200">
                 <div>รวมคงเหลือ</div>
@@ -524,7 +526,7 @@
               <th class="p-2 border-b border-r border-cream-300 text-right">จำนวนย่อย</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">แถม (ใหญ่)</th>
               <th class="p-2 border-b border-r border-cream-300 text-right">มูลค่าซื้อ (บาท)</th>
-              <th class="p-2 border-b border-r border-cream-300">หมายเหตุ</th>
+              <th class="p-2 border-b border-cream-300">หมายเหตุ</th>
             </tr>
           </thead>
           <tbody id="apoTableBody" class="divide-y divide-cream-200"></tbody>
@@ -557,8 +559,8 @@
     const GOOGLE_SHEET_NAME_68   = "ยอดขาย68"; 
     const GOOGLE_SHEET_NAME_69   = "ยอดขาย69"; 
 
-    let sales69DateTime = "01/01 - 03/11/2569 10.14 น.";
-    let stockDateTime = "03/11/2569 10.14 น.";
+    let sales69DateTime = "ข้อมูล: กำลังโหลด...";
+    let stockDateTime = "สต็อค ณ วันที่: กำลังโหลด...";
 
     let rawProducts = [];
     let currentFiltered = [];
@@ -593,8 +595,8 @@
     function updateDateTimeLabels() {
       const salesLbl = document.getElementById('lblSales69DateTime');
       const stockLbl = document.getElementById('lblStockDateTime');
-      if (salesLbl) salesLbl.innerText = `ข้อมูล: ${sales69DateTime}`;
-      if (stockLbl) stockLbl.innerText = `สต็อค ณ วันที่: ${stockDateTime}`;
+      if (salesLbl) salesLbl.innerText = sales69DateTime;
+      if (stockLbl) stockLbl.innerText = stockDateTime;
     }
 
     function initFilters() {
@@ -1291,7 +1293,7 @@
     }
 
     /**
-     * ดึงข้อมูลพร้อมกัน 3 ชีท: Forecast, ยอดขาย68 และ ยอดขาย69 แบบตัดปัญหาแคช
+     * ดึงข้อมูล Google Sheets แบบปลอดภัย และอ่านวันที่จาก A1:D1 และ A2:B2 โดยตรง
      */
     async function fetchGoogleSheetData() {
       const syncBadge = document.getElementById('syncBadge');
@@ -1319,19 +1321,24 @@
         const jsonMain = JSON.parse(matchMain[1]);
         const rowsMain = jsonMain.table.rows;
 
-        // สแกนหาวันที่และเวลาจากแถว 1 ถึง 4
-        for (let r = 0; r < Math.min(4, rowsMain.length); r++) {
-          const rowC = rowsMain[r] && rowsMain[r].c ? rowsMain[r].c : [];
-          for (let k = 0; k < rowC.length; k++) {
-            const val = rowC[k] && rowC[k].v ? String(rowC[k].v).trim() : '';
-            if (val.includes('01/01 -') || (val.includes('-') && val.includes('256'))) {
-              sales69DateTime = val;
-            }
-            if (val.includes('น.') && (val.includes('256') || val.includes('/'))) {
-              stockDateTime = val;
-            }
-          }
+        // ดึงวันที่และเวลาจากเซลล์ A1:D1 และ A2:B2 โดยตรง
+        const getCellStr = (rIdx, cIdx) => {
+          if (!rowsMain[rIdx] || !rowsMain[rIdx].c || !rowsMain[rIdx].c[cIdx]) return '';
+          const cell = rowsMain[rIdx].c[cIdx];
+          return (cell.v !== null && cell.v !== undefined) ? String(cell.v).trim() : (cell.f || '');
+        };
+
+        const stockDateVal = getCellStr(0, 1); // B1
+        const stockTimeVal = getCellStr(0, 3); // D1
+        if (stockDateVal) {
+          stockDateTime = `สต็อค ณ วันที่: ${stockDateVal}${stockTimeVal ? ` ${stockTimeVal} น.` : ''}`;
         }
+
+        const salesPeriodVal = getCellStr(1, 1); // B2
+        if (salesPeriodVal) {
+          sales69DateTime = `ข้อมูล: ${salesPeriodVal}`;
+        }
+
         updateDateTimeLabels();
 
         async function parseMonthlySheet(res) {
@@ -1416,7 +1423,6 @@
 
           const getVal = (idx) => (c[idx] && c[idx].v !== null && c[idx].v !== undefined) ? String(c[idx].v).trim() : '';
           
-          // แปลงตัวเลขรองรับ k และ m
           const getNum = (idx) => {
             if (!c[idx] || c[idx].v === null || c[idx].v === undefined) return 0;
             let strVal = String(c[idx].v).replace(/,/g, '').trim().toLowerCase();
@@ -1436,6 +1442,8 @@
           if (!nameVal || nameVal === '0' || nameVal === 'ชื่อสินค้า') continue;
 
           let codeVal = getVal(2) || getVal(1) || '';
+          
+          // คอลัมน์สถานะ AZ (Index 51)
           const statusVal = getVal(51);
           const isDisc = statusVal.includes('เลิก');
 
@@ -1452,9 +1460,9 @@
           const d69 = map69.get(codeVal) || map69.get(nameVal) || { tn: new Array(12).fill(0), cks: new Array(12).fill(0) };
 
           // มูลค่าสต็อคตามชีทจริง (AL=37, AM=38, AN=39)
-          const sValTn  = getNum(37);
-          const sValCks = getNum(38);
-          const sValTot = getNum(39) > 0 ? getNum(39) : (sValTn + sValCks);
+          const sValTn  = getNum(37); // AL
+          const sValCks = getNum(38); // AM
+          const sValTot = getNum(39) > 0 ? getNum(39) : (sValTn + sValCks); // AN
 
           parsedProducts.push({
             id: `P-${i}`,
@@ -1469,28 +1477,22 @@
             unitSub: getVal(7) || 'ย่อย',
             unitPrice: 100,
             isDiscontinued: isDisc,
-            // จำนวนขาย 68
             sales68_tn_1_5: getNum(11),
             sales68_tn_6: getNum(12),
             sales68_cks: getNum(13),
-            // มูลค่าขาย 68
             sales68_val_tn: getNum(17),
             sales68_val_cks: getNum(18),
             sales68_val: getNum(19),
-            // จำนวนขาย 69
             sales69_tn_1_5: getNum(21),
             sales69_tn_6: getNum(22),
             sales69_cks: getNum(23),
-            // มูลค่าขาย 69
             sales69_val_tn: getNum(27),
             sales69_val_cks: getNum(28),
             sales69_val: getNum(29),
-            // คลังสินค้าคงเหลือ (AE=30, AF=31, AG=32, AH=33)
             stock_pc: getNum(30),
             stock_kr: getNum(31),
             stock_cyp: getNum(32),
             stock_cks: getNum(33),
-            // มูลค่าสต็อคคงเหลือจริง (AL=37, AM=38, AN=39)
             stock_val_tn: sValTn,
             stock_val_cks: sValCks,
             stock_val: sValTot,
