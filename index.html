@@ -32,7 +32,6 @@
     .grid-table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; min-width: 100%; }
     .grid-table th, .grid-table td { border-right: 1px solid #E8E3D7; border-bottom: 1px solid #E8E3D7; box-sizing: border-box; }
     
-    /* ล็อคหัวตาราง (thead) และคอลัมน์แรกไม่ให้เลื่อนหาย */
     .table-scroll-container { overflow: auto; position: relative; max-height: 70vh; }
     .grid-table thead { position: sticky; top: 0; z-index: 40; }
     .sticky-col-1 { position: sticky; left: 0; z-index: 25; background-color: #FFFFFF; }
@@ -99,7 +98,7 @@
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2.5">
       <div class="col-span-1 md:col-span-2 bg-amber-50 p-2.5 rounded-xl border border-amber-200 flex flex-col justify-between">
         <div class="flex justify-between items-center">
-          <span class="text-xs font-semibold text-amber-900">ยอดขายปี 2568</span>
+          <span class="text-xs font-semibold text-amber-900">ยอดขายปี 2568 (เต็มปี)</span>
           <span id="kpiSales68Badge" class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">TN+CKS</span>
         </div>
         <div class="mt-1 flex items-baseline gap-1">
@@ -110,7 +109,7 @@
 
       <div class="col-span-1 md:col-span-2 bg-leaf-50 p-2.5 rounded-xl border border-leaf-300 flex flex-col justify-between">
         <div class="flex justify-between items-center">
-          <span class="text-xs font-semibold text-leaf-900">ยอดขายปี 2569</span>
+          <span class="text-xs font-semibold text-leaf-900">ยอดขายปี 2569 (สะสม)</span>
           <span id="kpiSales69Badge" class="text-[10px] px-1.5 py-0.5 rounded bg-leaf-100 text-leaf-800 font-medium">TN+CKS</span>
         </div>
         <div class="mt-1 flex items-baseline gap-1">
@@ -119,7 +118,7 @@
         </div>
         <div class="flex items-center gap-1.5 mt-0.5 text-[10.5px]">
           <span id="kpiYOYBadge" class="px-1.5 py-0.2 rounded bg-leaf-100 text-leaf-800 font-bold">▲ +0%</span>
-          <span id="kpiYOYDiffText" class="text-earth-700 font-mono">เทียบปี 68 (+0 บ.)</span>
+          <span id="kpiYOYDiffText" class="text-earth-700 font-mono">เทียบทั้งปี 68 (+0 บ.)</span>
         </div>
       </div>
 
@@ -205,16 +204,17 @@
         <table class="grid-table text-left border-collapse text-xs">
           <thead>
             <tr class="bg-earth-900 text-cream-50 text-[11px] font-semibold">
-              <th rowspan="2" class="sticky-corner-1 w-[240px] px-2.5 py-2 border-r border-earth-700 text-center">
+              <th rowspan="2" class="sticky-corner-1 w-[235px] px-2.5 py-2 border-r border-earth-700 text-center">
                 รายการสินค้า / คู่ค้า / หน่วยขาย
               </th>
 
               <th colspan="2" class="px-2 py-1.5 border-r-2 border-cream-400 text-center bg-amber-950 text-amber-200">
-                จำนวนขายปี 2568
+                จำนวนขายปี 2568 (เต็มปี)
               </th>
 
-              <th colspan="4" class="px-2 py-1.5 border-r-2 border-cream-400 text-center bg-amber-900 text-amber-100">
-                <div>จำนวนขายปี 2569 & เปรียบเทียบ (ปี 68 / ปี 69)</div>
+              <!-- ยอดขาย 69 + 3 คอลัมน์เปรียบเทียบ YOY (YTD / ทั้งปี / เดือนเดียวกัน) -->
+              <th colspan="5" class="px-2 py-1.5 border-r-2 border-cream-400 text-center bg-amber-900 text-amber-100">
+                <div>จำนวนขายปี 2569 & เปรียบเทียบ YOY (ปี 68 / ปี 69)</div>
                 <div id="lblSales69DateTime" class="text-[9.5px] font-normal text-amber-300">ข้อมูล: กำลังโหลด...</div>
               </th>
 
@@ -231,23 +231,24 @@
                 รายการขออนุมัติสั่งซื้อ
               </th>
 
-              <th rowspan="2" class="w-[48px] px-1 py-1.5 text-center bg-earth-900">กราฟ</th>
+              <th rowspan="2" class="w-[46px] px-1 py-1.5 text-center bg-earth-900">กราฟ</th>
             </tr>
 
             <tr class="bg-earth-800 text-cream-200 text-[10px]">
-              <th class="w-[100px] px-2 py-1 text-left border-r border-earth-700 bg-amber-950/90">แยกสาขา (ย่อย)</th>
-              <th class="w-[105px] px-2 py-1 text-right border-r-2 border-cream-400 bg-amber-950">รวม 68 (ใหญ่/ย่อย/บ.)</th>
+              <th class="w-[95px] px-2 py-1 text-left border-r border-earth-700 bg-amber-950/90">แยกสาขา (ย่อย)</th>
+              <th class="w-[100px] px-2 py-1 text-right border-r-2 border-cream-400 bg-amber-950">รวม 68 (ใหญ่/ย่อย/บ.)</th>
 
-              <th class="w-[100px] px-2 py-1 text-left border-r border-earth-700 bg-amber-900/90">แยกสาขา (ย่อย)</th>
-              <th class="w-[105px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900">รวม 69 (ใหญ่/ย่อย/บ.)</th>
-              <th class="w-[125px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900/80">ขาย MOM (ปี 68/ปี 69)</th>
-              <th class="w-[125px] px-2 py-1 text-right border-r-2 border-cream-400 bg-amber-900/95">ขาย YOY (ปี 68/ปี 69)</th>
+              <th class="w-[95px] px-2 py-1 text-left border-r border-earth-700 bg-amber-900/90">แยกสาขา (ย่อย)</th>
+              <th class="w-[100px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900">รวม 69 (ใหญ่/ย่อย/บ.)</th>
+              <th class="w-[120px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900/80">YOY (ช่วงเดียวกัน YTD)</th>
+              <th class="w-[120px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900/90">YOY (ทั้งปี 68 vs 69)</th>
+              <th class="w-[120px] px-2 py-1 text-right border-r-2 border-cream-400 bg-amber-900">YOY (เดือนเดียวกัน)</th>
 
-              <th class="w-[105px] px-2 py-1 text-left border-r border-earth-700 bg-leaf-900/80">แยกคลัง (ย่อย)</th>
-              <th class="w-[105px] px-2 py-1 text-right border-r-2 border-leaf-400 bg-leaf-900">รวมคงเหลือ (ใหญ่/ย่อย/บ.)</th>
+              <th class="w-[100px] px-2 py-1 text-left border-r border-earth-700 bg-leaf-900/80">แยกคลัง (ย่อย)</th>
+              <th class="w-[100px] px-2 py-1 text-right border-r-2 border-leaf-400 bg-leaf-900">รวมคงเหลือ (ใหญ่/ย่อย/บ.)</th>
 
-              <th class="w-[140px] px-2 py-1 text-center border-r border-earth-700 bg-earth-800">พยากรณ์เป้า (แบ่ง 4 ช่วง)</th>
-              <th class="w-[82px] px-1.5 py-1 text-center border-r border-earth-700 bg-earth-800">สถานะ</th>
+              <th class="w-[138px] px-2 py-1 text-center border-r border-earth-700 bg-earth-800">พยากรณ์เป้า (แบ่ง 4 ช่วง)</th>
+              <th class="w-[80px] px-1.5 py-1 text-center border-r border-earth-700 bg-earth-800">สถานะ</th>
 
               <th class="col-po-only hidden w-[135px] px-2 py-1 text-center border-r border-earth-700 bg-leaf-800">สั่ง / แถม (ใหญ่)</th>
               <th class="col-po-only hidden w-[125px] px-2 py-1 text-right border-r border-earth-700 bg-leaf-800">ราคา/หน่วย & รวม</th>
@@ -256,7 +257,7 @@
           </thead>
 
           <tbody id="tableBody" class="divide-y divide-cream-300 bg-white">
-            <tr><td colspan="15" class="text-center py-12 text-earth-600">กำลังโหลดข้อมูล...</td></tr>
+            <tr><td colspan="16" class="text-center py-12 text-earth-600">กำลังโหลดข้อมูล...</td></tr>
           </tbody>
         </table>
       </div>
@@ -418,7 +419,7 @@
     let apoDocumentsList = [];
     let activeAPOFilter = 'ALL';
     let expandedAPODocId = null;
-    let apoForecastMonths = 2; // ค่าเริ่มต้นการดูพยากรณ์ของผู้อนุมัติ (1, 1.5, 2, 3 เดือน)
+    let apoForecastMonths = 2;
 
     function fmtZero(val) {
       if (val === null || val === undefined) return '';
@@ -429,6 +430,12 @@
 
     function getCleanUnitName(unit) {
       return unit ? String(unit).replace(/\s*\([^)]*\)/g, '').trim() : '';
+    }
+
+    // ฟังก์ชันปรับรหัสสินค้าให้เป็นมาตรฐานเดียวกัน (เช่น 04-4000-00001 -> 4-4000-00001) เพื่อไม่ให้จับคู่พลาด
+    function normalizeCode(str) {
+      if (!str) return '';
+      return String(str).trim().replace(/^0+/, '').replace(/\s+/g, '').toLowerCase();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -471,27 +478,38 @@
           }
         }
 
+        // อ่านชีท ยอดขาย68 / ยอดขาย69 (A=รหัส, B=ชื่อ, C-N=TN 12 เดือน, O-Z=CKS 12 เดือน)
         async function parseMonthly(res) {
           const map = new Map();
           if (!res || !res.ok) return map;
           try {
             const txt = await res.text();
             const j = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/)[1]);
-            for (let r = 1; r < j.table.rows.length; r++) {
+            for (let r = 0; r < j.table.rows.length; r++) {
               const mc = j.table.rows[r].c;
               if (!mc) continue;
-              const code = mc[0] && mc[0].v ? String(mc[0].v).trim() : '';
-              const name = mc[1] && mc[1].v ? String(mc[1].v).trim() : '';
-              if (!code && !name) continue;
+              const codeRaw = mc[0] && mc[0].v !== null ? String(mc[0].v).trim() : '';
+              const nameRaw = mc[1] && mc[1].v !== null ? String(mc[1].v).trim() : '';
+              if ((!codeRaw && !nameRaw) || codeRaw === 'รหัสสินค้า' || nameRaw === 'ชื่อสินค้า') continue;
+
               const getN = (idx) => (mc[idx] && mc[idx].v !== null) ? parseFloat(String(mc[idx].v).replace(/,/g, '')) || 0 : 0;
               const tn = [], cks = [];
-              for (let i = 2; i <= 13; i++) tn.push(getN(i));
-              for (let i = 14; i <= 25; i++) cks.push(getN(i));
+              for (let i = 2; i <= 13; i++) tn.push(getN(i));   // C(2) ถึง N(13)
+              for (let i = 14; i <= 25; i++) cks.push(getN(i)); // O(14) ถึง Z(25)
+
               const obj = { tn, cks };
-              if (code) map.set(code, obj);
-              if (name) map.set(name, obj);
+              if (codeRaw) {
+                map.set(codeRaw, obj);
+                map.set(normalizeCode(codeRaw), obj);
+              }
+              if (nameRaw) {
+                map.set(nameRaw, obj);
+                map.set(nameRaw.toLowerCase(), obj);
+              }
             }
-          } catch (e) {}
+          } catch (e) {
+            console.warn("Monthly parse error:", e);
+          }
           return map;
         }
 
@@ -527,8 +545,9 @@
           if (!nameVal || nameVal === '0' || nameVal === 'ชื่อสินค้า') continue;
           const codeVal = getV(2) || getV(1) || `SKU-${i}`;
           const statusVal = getV(51); // คอลัมน์ AZ
-          const d68 = map68.get(codeVal) || map68.get(nameVal) || { tn: Array(12).fill(0), cks: Array(12).fill(0) };
-          const d69 = map69.get(codeVal) || map69.get(nameVal) || { tn: Array(12).fill(0), cks: Array(12).fill(0) };
+
+          const d68 = map68.get(codeVal) || map68.get(normalizeCode(codeVal)) || map68.get(nameVal) || map68.get(nameVal.toLowerCase()) || { tn: Array(12).fill(0), cks: Array(12).fill(0) };
+          const d69 = map69.get(codeVal) || map69.get(normalizeCode(codeVal)) || map69.get(nameVal) || map69.get(nameVal.toLowerCase()) || { tn: Array(12).fill(0), cks: Array(12).fill(0) };
 
           const sValTn = getN(37), sValCks = getN(38);
           const sValTot = getN(39) > 0 ? getN(39) : (sValTn + sValCks);
@@ -660,7 +679,7 @@
       const pct = s68 > 0 ? Math.round((diff / s68) * 100) : (s69 > 0 ? 100 : 0);
       document.getElementById('kpiYOYBadge').innerText = `${pct >= 0 ? '▲ +' : '▼ '}${pct}%`;
       document.getElementById('kpiYOYBadge').className = `px-1.5 py-0.2 rounded text-[10px] font-bold ${pct >= 0 ? 'bg-leaf-100 text-leaf-800' : 'bg-red-100 text-red-700'}`;
-      document.getElementById('kpiYOYDiffText').innerText = `เทียบปี 68 (${diff >= 0 ? '+' : ''}${Math.round(diff).toLocaleString()} บ.)`;
+      document.getElementById('kpiYOYDiffText').innerText = `เทียบทั้งปี 68 (${diff >= 0 ? '+' : ''}${Math.round(diff).toLocaleString()} บ.)`;
 
       document.getElementById('kpiCriticalCount').innerText = crit;
       document.getElementById('kpiReorderCount').innerText = reord;
@@ -669,7 +688,50 @@
       document.getElementById('badgeDraftCount').innerText = rawProducts.filter(p => p.orderBigQty > 0).length;
     }
 
-    function getCompareMOMHtml(p, cleanSub) {
+    // 1. YOY เทียบช่วงเวลาเดียวกัน (Year-to-Date: ม.ค. ถึงเดือนล่าสุดที่อัปเดต)
+    function getYOY_YTDHtml(p, s69Sub, cleanSub) {
+      const mIdx = latestMonthIndex; // 0=ม.ค., 10=พ.ย.
+      const mNames = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+      
+      let ytd68 = 0;
+      for (let i = 0; i <= mIdx; i++) {
+        if (activeCompanyFilter === 'TN') ytd68 += (p.monthly68_tn[i] || 0);
+        else if (activeCompanyFilter === 'CKS') ytd68 += (p.monthly68_cks[i] || 0);
+        else ytd68 += (p.monthly68_tn[i] || 0) + (p.monthly68_cks[i] || 0);
+      }
+
+      if (ytd68 === 0 && s69Sub === 0) return `<span class="text-earth-400">-</span>`;
+      const diff = s69Sub - ytd68;
+      const pct = ytd68 > 0 ? Math.round((diff / ytd68) * 100) : (s69Sub > 0 ? 100 : 0);
+      const color = pct >= 0 ? 'text-leaf-800' : 'text-red-600';
+
+      return `
+        <div class="text-[10.5px] leading-tight">
+          <div class="text-earth-700">ปี 68: <span class="font-mono font-medium">${ytd68.toLocaleString()}</span> <span class="text-[9.5px] text-earth-500">${cleanSub}</span></div>
+          <div class="font-bold text-earth-900">ปี 69: <span class="font-mono">${s69Sub.toLocaleString()}</span> <span class="font-normal text-[9.5px] text-earth-600">${cleanSub}</span></div>
+          <div class="font-bold ${color} mt-0.5">${pct >= 0 ? '▲ +' : '▼ '}${pct}% <span class="font-normal text-earth-500">(ม.ค.-${mNames[mIdx]})</span></div>
+        </div>
+      `;
+    }
+
+    // 2. YOY เทียบทั้งปี 68 vs ปี 69
+    function getYOY_FullYearHtml(s68Sub, s69Sub, cleanSub) {
+      if (s68Sub === 0 && s69Sub === 0) return `<span class="text-earth-400">-</span>`;
+      const diff = s69Sub - s68Sub;
+      const pct = s68Sub > 0 ? Math.round((diff / s68Sub) * 100) : (s69Sub > 0 ? 100 : 0);
+      const color = pct >= 0 ? 'text-leaf-800' : 'text-red-600';
+
+      return `
+        <div class="text-[10.5px] leading-tight">
+          <div class="text-earth-700">ปี 68: <span class="font-mono font-medium">${s68Sub.toLocaleString()}</span> <span class="text-[9.5px] text-earth-500">${cleanSub}</span></div>
+          <div class="font-bold text-earth-900">ปี 69: <span class="font-mono">${s69Sub.toLocaleString()}</span> <span class="font-normal text-[9.5px] text-earth-600">${cleanSub}</span></div>
+          <div class="font-bold ${color} mt-0.5">${pct >= 0 ? '▲ +' : '▼ '}${pct}% <span class="font-normal text-earth-500">(ทั้งปี)</span></div>
+        </div>
+      `;
+    }
+
+    // 3. YOY เทียบเดือนเดียวกันแต่คนละปี (เช่น พ.ย. 68 vs พ.ย. 69)
+    function getYOY_SameMonthHtml(p, cleanSub) {
       const mIdx = latestMonthIndex;
       const mNames = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
       
@@ -683,7 +745,6 @@
       const v69 = getVal(p.monthly69_tn, p.monthly69_cks);
 
       if (v68 === 0 && v69 === 0) return `<span class="text-earth-400">-</span>`;
-
       const diff = v69 - v68;
       const pct = v68 > 0 ? Math.round((diff / v68) * 100) : (v69 > 0 ? 100 : 0);
       const color = pct >= 0 ? 'text-leaf-800' : 'text-red-600';
@@ -693,21 +754,6 @@
           <div class="text-earth-700">ปี 68: <span class="font-mono font-medium">${v68.toLocaleString()}</span> <span class="text-[9.5px] text-earth-500">${cleanSub}</span></div>
           <div class="font-bold text-earth-900">ปี 69: <span class="font-mono">${v69.toLocaleString()}</span> <span class="font-normal text-[9.5px] text-earth-600">${cleanSub}</span></div>
           <div class="font-bold ${color} mt-0.5">${pct >= 0 ? '▲ +' : '▼ '}${pct}% <span class="font-normal text-earth-500">(${mNames[mIdx]})</span></div>
-        </div>
-      `;
-    }
-
-    function getCompareYOYHtml(s68Sub, s69Sub, cleanSub) {
-      if (s68Sub === 0 && s69Sub === 0) return `<span class="text-earth-400">-</span>`;
-      const diff = s69Sub - s68Sub;
-      const pct = s68Sub > 0 ? Math.round((diff / s68Sub) * 100) : (s69Sub > 0 ? 100 : 0);
-      const color = pct >= 0 ? 'text-leaf-800' : 'text-red-600';
-
-      return `
-        <div class="text-[10.5px] leading-tight">
-          <div class="text-earth-700">ปี 68: <span class="font-mono font-medium">${s68Sub.toLocaleString()}</span> <span class="text-[9.5px] text-earth-500">${cleanSub}</span></div>
-          <div class="font-bold text-earth-900">ปี 69: <span class="font-mono">${s69Sub.toLocaleString()}</span> <span class="font-normal text-[9.5px] text-earth-600">${cleanSub}</span></div>
-          <div class="font-bold ${color} mt-0.5">${pct >= 0 ? '▲ +' : '▼ '}${pct}% <span class="font-normal text-earth-500">(YOY)</span></div>
         </div>
       `;
     }
@@ -724,7 +770,7 @@
     function renderTable() {
       const tbody = document.getElementById('tableBody');
       if (currentFiltered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="15" class="text-center py-8 text-earth-600">ไม่พบข้อมูลสินค้า</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="16" class="text-center py-8 text-earth-600">ไม่พบข้อมูลสินค้า</td></tr>`;
         return;
       }
 
@@ -822,11 +868,16 @@
               <div class="text-[10px] text-earth-700">${s69Sub > 0 ? `(${s69Sub.toLocaleString()} ${cleanSub})` : ''}</div>
               <div class="text-[10px] font-mono font-semibold text-amber-950 mt-0.5">${fmtZero(s69Val)}</div>
             </td>
+
+            <!-- 3 คอลัมน์เปรียบเทียบ YOY -->
             <td class="px-2 py-1.5 text-right align-top bg-amber-50/30">
-              ${getCompareMOMHtml(p, cleanSub)}
+              ${getYOY_YTDHtml(p, s69Sub, cleanSub)}
             </td>
-            <td class="px-2 py-1.5 text-right align-top border-r-2 border-cream-400 bg-amber-50/50">
-              ${getCompareYOYHtml(s68Sub, s69Sub, cleanSub)}
+            <td class="px-2 py-1.5 text-right align-top bg-amber-50/40">
+              ${getYOY_FullYearHtml(s68Sub, s69Sub, cleanSub)}
+            </td>
+            <td class="px-2 py-1.5 text-right align-top border-r-2 border-cream-400 bg-amber-50/60">
+              ${getYOY_SameMonthHtml(p, cleanSub)}
             </td>
 
             <td class="px-2 py-1.5 align-top text-[10.5px] leading-tight">
@@ -1014,7 +1065,6 @@
           unitPrice: p.unitPriceInput || 0, val: val, notes: p.notes || '',
           s68Big, s68Sub, s69Big, s69Sub, yoyPct,
           stkBig, stkSub,
-          // บันทึกยอดขาย 12 เดือน เพื่อใช้แสดง 2 เดือนข้างหน้าของปีย้อนหลัง
           m68_tn: p.monthly68_tn, m68_cks: p.monthly68_cks,
           m69_tn: p.monthly69_tn, m69_cks: p.monthly69_cks,
           approvalStatus: 'APPROVED',
@@ -1078,19 +1128,16 @@
 
     function toggleAPODetail(docId) { expandedAPODocId = (expandedAPODocId === docId) ? null : docId; renderAPOList(); }
 
-    // ฟังก์ชันสลับเดือนพยากรณ์ในหน้าพิจารณาใบ APO
     function setAPOForecastMonths(m) {
       apoForecastMonths = m;
       renderAPOList();
     }
 
-    // ฟังก์ชันคำนวณยอดขายของ 2 เดือนข้างหน้าของปีย้อนหลัง (เช่น เดือนนี้ พ.ย.69 -> แสดง ธ.ค.68 และ ม.ค.69)
     function getNext2MonthsHistoryHtml(it) {
       const mShort = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-      const curM = latestMonthIndex; // 0=ม.ค., 10=พ.ย.
+      const curM = latestMonthIndex;
       const mul = it.mul || 1;
 
-      // ดึงข้อมูลรายเดือนจาก item ที่บันทึกไว้ หรือจาก rawProducts ปัจจุบัน
       let m68_tn = it.m68_tn, m68_cks = it.m68_cks, m69_tn = it.m69_tn, m69_cks = it.m69_cks;
       if (!m68_tn && rawProducts.length > 0) {
         const found = rawProducts.find(p => p.code === it.code || p.name === it.name);
@@ -1105,7 +1152,6 @@
       const getMonthLabelAndVal = (offset) => {
         const targetM = (curM + offset) % 12;
         const isNextYear = (curM + offset) >= 12;
-        // หากยังไม่ข้ามปี ให้ดึงยอดปี 68 ของเดือนนั้น; หากข้ามปีแล้ว (เช่น ม.ค.) ให้ดึงยอด ม.ค.69 มาเทียบ
         const yearLabel = isNextYear ? '69' : '68';
         const subVal = isNextYear
           ? ((m69_tn[targetM] || 0) + (m69_cks[targetM] || 0))
@@ -1219,7 +1265,6 @@
                           <div class="font-bold ${yoyColor}">YOY: ${yoySign}${it.yoyPct}%</div>
                         ` : (it.statSalesYOY || '-');
 
-                        // คำนวณพยากรณ์ตามจำนวนเดือนที่ผู้อนุมัติกดเลือก
                         const mul = it.mul || 1;
                         const s69Sub = it.s69Sub || 0;
                         const dynFcSub = Math.round((s69Sub / 10) * apoForecastMonths);
