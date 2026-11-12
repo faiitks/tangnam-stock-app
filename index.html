@@ -454,8 +454,9 @@
       const ts = Date.now();
 
       try {
+        // เพิ่ม &range=A1:CZ2500 เพื่อให้ Google Sheets ส่งคอลัมน์ท้ายๆ (CR, CS, CT) มาครบทุกคอลัมน์
         const [resMain, res68, res69] = await Promise.all([
-          fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_MAIN)}&t=${ts}`, { cache: 'no-store' }),
+          fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_MAIN)}&range=A1:CZ2500&t=${ts}`, { cache: 'no-store' }),
           fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_68)}&t=${ts}`, { cache: 'no-store' }).catch(() => null),
           fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_69)}&t=${ts}`, { cache: 'no-store' }).catch(() => null)
         ]);
@@ -516,26 +517,13 @@
 
         const [map68, map69] = await Promise.all([parseMonthly(res68), parseMonthly(res69)]);
 
-        // สแกนหาตำแหน่งคอลัมน์จากหัวตารางแถวที่ 1-5 อัตโนมัติ (พร้อม Fallback CR=95, CS=96, CT=97)
-        let GEN_COL_IDX = 95; // คอลัมน์ CR
-        let SUP_COL_IDX = 96; // คอลัมน์ CS
-        let CAT_COL_IDX = 97; // คอลัมน์ CT
-
-        for (let r = 0; r < Math.min(5, rowsMain.length); r++) {
-          const hRow = rowsMain[r] && rowsMain[r].c ? rowsMain[r].c : [];
-          hRow.forEach((cell, idx) => {
-            if (cell && (cell.v !== null || cell.f)) {
-              const title = String(cell.v || cell.f).trim().toLowerCase();
-              if (title.includes('สามัญ')) {
-                GEN_COL_IDX = idx;
-              } else if (title.includes('คู่ค้า') || title.includes('supplier') || title.includes('บริษัท')) {
-                if (idx > 50) SUP_COL_IDX = idx;
-              } else if (title.includes('ประเภท') || title.includes('หมวด')) {
-                if (idx > 50) CAT_COL_IDX = idx;
-              }
-            }
-          });
-        }
+        // ตำแหน่งคอลัมน์ในชีท Forecast (บังคับดึง A1:CZ2500 แล้ว Index จะตรงเป๊ะ)
+        // CR = Index 95 (ชื่อสามัญ)
+        // CS = Index 96 (บริษัทคู่ค้า)
+        // CT = Index 97 (ประเภทสินค้า)
+        const GEN_COL_IDX = 95; // คอลัมน์ CR
+        const SUP_COL_IDX = 96; // คอลัมน์ CS
+        const CAT_COL_IDX = 97; // คอลัมน์ CT
 
         const products = [];
         for (let i = 4; i < rowsMain.length; i++) {
@@ -863,7 +851,7 @@
                 <span class="text-earth-600">(1*${mul} ${p.unitBig}/${cleanSub})</span>
               </div>
 
-              <!-- บรรทัดที่ 3: ประเภทสินค้า และ ชื่อสามัญ -->
+              <!-- บรรทัดที่ 3: ประเภทสินค้า (CT) และ ชื่อสามัญ (CR) -->
               ${(p.category || p.genericName) ? `
                 <div class="flex flex-wrap items-center gap-1 mt-1 text-[10px]">
                   ${p.category ? `<span class="px-1.5 py-0.2 rounded bg-leaf-50 text-leaf-800 border border-leaf-200 font-medium">${p.category}</span>` : ''}
