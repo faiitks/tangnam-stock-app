@@ -204,7 +204,7 @@
         <table class="grid-table text-left border-collapse text-xs">
           <thead>
             <tr class="bg-earth-900 text-cream-50 text-[11px] font-semibold">
-              <th rowspan="2" class="sticky-corner-1 w-[235px] px-2.5 py-2 border-r border-earth-700 text-center">
+              <th rowspan="2" class="sticky-corner-1 w-[240px] px-2.5 py-2 border-r border-earth-700 text-center">
                 รายการสินค้า / คู่ค้า / หน่วยขาย
               </th>
 
@@ -212,7 +212,6 @@
                 จำนวนขายปี 2568 (เต็มปี)
               </th>
 
-              <!-- ยอดขายปี 69: แยกสาขา | รวม 69 (ใหญ่/ย่อย/บ. + YOY ทั้งปี) | YOY YTD | YOY เดือนเดียวกัน -->
               <th colspan="4" class="px-2 py-1.5 border-r-2 border-cream-400 text-center bg-amber-900 text-amber-100">
                 <div>จำนวนขายปี 2569 & เปรียบเทียบ YOY (ปี 68 / ปี 69)</div>
                 <div id="lblSales69DateTime" class="text-[9.5px] font-normal text-amber-300">ข้อมูล: กำลังโหลด...</div>
@@ -413,7 +412,7 @@
     let activeViewMode = 'stock';
     let activeCompanyFilter = 'ALL';
     let visibleLimit = 80;
-    let latestMonthIndex = 10; // พ.ย. (index 10)
+    let latestMonthIndex = 10; 
 
     let apoDocumentsList = [];
     let activeAPOFilter = 'ALL';
@@ -434,6 +433,14 @@
     function normalizeCode(str) {
       if (!str) return '';
       return String(str).trim().replace(/^0+/, '').replace(/\s+/g, '').toLowerCase();
+    }
+
+    // ฟังก์ชันช่วยล้างค่าว่าง/ขยะในช่องข้อความ (ถ้าเป็น 0, ., -, ทั่วไป ให้คืนค่าว่าง)
+    function cleanTextField(val) {
+      if (!val) return '';
+      const s = String(val).trim();
+      if (s === '0' || s === '.' || s === '-' || s === 'ทั่วไป') return '';
+      return s;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -491,8 +498,8 @@
 
               const getN = (idx) => (mc[idx] && mc[idx].v !== null) ? parseFloat(String(mc[idx].v).replace(/,/g, '')) || 0 : 0;
               const tn = [], cks = [];
-              for (let i = 2; i <= 13; i++) tn.push(getN(i));   // C(2) ถึง N(13)
-              for (let i = 14; i <= 25; i++) cks.push(getN(i)); // O(14) ถึง Z(25)
+              for (let i = 2; i <= 13; i++) tn.push(getN(i));   
+              for (let i = 14; i <= 25; i++) cks.push(getN(i)); 
 
               const obj = { tn, cks };
               if (codeRaw) {
@@ -504,25 +511,19 @@
                 map.set(nameRaw.toLowerCase(), obj);
               }
             }
-          } catch (e) {
-            console.warn("Monthly parse error:", e);
-          }
+          } catch (e) {}
           return map;
         }
 
         const [map68, map69] = await Promise.all([parseMonthly(res68), parseMonthly(res69)]);
 
-        let catCol = 98, supCol = 95, genCol = 96;
-        [rowsMain[3], rowsMain[4]].forEach(hr => {
-          if (hr && hr.c) hr.c.forEach((cell, idx) => {
-            if (cell && cell.v) {
-              const t = String(cell.v).trim();
-              if (t.includes('ประเภท') || t.includes('หมวด')) catCol = idx;
-              if (t.toLowerCase().includes('supplier') || t.includes('คู่ค้า')) supCol = idx;
-              if (t.includes('สามัญ')) genCol = idx;
-            }
-          });
-        });
+        // ตำแหน่งคอลัมน์ในชีท Forecast:
+        // CR = Index 95 (ชื่อสามัญ)
+        // CS = Index 96 (บริษัทคู่ค้า)
+        // CT = Index 97 (ประเภทสินค้า)
+        const GEN_COL_IDX = 95; // คอลัมน์ CR
+        const SUP_COL_IDX = 96; // คอลัมน์ CS
+        const CAT_COL_IDX = 97; // คอลัมน์ CT
 
         const products = [];
         for (let i = 4; i < rowsMain.length; i++) {
@@ -549,12 +550,17 @@
           const sValTn = getN(37), sValCks = getN(38);
           const sValTot = getN(39) > 0 ? getN(39) : (sValTn + sValCks);
 
+          // ดึงข้อมูลตามตำแหน่งคอลัมน์จริง CR, CS, CT และเว้นว่างหากไม่มีค่า
+          const genericVal  = cleanTextField(getV(GEN_COL_IDX)); // CR (Index 95)
+          const supplierVal = cleanTextField(getV(SUP_COL_IDX)); // CS (Index 96)
+          const categoryVal = cleanTextField(getV(CAT_COL_IDX)); // CT (Index 97)
+
           products.push({
             id: `P-${i}`, code: codeVal, name: nameVal, statusRaw: statusVal,
             isDiscontinued: statusVal.includes('เลิก'),
-            supplier: getV(supCol) || 'ทั่วไป',
-            genericName: getV(genCol) === '0' ? '' : getV(genCol),
-            category: getV(catCol) || 'ทั่วไป',
+            supplier: supplierVal,
+            genericName: genericVal,
+            category: categoryVal,
             unitMultiplier: getN(3) || 1,
             unitBig: getV(4) || 'ลัง',
             unitSub: getV(7) || 'ย่อย',
@@ -590,8 +596,8 @@
         el.innerHTML = `<option value="ALL">${label}</option>` + arr.map(v => `<option value="${v}">${v}</option>`).join('');
         if (arr.includes(cur)) el.value = cur;
       };
-      fill('supplierFilter', [...new Set(rawProducts.map(p => p.supplier).filter(s => s && s !== 'ทั่วไป'))].sort(), 'บริษัทคู่ค้า (ทั้งหมด)');
-      fill('categoryFilter', [...new Set(rawProducts.map(p => p.category).filter(c => c && c !== 'ทั่วไป'))].sort(), 'ประเภทสินค้า (ทั้งหมด)');
+      fill('supplierFilter', [...new Set(rawProducts.map(p => p.supplier).filter(Boolean))].sort(), 'บริษัทคู่ค้า (ทั้งหมด)');
+      fill('categoryFilter', [...new Set(rawProducts.map(p => p.category).filter(Boolean))].sort(), 'ประเภทสินค้า (ทั้งหมด)');
       fill('genericFilter', [...new Set(rawProducts.map(p => p.genericName).filter(Boolean))].sort(), 'ชื่อสามัญ (ทั้งหมด)');
     }
 
@@ -685,7 +691,6 @@
       document.getElementById('badgeDraftCount').innerText = rawProducts.filter(p => p.orderBigQty > 0).length;
     }
 
-    // 1. YOY เทียบช่วงเวลาเดียวกัน (Year-to-Date)
     function getYOY_YTDHtml(p, s69Sub, cleanSub) {
       const mIdx = latestMonthIndex;
       const mNames = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -711,7 +716,6 @@
       `;
     }
 
-    // 2. YOY เทียบเดือนเดียวกันแต่คนละปี
     function getYOY_SameMonthHtml(p, cleanSub) {
       const mIdx = latestMonthIndex;
       const mNames = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -782,7 +786,6 @@
         const s69Big = Math.ceil(s69Sub / mul);
         const stkBig = Math.ceil(stkSub / mul);
 
-        // คำนวณ YOY ทั้งปี (68 vs 69) เพื่อนำไปแสดงต่อท้ายมูลค่าในช่อง รวม 69
         let yoyFullHtml = '';
         if (s68Sub > 0 || s69Sub > 0) {
           const yoyDiff = s69Sub - s68Sub;
@@ -834,13 +837,24 @@
 
         html += `
           <tr class="${p.isDiscontinued ? 'opacity-45 bg-gray-50' : 'hover:bg-cream-100/60'}">
+            <!-- คอลัมน์ 1: จัดเรียง 3 บรรทัดตามรูปแบบที่กำหนด -->
             <td class="sticky-col-1 px-2.5 py-2 border-r border-cream-300 align-top">
+              <!-- บรรทัดที่ 1: ชื่อสินค้า -->
               <div class="font-semibold text-earth-900 leading-snug text-[11.5px]">${p.name}</div>
-              <div class="flex flex-wrap items-center gap-1 mt-1 text-[10px]">
-                <span class="px-1.5 py-0.2 rounded bg-earth-100 text-earth-800 font-medium">${p.supplier}</span>
-                <span class="px-1.5 py-0.2 rounded bg-leaf-50 text-leaf-800 border border-leaf-200">${p.category}</span>
+              
+              <!-- บรรทัดที่ 2: บ.คู่ค้า + จำนวนหน่วยคูณ + หน่วยใหญ่/ย่อย -->
+              <div class="flex flex-wrap items-center gap-1.5 mt-1 text-[10px]">
+                ${p.supplier ? `<span class="px-1.5 py-0.2 rounded bg-earth-100 text-earth-800 font-medium">${p.supplier}</span>` : ''}
                 <span class="text-earth-600">(1*${mul} ${p.unitBig}/${cleanSub})</span>
               </div>
+
+              <!-- บรรทัดที่ 3: ประเภทสินค้า (CT) และ ชื่อสามัญ (CR) ถ้าไม่มีค่าให้เว้นว่างไว้ -->
+              ${(p.category || p.genericName) ? `
+                <div class="flex flex-wrap items-center gap-1 mt-1 text-[10px]">
+                  ${p.category ? `<span class="px-1.5 py-0.2 rounded bg-leaf-50 text-leaf-800 border border-leaf-200 font-medium">${p.category}</span>` : ''}
+                  ${p.genericName ? `<span class="px-1.5 py-0.2 rounded bg-cream-200 text-earth-700 border border-cream-300">${p.genericName}</span>` : ''}
+                </div>
+              ` : ''}
             </td>
 
             <td class="px-2 py-1.5 align-top text-[10.5px] leading-tight">
@@ -856,7 +870,6 @@
               ${branch69Lines.length > 0 ? branch69Lines.join('') : '<span class="text-earth-400">-</span>'}
             </td>
 
-            <!-- ช่อง รวม 69 (ใหญ่ / ย่อย / มูลค่า(บาท) / YOY ทั้งปี 68 vs 69 บรรทัดล่างสุด) -->
             <td class="px-2 py-1.5 text-right align-top bg-amber-50/70">
               <div class="font-bold text-earth-900 text-[11.5px]">${s69Big > 0 ? `${s69Big.toLocaleString()} ${p.unitBig}` : '-'}</div>
               <div class="text-[10px] text-earth-700">${s69Sub > 0 ? `(${s69Sub.toLocaleString()} ${cleanSub})` : ''}</div>
@@ -864,7 +877,6 @@
               ${yoyFullHtml}
             </td>
 
-            <!-- YOY ช่วงเดียวกัน (YTD) และ YOY เดือนเดียวกัน -->
             <td class="px-2 py-1.5 text-right align-top bg-amber-50/30">
               ${getYOY_YTDHtml(p, s69Sub, cleanSub)}
             </td>
@@ -985,8 +997,8 @@
         return;
       }
 
-      const detectedSuppliers = [...new Set(itemsToOrder.map(i => i.supplier))];
-      document.getElementById('newApoSupplier').value = selectedSupplier !== 'ALL' ? selectedSupplier : detectedSuppliers.join(', ');
+      const detectedSuppliers = [...new Set(itemsToOrder.map(i => i.supplier).filter(Boolean))];
+      document.getElementById('newApoSupplier').value = selectedSupplier !== 'ALL' ? selectedSupplier : (detectedSuppliers.join(', ') || 'ทั่วไป');
 
       const now = new Date();
       const nextNum = String(apoDocumentsList.length + 1).padStart(3, '0');
@@ -1435,7 +1447,7 @@
     function openMonthlyModal(productId) {
       const p = rawProducts.find(x => x.id === productId);
       if (!p) return;
-      document.getElementById('modalProductCode').innerText = `${p.category} | คู่ค้า: ${p.supplier}`;
+      document.getElementById('modalProductCode').innerText = `${p.category || 'สินค้าเกษตร'} ${p.supplier ? `| คู่ค้า: ${p.supplier}` : ''}`;
       document.getElementById('modalProductName').innerText = p.name;
 
       const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -1471,7 +1483,7 @@
 
     function exportToExcel() {
       const data = currentFiltered.map(p => ({
-        'รหัส': p.code, 'ชื่อสินค้า': p.name, 'คู่ค้า': p.supplier, 'หมวดหมู่': p.category,
+        'รหัส': p.code, 'ชื่อสินค้า': p.name, 'คู่ค้า': p.supplier, 'หมวดหมู่': p.category, 'ชื่อสามัญ': p.genericName,
         'ขาย68(ย่อย)': p.sales68_tn_1_5 + p.sales68_tn_6 + p.sales68_cks, 'มูลค่า68': p.sales68_val,
         'ขาย69(ย่อย)': p.sales69_tn_1_5 + p.sales69_tn_6 + p.sales69_cks, 'มูลค่า69': p.sales69_val,
         'คงเหลือ(ย่อย)': p.stock_pc + p.stock_kr + p.stock_cyp + p.stock_cks, 'มูลค่าคงเหลือ': p.stock_val,
