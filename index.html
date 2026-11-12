@@ -310,7 +310,6 @@
                 <th class="p-2 border-b border-r border-cream-300">รายการสินค้า</th>
                 <th class="p-2 border-b border-r border-cream-300 text-right">สั่ง (ใหญ่)</th>
                 <th class="p-2 border-b border-r border-cream-300 text-right">รวม (ย่อย)</th>
-                <!-- ข้อ 6: ช่องแถม (ใหญ่) -->
                 <th class="p-2 border-b border-r border-cream-300 text-right">แถม (ใหญ่)</th>
                 <th class="p-2 border-b border-r border-cream-300 text-right">ราคา/หน่วยย่อย</th>
                 <th class="p-2 border-b border-r border-cream-300 text-right">มูลค่าซื้อรวม (บาท)</th>
@@ -414,11 +413,12 @@
     let activeViewMode = 'stock';
     let activeCompanyFilter = 'ALL';
     let visibleLimit = 80;
-    let latestMonthIndex = 9; 
+    let latestMonthIndex = 10; // พ.ย. (index 10)
 
     let apoDocumentsList = [];
     let activeAPOFilter = 'ALL';
     let expandedAPODocId = null;
+    let apoForecastMonths = 2; // ค่าเริ่มต้นการดูพยากรณ์ของผู้อนุมัติ (1, 1.5, 2, 3 เดือน)
 
     function fmtZero(val) {
       if (val === null || val === undefined) return '';
@@ -558,6 +558,9 @@
         initFilters();
         resetAndFilter();
         syncText.innerText = `ซิงค์สำเร็จ (${products.length.toLocaleString()} รายการ)`;
+        if (!document.getElementById('apoListModal').classList.contains('hidden')) {
+          renderAPOList();
+        }
       } catch (err) {
         console.error(err);
         syncText.innerText = "เชื่อมต่อชีทไม่สำเร็จ";
@@ -709,7 +712,6 @@
       `;
     }
 
-    // ข้อ 5: สร้างข้อความแสดงหน่วยย่อยใต้ช่องสั่ง/แถม (เช่น "ซื้อ 600 ขวด + แถม 60 ขวด")
     function formatSubUnitSummary(orderSub, freeSub, cleanSub) {
       if (orderSub <= 0 && freeSub <= 0) return '';
       let parts = [];
@@ -861,7 +863,6 @@
               <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold border ${st.badge}">${st.label}</span>
             </td>
 
-            <!-- โหมดขออนุมัติสั่งซื้อ -->
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 align-top bg-leaf-50/30">
               <div class="flex items-center justify-between gap-1 mb-1">
                 <span class="text-[10px] text-earth-700">สั่ง:</span>
@@ -873,7 +874,6 @@
                 <input type="number" min="0" step="any" value="${p.freeBigQty || ''}" placeholder="0" oninput="onPOInput('${p.id}', 'free', this.value)" class="w-14 px-1 py-0.5 text-right font-semibold border border-cream-300 rounded bg-white">
                 <span class="text-[10px] text-earth-600">${p.unitBig}</span>
               </div>
-              <!-- ข้อ 5: แสดงเป็น "ซื้อ xx หน่วยย่อย + แถม xx หน่วยย่อย" ตัวเล็กไม่เด่น -->
               <div id="subTotal_${p.id}" class="text-[9px] text-right text-earth-500 mt-0.5 leading-tight">
                 ${subSummaryText}
               </div>
@@ -954,7 +954,6 @@
         const subQty = Math.round(p.orderBigQty * p.unitMultiplier);
         const val = subQty * (p.unitPriceInput || 0);
         totalVal += val;
-        // ข้อ 6: ถ้าไม่มีแถมให้เว้นว่าง
         const freeDisplay = (p.freeBigQty && p.freeBigQty > 0) ? `${p.freeBigQty} ${p.unitBig}` : '';
 
         html += `
@@ -1007,18 +1006,18 @@
         const stkBig = Math.ceil(stkSub / mul);
 
         const yoyPct = s68Sub > 0 ? Math.round(((s69Sub - s68Sub) / s68Sub) * 100) : (s69Sub > 0 ? 100 : 0);
-        const fc2Big = Math.ceil(((s69Sub / 10) * 2) / mul);
-        const fc2Sub = Math.round((s69Sub / 10) * 2);
 
         return {
           code: p.code, name: p.name, category: p.category,
           unitBig: p.unitBig, unitSub: cleanSub, mul: mul,
           orderBigQty: p.orderBigQty, subQty: subQty, freeBigQty: p.freeBigQty || 0,
           unitPrice: p.unitPriceInput || 0, val: val, notes: p.notes || '',
-          // เก็บค่าแยกสำหรับแสดงผลตามข้อ 1 และ ข้อ 2
           s68Big, s68Sub, s69Big, s69Sub, yoyPct,
-          stkBig, stkSub, fc2Big, fc2Sub,
-          approvalStatus: 'APPROVED', // APPROVED | REJECTED | REDUCE | INCREASE
+          stkBig, stkSub,
+          // บันทึกยอดขาย 12 เดือน เพื่อใช้แสดง 2 เดือนข้างหน้าของปีย้อนหลัง
+          m68_tn: p.monthly68_tn, m68_cks: p.monthly68_cks,
+          m69_tn: p.monthly69_tn, m69_cks: p.monthly69_cks,
+          approvalStatus: 'APPROVED',
           rejectReason: ''
         };
       });
@@ -1079,6 +1078,50 @@
 
     function toggleAPODetail(docId) { expandedAPODocId = (expandedAPODocId === docId) ? null : docId; renderAPOList(); }
 
+    // ฟังก์ชันสลับเดือนพยากรณ์ในหน้าพิจารณาใบ APO
+    function setAPOForecastMonths(m) {
+      apoForecastMonths = m;
+      renderAPOList();
+    }
+
+    // ฟังก์ชันคำนวณยอดขายของ 2 เดือนข้างหน้าของปีย้อนหลัง (เช่น เดือนนี้ พ.ย.69 -> แสดง ธ.ค.68 และ ม.ค.69)
+    function getNext2MonthsHistoryHtml(it) {
+      const mShort = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+      const curM = latestMonthIndex; // 0=ม.ค., 10=พ.ย.
+      const mul = it.mul || 1;
+
+      // ดึงข้อมูลรายเดือนจาก item ที่บันทึกไว้ หรือจาก rawProducts ปัจจุบัน
+      let m68_tn = it.m68_tn, m68_cks = it.m68_cks, m69_tn = it.m69_tn, m69_cks = it.m69_cks;
+      if (!m68_tn && rawProducts.length > 0) {
+        const found = rawProducts.find(p => p.code === it.code || p.name === it.name);
+        if (found) {
+          m68_tn = found.monthly68_tn; m68_cks = found.monthly68_cks;
+          m69_tn = found.monthly69_tn; m69_cks = found.monthly69_cks;
+        }
+      }
+
+      if (!m68_tn) return `<div class="text-[9.5px] text-earth-400">2 ด.ข้างหน้าปีก่อน: -</div>`;
+
+      const getMonthLabelAndVal = (offset) => {
+        const targetM = (curM + offset) % 12;
+        const isNextYear = (curM + offset) >= 12;
+        // หากยังไม่ข้ามปี ให้ดึงยอดปี 68 ของเดือนนั้น; หากข้ามปีแล้ว (เช่น ม.ค.) ให้ดึงยอด ม.ค.69 มาเทียบ
+        const yearLabel = isNextYear ? '69' : '68';
+        const subVal = isNextYear
+          ? ((m69_tn[targetM] || 0) + (m69_cks[targetM] || 0))
+          : ((m68_tn[targetM] || 0) + (m68_cks[targetM] || 0));
+        const bigVal = Math.ceil(subVal / mul);
+        return `${mShort[targetM]}${yearLabel}: <b>${bigVal.toLocaleString()}</b>`;
+      };
+
+      const m1Str = getMonthLabelAndVal(1);
+      const m2Str = getMonthLabelAndVal(2);
+
+      return `<div class="text-[10px] text-earth-700 mt-0.5 pt-0.5 border-t border-leaf-200/70">
+        ย้อนหลัง: ${m1Str} | ${m2Str} <span class="text-[9px] text-earth-500">${it.unitBig}</span>
+      </div>`;
+    }
+
     function renderAPOList() {
       const container = document.getElementById('apoListContainer');
       const filteredDocs = apoDocumentsList.filter(d => activeAPOFilter === 'ALL' || d.status === activeAPOFilter);
@@ -1125,7 +1168,14 @@
             ${isExpanded ? `
               <div class="p-4 bg-cream-50 border-t border-cream-300 flex flex-col gap-3">
                 <div class="flex flex-wrap items-center justify-between gap-2">
-                  <div class="font-bold text-earth-900 text-xs">รายละเอียดรายการสินค้าและข้อมูลประกอบการพิจารณา:</div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="font-bold text-earth-900 text-xs">เลือกดูพยากรณ์:</span>
+                    <div class="inline-flex bg-white p-0.5 rounded-lg border border-cream-300 text-[11px]">
+                      ${[1, 1.5, 2, 3].map(m => `
+                        <button onclick="setAPOForecastMonths(${m})" class="px-2 py-0.5 rounded font-semibold ${apoForecastMonths === m ? 'bg-leaf-700 text-white' : 'text-earth-700 hover:bg-cream-100'}">${m} ด.</button>
+                      `).join('')}
+                    </div>
+                  </div>
                   <div class="flex items-center gap-2">
                     <button onclick="approveAllInDoc('${doc.docId}')" class="px-3 py-1 rounded bg-leaf-100 hover:bg-leaf-200 text-leaf-900 border border-leaf-300 text-xs font-semibold">
                       ✓ เลือกอนุมัติทั้งหมด
@@ -1142,13 +1192,10 @@
                       <tr>
                         <th class="p-2 border-b border-r text-center w-8">#</th>
                         <th class="p-2 border-b border-r">รายการสินค้า</th>
-                        <!-- ข้อ 1: ยอดขาย 68 69 YOY คนละบรรทัด (หน่วยใหญ่หลัก หน่วยย่อยไม่เด่น) -->
                         <th class="p-2 border-b border-r bg-amber-50/70">ยอดขาย 68 / 69 & YOY</th>
-                        <!-- ข้อ 2: คงเหลือ พยากรณ์ คนละบรรทัด (หน่วยใหญ่หลัก หน่วยย่อยไม่เด่น) -->
-                        <th class="p-2 border-b border-r bg-leaf-50/70">คงเหลือ & พยากรณ์</th>
+                        <th class="p-2 border-b border-r bg-leaf-50/70">คงเหลือ & พยากรณ์ (${apoForecastMonths} ด.)</th>
                         <th class="p-2 border-b border-r text-right">สั่ง / แถม</th>
                         <th class="p-2 border-b border-r text-right">ราคา & มูลค่ารวม</th>
-                        <!-- ข้อ 3: พิจารณา (อนุมัติ, ไม่อนุมัติ, ลดจำนวน, เพิ่มจำนวน) -->
                         <th class="p-2 border-b border-r text-center w-36">พิจารณา</th>
                         <th class="p-2 border-b">หมายเหตุ / เหตุผล</th>
                       </tr>
@@ -1159,13 +1206,11 @@
                         const isRejected = stCode === 'REJECTED';
                         const isQtyMod = stCode === 'REDUCE' || stCode === 'INCREASE';
 
-                        // สีกรอบ Select ตามสถานะ
                         let selClass = 'border-leaf-500 bg-leaf-50 text-leaf-800';
                         if (isRejected) selClass = 'border-red-400 bg-red-100 text-red-700';
                         else if (stCode === 'REDUCE') selClass = 'border-amber-500 bg-amber-50 text-amber-800';
                         else if (stCode === 'INCREASE') selClass = 'border-blue-500 bg-blue-50 text-blue-800';
 
-                        // การแสดงผลข้อ 1: ยอดขาย 68, 69, YOY คนละบรรทัด
                         const yoySign = (it.yoyPct || 0) >= 0 ? '+' : '';
                         const yoyColor = (it.yoyPct || 0) >= 0 ? 'text-leaf-700' : 'text-red-600';
                         const salesHtml = (it.s68Big !== undefined) ? `
@@ -1174,10 +1219,16 @@
                           <div class="font-bold ${yoyColor}">YOY: ${yoySign}${it.yoyPct}%</div>
                         ` : (it.statSalesYOY || '-');
 
-                        // การแสดงผลข้อ 2: คงเหลือ, พยากรณ์ คนละบรรทัด
+                        // คำนวณพยากรณ์ตามจำนวนเดือนที่ผู้อนุมัติกดเลือก
+                        const mul = it.mul || 1;
+                        const s69Sub = it.s69Sub || 0;
+                        const dynFcSub = Math.round((s69Sub / 10) * apoForecastMonths);
+                        const dynFcBig = Math.ceil(dynFcSub / mul);
+
                         const stockFcHtml = (it.stkBig !== undefined) ? `
                           <div>คงเหลือ: <b class="text-leaf-900">${it.stkBig.toLocaleString()} ${it.unitBig}</b> <span class="text-[9.5px] text-earth-500">(${it.stkSub.toLocaleString()} ${it.unitSub})</span></div>
-                          <div>เป้า 2 ด.: <b class="text-earth-900">${it.fc2Big.toLocaleString()} ${it.unitBig}</b> <span class="text-[9.5px] text-earth-500">(${it.fc2Sub.toLocaleString()} ${it.unitSub})</span></div>
+                          <div>เป้า ${apoForecastMonths} ด.: <b class="text-earth-900">${dynFcBig.toLocaleString()} ${it.unitBig}</b> <span class="text-[9.5px] text-earth-500">(${dynFcSub.toLocaleString()} ${it.unitSub})</span></div>
+                          ${getNext2MonthsHistoryHtml(it)}
                         ` : (it.statStockFc || '-');
 
                         return `
@@ -1201,7 +1252,6 @@
                               <div class="font-bold ${!isRejected ? 'text-leaf-800' : 'line-through text-red-500'}">${it.val.toLocaleString()} บ.</div>
                             </td>
 
-                            <!-- ข้อ 3: ตัวเลือก อนุมัติ / ไม่อนุมัติ / ลดจำนวน / เพิ่มจำนวน -->
                             <td class="p-1.5 text-center border-r">
                               <select onchange="setAPOItemStatus('${doc.docId}', ${idx}, this.value)" class="w-full px-1.5 py-1 rounded border text-xs font-semibold ${selClass}">
                                 <option value="APPROVED" ${stCode === 'APPROVED' ? 'selected' : ''}>✓ อนุมัติ</option>
@@ -1232,7 +1282,6 @@
                 </div>
 
                 <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-                  <!-- ข้อ 4: ชื่อผู้อนุมัติเป็นดรอปดาวน์ 3 รายชื่อ -->
                   <div class="flex items-center gap-2">
                     <label class="font-semibold text-earth-800">ชื่อผู้อนุมัติ:</label>
                     <select id="approverName_${doc.docId}" class="px-2.5 py-1.5 border border-cream-400 rounded-lg bg-white text-xs font-semibold text-earth-900 w-52">
@@ -1273,7 +1322,6 @@
       renderAPOList();
     }
 
-    // ฟังก์ชันปรับเพิ่ม/ลดจำนวนสั่งซื้อโดยผู้อนุมัติ และคำนวณเงินใหม่ทันที
     function modifyAPOItemQty(docId, idx, newBigQty) {
       const doc = apoDocumentsList.find(d => d.docId === docId);
       if (!doc || !doc.items[idx]) return;
