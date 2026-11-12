@@ -214,7 +214,7 @@
               </th>
 
               <th colspan="4" class="px-2 py-1.5 border-r-2 border-cream-400 text-center bg-amber-900 text-amber-100">
-                <div>จำนวนขายปี 2569 & เปรียบเทียบ (68 vs 69)</div>
+                <div>จำนวนขายปี 2569 & เปรียบเทียบ (ปี 68 / ปี 69)</div>
                 <div id="lblSales69DateTime" class="text-[9.5px] font-normal text-amber-300">ข้อมูล: กำลังโหลด...</div>
               </th>
 
@@ -240,13 +240,13 @@
 
               <th class="w-[100px] px-2 py-1 text-left border-r border-earth-700 bg-amber-900/90">แยกสาขา (ย่อย)</th>
               <th class="w-[105px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900">รวม 69 (ใหญ่/ย่อย/บ.)</th>
-              <th class="w-[115px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900/80">ขาย MOM (68 vs 69)</th>
-              <th class="w-[115px] px-2 py-1 text-right border-r-2 border-cream-400 bg-amber-900/95">ขาย YOY (68 vs 69)</th>
+              <th class="w-[125px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900/80">ขาย MOM (ปี 68/ปี 69)</th>
+              <th class="w-[125px] px-2 py-1 text-right border-r-2 border-cream-400 bg-amber-900/95">ขาย YOY (ปี 68/ปี 69)</th>
 
               <th class="w-[105px] px-2 py-1 text-left border-r border-earth-700 bg-leaf-900/80">แยกคลัง (ย่อย)</th>
               <th class="w-[105px] px-2 py-1 text-right border-r-2 border-leaf-400 bg-leaf-900">รวมคงเหลือ (ใหญ่/ย่อย/บ.)</th>
 
-              <th class="w-[105px] px-2 py-1 text-left border-r border-earth-700 bg-earth-800">พยากรณ์เป้า (ใหญ่)</th>
+              <th class="w-[140px] px-2 py-1 text-center border-r border-earth-700 bg-earth-800">พยากรณ์เป้า (แบ่ง 4 ช่วง)</th>
               <th class="w-[82px] px-1.5 py-1 text-center border-r border-earth-700 bg-earth-800">สถานะ</th>
 
               <th class="col-po-only hidden w-[125px] px-2 py-1 text-center border-r border-earth-700 bg-leaf-800">สั่ง / แถม (ใหญ่)</th>
@@ -665,6 +665,7 @@
       document.getElementById('badgeDraftCount').innerText = rawProducts.filter(p => p.orderBigQty > 0).length;
     }
 
+    // ข้อ 1 (ในรอบนี้): ระบุคำว่า "ปี 68:" และ "ปี 69:" พร้อมหน่วยขายทั้งคู่ในช่อง ขาย MOM
     function getCompareMOMHtml(p, cleanSub) {
       const mIdx = latestMonthIndex;
       const mNames = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -686,13 +687,14 @@
 
       return `
         <div class="text-[10.5px] leading-tight">
-          <div class="text-earth-600">68: <span class="font-mono">${v68.toLocaleString()}</span></div>
-          <div class="font-bold text-earth-900">69: <span class="font-mono">${v69.toLocaleString()}</span> <span class="font-normal text-[9.5px]">${cleanSub}</span></div>
+          <div class="text-earth-700">ปี 68: <span class="font-mono font-medium">${v68.toLocaleString()}</span> <span class="text-[9.5px] text-earth-500">${cleanSub}</span></div>
+          <div class="font-bold text-earth-900">ปี 69: <span class="font-mono">${v69.toLocaleString()}</span> <span class="font-normal text-[9.5px] text-earth-600">${cleanSub}</span></div>
           <div class="font-bold ${color} mt-0.5">${pct >= 0 ? '▲ +' : '▼ '}${pct}% <span class="font-normal text-earth-500">(${mNames[mIdx]})</span></div>
         </div>
       `;
     }
 
+    // ข้อ 1 (ในรอบนี้): ระบุคำว่า "ปี 68:" และ "ปี 69:" พร้อมหน่วยขายทั้งคู่ในช่อง ขาย YOY
     function getCompareYOYHtml(s68Sub, s69Sub, cleanSub) {
       if (s68Sub === 0 && s69Sub === 0) return `<span class="text-earth-400">-</span>`;
       const diff = s69Sub - s68Sub;
@@ -701,8 +703,8 @@
 
       return `
         <div class="text-[10.5px] leading-tight">
-          <div class="text-earth-600">68: <span class="font-mono">${s68Sub.toLocaleString()}</span></div>
-          <div class="font-bold text-earth-900">69: <span class="font-mono">${s69Sub.toLocaleString()}</span> <span class="font-normal text-[9.5px]">${cleanSub}</span></div>
+          <div class="text-earth-700">ปี 68: <span class="font-mono font-medium">${s68Sub.toLocaleString()}</span> <span class="text-[9.5px] text-earth-500">${cleanSub}</span></div>
+          <div class="font-bold text-earth-900">ปี 69: <span class="font-mono">${s69Sub.toLocaleString()}</span> <span class="font-normal text-[9.5px] text-earth-600">${cleanSub}</span></div>
           <div class="font-bold ${color} mt-0.5">${pct >= 0 ? '▲ +' : '▼ '}${pct}% <span class="font-normal text-earth-500">(YOY)</span></div>
         </div>
       `;
@@ -824,17 +826,33 @@
               <div class="text-[10px] font-mono font-semibold text-leaf-900 mt-0.5">${fmtZero(stkVal)}</div>
             </td>
 
-            <td class="px-2 py-1.5 align-top text-[10.5px] leading-tight">
-              <div>1 ด.: <b>${fc1}</b> ${p.unitBig}</div>
-              <div>1.5 ด.: <b>${fc1_5}</b> ${p.unitBig}</div>
-              <div>2 ด.: <b>${fc2}</b> ${p.unitBig}</div>
-              <div>3 ด.: <b>${fc3}</b> ${p.unitBig}</div>
+            <!-- ข้อ 2 (ในรอบนี้): แบ่งช่องพยากรณ์เป็นตารางย่อย 4 ช่องชัดเจน (Grid 2x2) -->
+            <td class="p-1 align-middle">
+              <div class="grid grid-cols-2 gap-1 text-[10px]">
+                <div class="bg-cream-100/80 border border-cream-300 rounded px-1.5 py-0.5">
+                  <div class="text-[9px] text-earth-600 leading-none">1 เดือน</div>
+                  <div class="font-bold text-earth-900 leading-tight mt-0.5">${fc1} <span class="font-normal text-[9px]">${p.unitBig}</span></div>
+                </div>
+                <div class="bg-cream-100/80 border border-cream-300 rounded px-1.5 py-0.5">
+                  <div class="text-[9px] text-earth-600 leading-none">1.5 เดือน</div>
+                  <div class="font-bold text-earth-900 leading-tight mt-0.5">${fc1_5} <span class="font-normal text-[9px]">${p.unitBig}</span></div>
+                </div>
+                <div class="bg-leaf-50/70 border border-leaf-200 rounded px-1.5 py-0.5">
+                  <div class="text-[9px] text-leaf-800 leading-none">2 เดือน</div>
+                  <div class="font-bold text-leaf-900 leading-tight mt-0.5">${fc2} <span class="font-normal text-[9px]">${p.unitBig}</span></div>
+                </div>
+                <div class="bg-amber-50/70 border border-amber-200 rounded px-1.5 py-0.5">
+                  <div class="text-[9px] text-amber-800 leading-none">3 เดือน</div>
+                  <div class="font-bold text-amber-950 leading-tight mt-0.5">${fc3} <span class="font-normal text-[9px]">${p.unitBig}</span></div>
+                </div>
+              </div>
             </td>
+
             <td class="px-1.5 py-1.5 text-center align-middle">
               <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold border ${st.badge}">${st.label}</span>
             </td>
 
-            <!-- โหมดขออนุมัติสั่งซื้อ (อัปเดตเฉพาะช่องตัวเลข ไม่วาดตารางใหม่ทั้งหน้า เพื่อไม่ให้เคอร์เซอร์เด้ง) -->
+            <!-- โหมดขออนุมัติสั่งซื้อ -->
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 align-top bg-leaf-50/30">
               <div class="flex items-center justify-between gap-1 mb-1">
                 <span class="text-[10px] text-earth-700">สั่ง:</span>
@@ -878,7 +896,6 @@
       document.getElementById('btnLoadAll').classList.toggle('hidden', visibleLimit >= currentFiltered.length);
     }
 
-    // แก้ไข: อัปเดตเฉพาะตัวเลขผลลัพธ์ของแถวนั้นโดยไม่เรียก renderTable() เพื่อไม่ให้เคอร์เซอร์หลุด
     function onPOInput(id, field, val) {
       const p = rawProducts.find(x => x.id === id);
       if (!p) return;
@@ -977,7 +994,7 @@
           unitBig: p.unitBig, unitSub: cleanSub, mul: mul,
           orderBigQty: p.orderBigQty, subQty: subQty, freeBigQty: p.freeBigQty || 0,
           unitPrice: p.unitPriceInput || 0, val: val, notes: p.notes || '',
-          statSalesYOY: `68: ${s68.toLocaleString()} | 69: ${s69.toLocaleString()} ${cleanSub} (${yoyPct >= 0 ? '+' : ''}${yoyPct}% YOY)`,
+          statSalesYOY: `ปี 68: ${s68.toLocaleString()} ${cleanSub} | ปี 69: ${s69.toLocaleString()} ${cleanSub} (${yoyPct >= 0 ? '+' : ''}${yoyPct}% YOY)`,
           statStockFc: `คงเหลือ: ${Math.ceil(stk/mul)} ${p.unitBig} (${stk.toLocaleString()} ${cleanSub}) | เป้า 2 ด.: ${fc2} ${p.unitBig}`,
           approvalStatus: 'APPROVED',
           rejectReason: ''
