@@ -454,8 +454,9 @@
       const ts = Date.now();
 
       try {
+        // ใช้ tq=SELECT * เพื่อดึงทุกคอลัมน์จริงในชีทโดยไม่โดนตัดคอลัมน์ว่างคั่นกลาง
         const [resMain, res68, res69] = await Promise.all([
-          fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_MAIN)}&range=A1:CZ2500&t=${ts}`, { cache: 'no-store' }),
+          fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_MAIN)}&tq=${encodeURIComponent('SELECT *')}&t=${ts}`, { cache: 'no-store' }),
           fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_68)}&t=${ts}`, { cache: 'no-store' }).catch(() => null),
           fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_69)}&t=${ts}`, { cache: 'no-store' }).catch(() => null)
         ]);
@@ -465,17 +466,27 @@
         const colsMain = jsonMain.table.cols || [];
         const rowsMain = jsonMain.table.rows || [];
 
-        // ฟังก์ชันค้นหา Index จากชื่อตัวอักษรคอลัมน์จริงใน jsonMain.table.cols (col.id)
-        const findColIdxById = (colLetters, fallbackIdx) => {
-          const target = colLetters.toUpperCase();
-          const idx = colsMain.findIndex(col => col && col.id && col.id.toUpperCase() === target);
-          return idx !== -1 ? idx : fallbackIdx;
+        // ค้นหา Index จาก col.id และชื่อหัวตาราง (label)
+        const findColIdx = (colLetters, keywordList, fallbackIdx) => {
+          const targetId = colLetters.toUpperCase();
+          // 1. ค้นหาจาก col.id ตรงๆ (เช่น col.id === 'CR')
+          const byId = colsMain.findIndex(col => col && col.id && col.id.toUpperCase() === targetId);
+          if (byId !== -1) return byId;
+
+          // 2. ค้นหาจาก col.label (หัวตารางที่ Google API อ่านได้)
+          const byLabel = colsMain.findIndex(col => {
+            if (!col || !col.label) return false;
+            const lbl = col.label.toLowerCase();
+            return keywordList.some(kw => lbl.includes(kw));
+          });
+          if (byLabel !== -1) return byLabel;
+
+          return fallbackIdx;
         };
 
-        // จับคู่ตรงจาก col.id === 'CR', 'CS', 'CT'
-        const GEN_COL_IDX = findColIdxById('CR', 95); // ชื่อสามัญ (CR)
-        const SUP_COL_IDX = findColIdxById('CS', 96); // บริษัทคู่ค้า (CS)
-        const CAT_COL_IDX = findColIdxById('CT', 97); // ประเภทสินค้า (CT)
+        const GEN_COL_IDX = findColIdx('CR', ['สามัญ'], 95);           // ชื่อสามัญ (CR)
+        const SUP_COL_IDX = findColIdx('CS', ['คู่ค้า', 'supplier'], 96); // บริษัทคู่ค้า (CS)
+        const CAT_COL_IDX = findColIdx('CT', ['ประเภท', 'หมวด'], 97);   // ประเภทสินค้า (CT)
 
         const getCellStr = (r, c) => (rowsMain[r] && rowsMain[r].c && rowsMain[r].c[c] && rowsMain[r].c[c].v !== null) ? String(rowsMain[r].c[c].v).trim() : '';
         const sDate = getCellStr(0, 1);
@@ -534,13 +545,13 @@
           const c = rowsMain[i] ? rowsMain[i].c : null;
           if (!c) continue;
           const getV = (idx) => {
-            if (!c[idx]) return '';
+            if (idx < 0 || !c[idx]) return '';
             if (c[idx].v !== null && c[idx].v !== undefined) return String(c[idx].v).trim();
             if (c[idx].f !== null && c[idx].f !== undefined) return String(c[idx].f).trim();
             return '';
           };
           const getN = (idx) => {
-            if (!c[idx] || c[idx].v === null) return 0;
+            if (idx < 0 || !c[idx] || c[idx].v === null) return 0;
             let s = String(c[idx].v).replace(/,/g, '').trim().toLowerCase();
             let m = 1;
             if (s.endsWith('k')) { m = 1000; s = s.replace('k', ''); }
@@ -587,7 +598,8 @@
         rawProducts = products;
         initFilters();
         resetAndFilter();
-        syncText.innerText = `ซิงค์สำเร็จ (${products.length.toLocaleString()} รายการ)`;
+        const genCount = products.filter(p => p.genericName).length;
+        syncText.innerText = `ซิงค์สำเร็จ (${products.length.toLocaleString()} รายการ | สามัญ ${genCount})`;
         if (!document.getElementById('apoListModal').classList.contains('hidden')) {
           renderAPOList();
         }
