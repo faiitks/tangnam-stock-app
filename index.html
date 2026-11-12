@@ -197,9 +197,11 @@
           <span>Excel</span>
         </button>
 
+        <!-- ปุ่มเปิดดูใบขออนุมัติสั่งซื้อ (แสดง badge จำนวนรายการและสถานะ) -->
         <button id="btnOpenAPO" onclick="openAPOModal()" class="hidden items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-earth-700 bg-earth-900 text-cream-50 hover:bg-black text-xs font-semibold shadow-sm">
           <span>ใบ APO</span>
           <span id="badgeAPOCount" class="px-1.5 py-0.2 rounded-full bg-leaf-500 text-white text-[10px]">0</span>
+          <span id="badgeAPOStatus" class="hidden px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white font-normal">รออนุมัติ</span>
         </button>
       </div>
     </div>
@@ -352,7 +354,7 @@
                 <div class="text-[9px] font-normal text-amber-300">(ใหญ่ / บาท)</div>
               </th>
 
-              <!-- หัวตารางยอดขาย 69 แสดงช่วงวันที่จากช่อง B2 -->
+              <!-- หัวตารางยอดขาย 69 -->
               <th id="hdrSales69Group" colspan="4" class="px-2 py-1 border-r border-earth-700 text-center bg-earth-800 text-cream-100">
                 <div>จำนวนขายปี 2569 (หน่วยย่อย)</div>
                 <div id="lblSales69DateTime" class="text-[9.5px] font-normal text-amber-300">ข้อมูล: กำลังโหลด...</div>
@@ -362,7 +364,7 @@
                 <div class="text-[9px] font-normal text-amber-300">(ใหญ่ / บาท)</div>
               </th>
 
-              <!-- หัวตารางสินค้าคงเหลือ แสดงวันที่และเวลาจาก B1 และ D1 -->
+              <!-- หัวตารางสินค้าคงเหลือ -->
               <th id="hdrStockGroup" colspan="5" class="px-2 py-1 border-r border-earth-700 text-center bg-leaf-800 text-cream-100">
                 <div>สินค้าคงเหลือตามคลัง (หน่วยย่อย)</div>
                 <div id="lblStockDateTime" class="text-[9.5px] font-normal text-leaf-200">สต็อค ณ วันที่: กำลังโหลด...</div>
@@ -495,58 +497,90 @@
     </div>
   </div>
 
-  <!-- ================= POP-UP APO PREVIEW MODAL ================= -->
-  <div id="apoModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 no-print">
-    <div class="bg-white rounded-2xl max-w-5xl w-full border border-cream-300 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
+  <!-- ================= POP-UP APO PREVIEW & APPROVAL MODAL (ระบบขออนุมัติและไม่อนุมัติ) ================= -->
+  <div id="apoModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-5xl w-full border border-cream-300 shadow-2xl flex flex-col max-h-[94vh] overflow-hidden">
+      
       <div class="px-5 py-3.5 bg-earth-900 text-cream-50 flex items-center justify-between">
-        <div>
-          <div class="text-xs text-leaf-300 font-semibold">APO2026110301</div>
+        <div class="flex items-center gap-2.5">
+          <span class="text-xs text-leaf-300 font-semibold px-2 py-0.5 rounded bg-earth-800 border border-earth-700" id="apoDocId">APO-PENDING</span>
           <div class="text-base font-bold font-prompt">ใบขออนุมัติสั่งซื้อสินค้า (APO)</div>
+          <span id="apoStatusBadge" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-500 text-white">ฉบับร่าง</span>
         </div>
-        <button onclick="closeAPOModal()" class="text-cream-300 hover:text-white p-1 text-xl font-bold">&times;</button>
+        <button onclick="closeAPOModal()" class="text-cream-300 hover:text-white p-1 text-2xl font-bold leading-none">&times;</button>
       </div>
 
       <div id="apoPrintArea" class="p-4 sm:p-6 overflow-y-auto flex-1 flex flex-col gap-4 text-xs">
-        <div class="flex justify-between items-start border-b border-cream-300 pb-3">
+        
+        <div class="flex flex-wrap justify-between items-start border-b border-cream-300 pb-3 gap-2">
           <div>
             <div class="font-prompt font-bold text-sm sm:text-base text-earth-900">บริษัท ตังนำเกษตร จำกัด / บริษัท ชาวเกษตร จำกัด</div>
             <div class="text-earth-700">ฝ่ายจัดซื้อและบริหารคลังสินค้ากลาง</div>
           </div>
           <div class="text-right">
-            <div><strong>วันที่:</strong> <span id="apoDate">03/11/2569</span></div>
+            <div><strong>วันที่สร้าง:</strong> <span id="apoDate">07/11/2026</span></div>
+            <div id="apoApproverInfo" class="text-earth-600 mt-0.5"></div>
           </div>
         </div>
 
-        <table class="w-full text-xs text-left border border-cream-300">
-          <thead class="bg-cream-200 text-earth-900 font-semibold">
-            <tr>
-              <th class="p-2 border-b border-r border-cream-300 text-center">ลำดับ</th>
-              <th class="p-2 border-b border-r border-cream-300">รายการสินค้า / ประเภท</th>
-              <th class="p-2 border-b border-r border-cream-300 text-right">จำนวนสั่ง (ใหญ่)</th>
-              <th class="p-2 border-b border-r border-cream-300 text-right">จำนวนย่อย</th>
-              <th class="p-2 border-b border-r border-cream-300 text-right">แถม (ใหญ่)</th>
-              <th class="p-2 border-b border-r border-cream-300 text-right">มูลค่าซื้อ (บาท)</th>
-              <th class="p-2 border-b border-cream-300">หมายเหตุ</th>
-            </tr>
-          </thead>
-          <tbody id="apoTableBody" class="divide-y divide-cream-200"></tbody>
-          <tfoot class="bg-cream-100 font-bold">
-            <tr>
-              <td colspan="5" class="p-2 text-right border-t border-cream-300">รวมมูลค่าขออนุมัติทั้งสิ้น:</td>
-              <td id="apoGrandTotal" class="p-2 text-right border-t border-cream-300 text-leaf-800 text-sm">0</td>
-              <td class="border-t border-cream-300"></td>
-            </tr>
-          </tfoot>
-        </table>
+        <!-- รายการสินค้าและตัวเลือกการอนุมัติรายสินค้า -->
+        <div class="border border-cream-300 rounded-xl overflow-hidden shadow-xs">
+          <table class="w-full text-xs text-left border-collapse">
+            <thead class="bg-cream-200 text-earth-900 font-semibold">
+              <tr>
+                <th class="p-2 border-b border-r border-cream-300 text-center w-10">ลำดับ</th>
+                <th class="p-2 border-b border-r border-cream-300">รายการสินค้า / ประเภท</th>
+                <th class="p-2 border-b border-r border-cream-300 text-right w-24">จำนวนสั่ง (ใหญ่)</th>
+                <th class="p-2 border-b border-r border-cream-300 text-right w-20">จำนวนย่อย</th>
+                <th class="p-2 border-b border-r border-cream-300 text-right w-16">แถม</th>
+                <th class="p-2 border-b border-r border-cream-300 text-right w-24">มูลค่า (บาท)</th>
+                <th class="p-2 border-b border-r border-cream-300 text-center w-36">ผลการอนุมัติ</th>
+                <th class="p-2 border-b border-cream-300">หมายเหตุ / เหตุผลไม่อนุมัติ</th>
+              </tr>
+            </thead>
+            <tbody id="apoTableBody" class="divide-y divide-cream-200"></tbody>
+            <tfoot class="bg-cream-100 font-bold border-t-2 border-cream-300">
+              <tr>
+                <td colspan="5" class="p-2 text-right border-r border-cream-300">มูลค่าที่ขอสั่งทั้งหมด:</td>
+                <td id="apoGrandTotal" class="p-2 text-right border-r border-cream-300 text-earth-900 font-mono">0</td>
+                <td colspan="2" class="p-2 text-earth-600 font-normal">ยอดรวมทั้งใบ</td>
+              </tr>
+              <tr class="bg-leaf-50 text-leaf-900 text-sm">
+                <td colspan="5" class="p-2.5 text-right border-r border-leaf-200 font-extrabold">มูลค่าที่อนุมัติสั่งจริง (สุทธิ):</td>
+                <td id="apoApprovedTotal" class="p-2.5 text-right border-r border-leaf-200 font-mono font-extrabold">0</td>
+                <td colspan="2" class="p-2.5 text-xs text-leaf-800 font-normal">คำนวณเฉพาะรายการที่อนุมัติ</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
       </div>
 
-      <div class="px-5 py-3 bg-cream-100 border-t border-cream-300 flex justify-end gap-2">
-        <button onclick="window.print()" class="px-4 py-1.5 rounded-lg border border-leaf-600 bg-leaf-700 text-white text-xs font-semibold">
-          พิมพ์ใบขออนุมัติ
-        </button>
-        <button onclick="closeAPOModal()" class="px-4 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 text-xs font-semibold">
-          ปิด
-        </button>
+      <!-- Action Buttons -->
+      <div class="px-5 py-3 bg-cream-100 border-t border-cream-300 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <!-- ปุ่มล้างข้อมูลร่างใบ APO -->
+          <button onclick="clearSavedAPO()" class="px-3 py-1.5 rounded-lg border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 text-xs font-semibold">
+            ล้างข้อมูลใบนี้
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- บันทึกส่งรออนุมัติ -->
+          <button id="btnSaveDraftAPO" onclick="saveDraftAPO()" class="px-4 py-1.5 rounded-lg border border-amber-600 bg-amber-600 text-white hover:bg-amber-700 text-xs font-semibold shadow-xs">
+            💾 บันทึกใบขออนุมัติ
+          </button>
+          <!-- ผู้อนุมัติกดยืนยัน -->
+          <button id="btnConfirmApproval" onclick="confirmApprovalAction()" class="px-4 py-1.5 rounded-lg border border-leaf-600 bg-leaf-700 text-white hover:bg-leaf-800 text-xs font-semibold shadow-xs">
+            ✓ ยืนยันผลการพิจารณา
+          </button>
+          <button onclick="window.print()" class="px-4 py-1.5 rounded-lg border border-earth-600 bg-white text-earth-800 hover:bg-cream-200 text-xs font-semibold">
+            พิมพ์ใบอนุมัติ
+          </button>
+          <button onclick="closeAPOModal()" class="px-4 py-1.5 rounded-lg border border-cream-300 bg-white text-earth-800 text-xs font-semibold">
+            ปิด
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -574,6 +608,9 @@
     let currentModalProduct = null;
     let modalCompanyView = 'ALL';
 
+    // ข้อมูลใบขออนุมัติสั่งซื้อ (APO) ที่บันทึกค้างไว้ในระบบ
+    let savedAPODocument = null;
+
     function fmtZero(val) {
       if (val === null || val === undefined) return '';
       const num = typeof val === 'number' ? val : parseFloat(String(val).replace(/,/g, ''));
@@ -589,6 +626,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       renderDynamicForecastHeaders();
       updateDateTimeLabels();
+      loadSavedAPOFromStorage();
       fetchGoogleSheetData();
     });
 
@@ -871,7 +909,10 @@
       document.getElementById('kpiReorderCount').innerText = reorderCount.toLocaleString();
       document.getElementById('kpiOptimalCount').innerText = optimalCount.toLocaleString();
       document.getElementById('kpiOverstockCount').innerText = overstockCount.toLocaleString();
-      document.getElementById('badgeAPOCount').innerText = orderItemsCount;
+      
+      // อัปเดตตัวเลข badge บนปุ่ม APO
+      const totalAPOItems = savedAPODocument ? savedAPODocument.items.length : orderItemsCount;
+      document.getElementById('badgeAPOCount').innerText = totalAPOItems;
     }
 
     function renderTable() {
@@ -1203,39 +1244,258 @@
       document.getElementById('monthlyModal').classList.add('hidden');
     }
 
-    function openAPOModal() {
-      const itemsToOrder = rawProducts.filter(p => (p.orderBigQty || 0) > 0 || (p.orderValManual || 0) > 0);
-      const tbody = document.getElementById('apoTableBody');
-      let grandTotal = 0;
+    // =========================================================================
+    // ระบบบันทึกและพิจารณาอนุมัติใบขออนุมัติสั่งซื้อ (APO)
+    // =========================================================================
 
-      if (itemsToOrder.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-earth-600">ยังไม่มีรายการที่กรอกจำนวนสั่งซื้อ</td></tr>`;
+    function loadSavedAPOFromStorage() {
+      try {
+        const data = localStorage.getItem('TANGNAM_SAVED_APO');
+        if (data) {
+          savedAPODocument = JSON.parse(data);
+          updateAPOHeaderBadge();
+        }
+      } catch (e) {
+        console.warn("Load saved APO error:", e);
+      }
+    }
+
+    function updateAPOHeaderBadge() {
+      const badgeStatus = document.getElementById('badgeAPOStatus');
+      const badgeCount = document.getElementById('badgeAPOCount');
+      if (savedAPODocument && savedAPODocument.items && savedAPODocument.items.length > 0) {
+        badgeStatus.classList.remove('hidden');
+        badgeStatus.innerText = savedAPODocument.status === 'APPROVED' ? 'อนุมัติแล้ว' : 'รออนุมัติ';
+        badgeStatus.className = savedAPODocument.status === 'APPROVED' ? 'px-1.5 py-0.2 rounded-full text-[10px] bg-leaf-600 text-white' : 'px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white animate-pulse';
+        badgeCount.innerText = savedAPODocument.items.length;
       } else {
-        let html = '';
-        itemsToOrder.forEach((p, idx) => {
+        badgeStatus.classList.add('hidden');
+      }
+    }
+
+    function openAPOModal() {
+      let items = [];
+      
+      // ถ้ามีเอกสารที่บันทึกไว้ในระบบ ให้ดึงขึ้นมาตรวจพิจารณา
+      if (savedAPODocument && savedAPODocument.items && savedAPODocument.items.length > 0) {
+        items = savedAPODocument.items;
+        document.getElementById('apoDocId').innerText = savedAPODocument.docId || 'APO-DRAFT';
+        document.getElementById('apoDate').innerText = savedAPODocument.createdAt || new Date().toLocaleDateString('th-TH');
+        
+        const badge = document.getElementById('apoStatusBadge');
+        if (savedAPODocument.status === 'APPROVED') {
+          badge.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-leaf-600 text-white';
+          badge.innerText = 'อนุมัติแล้ว';
+          document.getElementById('apoApproverInfo').innerText = `อนุมัติเมื่อ: ${savedAPODocument.approvedAt || '-'}`;
+        } else {
+          badge.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-500 text-white';
+          badge.innerText = 'รออนุมัติ';
+          document.getElementById('apoApproverInfo').innerText = 'สถานะ: รอผู้อนุมัติพิจารณา';
+        }
+      } else {
+        // ถ้าร่างใหม่ ดึงรายการที่กำลังกรอกอยู่ปัจจุบัน
+        const toOrder = rawProducts.filter(p => (p.orderBigQty || 0) > 0 || (p.orderValManual || 0) > 0);
+        items = toOrder.map(p => {
           const mul = p.unitMultiplier || 1;
           const cleanSub = getCleanUnitName(p.unitSub);
           const subQty = Math.round(p.orderBigQty * mul);
           const val = p.orderValManual !== undefined ? p.orderValManual : (subQty * (p.unitPrice || 0));
-          grandTotal += val;
-
-          html += `
-            <tr>
-              <td class="p-2 text-center">${idx + 1}</td>
-              <td class="p-2 font-medium">${p.name} <span class="text-[11px] text-earth-600">(${p.category || 'ทั่วไป'})</span></td>
-              <td class="p-2 text-right font-bold">${p.orderBigQty || 0} ${p.unitBig}</td>
-              <td class="p-2 text-right">${subQty.toLocaleString()} ${cleanSub}</td>
-              <td class="p-2 text-right">${p.freeBigQty || 0} ${p.unitBig}</td>
-              <td class="p-2 text-right font-mono font-semibold">${val.toLocaleString()}</td>
-              <td class="p-2">${p.notes || '-'}</td>
-            </tr>
-          `;
+          return {
+            id: p.id,
+            name: p.name,
+            category: p.category || 'ทั่วไป',
+            unitBig: p.unitBig,
+            unitSub: cleanSub,
+            orderBigQty: p.orderBigQty || 0,
+            subQty: subQty,
+            freeBigQty: p.freeBigQty || 0,
+            val: val,
+            notes: p.notes || '',
+            approvalStatus: 'APPROVED', // ค่าเริ่มต้นคือต้องการอนุมัติ
+            rejectReason: ''
+          };
         });
-        tbody.innerHTML = html;
+
+        const now = new Date();
+        document.getElementById('apoDocId').innerText = `APO-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}-${String(Math.floor(Math.random()*900)+100)}`;
+        document.getElementById('apoDate').innerText = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+        document.getElementById('apoStatusBadge').className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-500 text-white';
+        document.getElementById('apoStatusBadge').innerText = 'ฉบับร่างใหม่';
+        document.getElementById('apoApproverInfo').innerText = 'ยังไม่ได้บันทึกลงระบบ';
       }
 
-      document.getElementById('apoGrandTotal').innerText = grandTotal.toLocaleString();
+      renderAPOTable(items);
       document.getElementById('apoModal').classList.remove('hidden');
+    }
+
+    function renderAPOTable(items) {
+      const tbody = document.getElementById('apoTableBody');
+      let grandTotal = 0;
+      let approvedTotal = 0;
+
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-earth-600">ยังไม่มีรายการที่กรอกจำนวนสั่งซื้อ</td></tr>`;
+        document.getElementById('apoGrandTotal').innerText = "0";
+        document.getElementById('apoApprovedTotal').innerText = "0";
+        return;
+      }
+
+      let html = '';
+      items.forEach((item, idx) => {
+        grandTotal += (item.val || 0);
+        const isApproved = item.approvalStatus !== 'REJECTED';
+        if (isApproved) {
+          approvedTotal += (item.val || 0);
+        }
+
+        const rowBg = isApproved ? 'bg-white' : 'bg-red-50/60 text-red-950 opacity-75';
+
+        html += `
+          <tr class="${rowBg}">
+            <td class="p-2 text-center border-r border-cream-200 font-mono">${idx + 1}</td>
+            <td class="p-2 border-r border-cream-200">
+              <div class="font-semibold text-earth-900">${item.name}</div>
+              <div class="text-[10.5px] text-earth-600 font-normal">หมวด: ${item.category}</div>
+            </td>
+            <td class="p-2 text-right border-r border-cream-200 font-bold">${item.orderBigQty} ${item.unitBig}</td>
+            <td class="p-2 text-right border-r border-cream-200 font-mono">${fmtZero(item.subQty)} ${item.unitSub}</td>
+            <td class="p-2 text-right border-r border-cream-200 font-mono">${item.freeBigQty || 0}</td>
+            <td class="p-2 text-right border-r border-cream-200 font-mono font-semibold ${isApproved ? 'text-leaf-800' : 'line-through text-red-500'}">
+              ${fmtZero(item.val)}
+            </td>
+            
+            <!-- ตัวเลือก อนุมัติ / ไม่อนุมัติ รายสินค้า -->
+            <td class="p-1.5 text-center border-r border-cream-200">
+              <select onchange="updateItemApprovalStatus(${idx}, this.value)" class="w-full px-2 py-1 text-xs font-semibold rounded border ${isApproved ? 'border-leaf-500 text-leaf-800 bg-leaf-50' : 'border-red-400 text-red-700 bg-red-100'} focus:outline-none">
+                <option value="APPROVED" ${isApproved ? 'selected' : ''}>✓ อนุมัติสั่ง</option>
+                <option value="REJECTED" ${!isApproved ? 'selected' : ''}>✕ ไม่อนุมัติ</option>
+              </select>
+            </td>
+
+            <!-- ช่องระบุหมายเหตุ / เหตุผลไม่อนุมัติ -->
+            <td class="p-1.5">
+              ${!isApproved ? `
+                <input type="text" value="${item.rejectReason || ''}" placeholder="ระบุเหตุผลที่ไม่อนุมัติ..." oninput="updateItemRejectReason(${idx}, this.value)" class="w-full px-2 py-1 text-[11px] border border-red-300 rounded bg-white text-red-900 focus:outline-none focus:border-red-500 placeholder-red-300">
+              ` : `
+                <input type="text" value="${item.notes || ''}" placeholder="หมายเหตุเพิ่มเติม..." oninput="updateItemNotes(${idx}, this.value)" class="w-full px-2 py-1 text-[11px] border border-cream-300 rounded bg-white text-earth-800 focus:outline-none">
+              `}
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+      document.getElementById('apoGrandTotal').innerText = Math.round(grandTotal).toLocaleString();
+      document.getElementById('apoApprovedTotal').innerText = Math.round(approvedTotal).toLocaleString();
+    }
+
+    function getActiveAPOItems() {
+      if (savedAPODocument && savedAPODocument.items) return savedAPODocument.items;
+      return [];
+    }
+
+    function updateItemApprovalStatus(idx, status) {
+      if (!savedAPODocument) {
+        // ถ้าร่างยังไม่ถูกบันทึก ให้สร้างออบเจกต์ชั่วคราว
+        buildCurrentAPOFromInputs();
+      }
+      if (savedAPODocument && savedAPODocument.items[idx]) {
+        savedAPODocument.items[idx].approvalStatus = status;
+        renderAPOTable(savedAPODocument.items);
+      }
+    }
+
+    function updateItemRejectReason(idx, reason) {
+      if (savedAPODocument && savedAPODocument.items[idx]) {
+        savedAPODocument.items[idx].rejectReason = reason;
+      }
+    }
+
+    function updateItemNotes(idx, notes) {
+      if (savedAPODocument && savedAPODocument.items[idx]) {
+        savedAPODocument.items[idx].notes = notes;
+      }
+    }
+
+    function buildCurrentAPOFromInputs() {
+      const toOrder = rawProducts.filter(p => (p.orderBigQty || 0) > 0 || (p.orderValManual || 0) > 0);
+      const items = toOrder.map(p => {
+        const mul = p.unitMultiplier || 1;
+        const cleanSub = getCleanUnitName(p.unitSub);
+        const subQty = Math.round(p.orderBigQty * mul);
+        const val = p.orderValManual !== undefined ? p.orderValManual : (subQty * (p.unitPrice || 0));
+        return {
+          id: p.id,
+          name: p.name,
+          category: p.category || 'ทั่วไป',
+          unitBig: p.unitBig,
+          unitSub: cleanSub,
+          orderBigQty: p.orderBigQty || 0,
+          subQty: subQty,
+          freeBigQty: p.freeBigQty || 0,
+          val: val,
+          notes: p.notes || '',
+          approvalStatus: 'APPROVED',
+          rejectReason: ''
+        };
+      });
+
+      const now = new Date();
+      savedAPODocument = {
+        docId: document.getElementById('apoDocId').innerText || `APO-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}-001`,
+        createdAt: `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`,
+        status: 'PENDING',
+        items: items
+      };
+    }
+
+    // ฟังก์ชันบันทึกร่างใบขออนุมัติสั่งซื้อลงในหน้าแอป (รอผู้อนุมัติ)
+    function saveDraftAPO() {
+      buildCurrentAPOFromInputs();
+      if (!savedAPODocument || savedAPODocument.items.length === 0) {
+        alert("กรุณากรอกจำนวนสั่งซื้อสินค้าในตารางก่อนทำการบันทึก");
+        return;
+      }
+      savedAPODocument.status = 'PENDING';
+      localStorage.setItem('TANGNAM_SAVED_APO', JSON.stringify(savedAPODocument));
+      updateAPOHeaderBadge();
+      alert(`บันทึกใบขออนุมัติเลขที่ ${savedAPODocument.docId} เรียบร้อยแล้ว\nสถานะ: รอผู้อนุมัติมาพิจารณา`);
+      openAPOModal();
+    }
+
+    // ผู้อนุมัติกดยืนยันผลการพิจารณา (อนุมัติ / ไม่อนุมัติ)
+    function confirmApprovalAction() {
+      if (!savedAPODocument || !savedAPODocument.items || savedAPODocument.items.length === 0) {
+        alert("ไม่พบรายการสินค้าที่ขออนุมัติ");
+        return;
+      }
+
+      // เช็คว่ามีรายการที่ไม่อนุมัติแต่ไม่ได้ใส่เหตุผลหรือไม่
+      const missingReason = savedAPODocument.items.find(it => it.approvalStatus === 'REJECTED' && !it.rejectReason.trim());
+      if (missingReason) {
+        alert(`กรุณาระบุเหตุผลที่ไม่อนุมัติ สำหรับรายการ:\n"${missingReason.name}"`);
+        return;
+      }
+
+      const now = new Date();
+      savedAPODocument.status = 'APPROVED';
+      savedAPODocument.approvedAt = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} น.`;
+      
+      localStorage.setItem('TANGNAM_SAVED_APO', JSON.stringify(savedAPODocument));
+      updateAPOHeaderBadge();
+      alert("บันทึกผลการอนุมัติสั่งซื้อเรียบร้อยแล้ว!");
+      openAPOModal();
+    }
+
+    // ล้างข้อมูลใบขออนุมัติ
+    function clearSavedAPO() {
+      if (confirm("ต้องการล้างข้อมูลใบขออนุมัตินี้ใช่หรือไม่?")) {
+        localStorage.removeItem('TANGNAM_SAVED_APO');
+        savedAPODocument = null;
+        updateAPOHeaderBadge();
+        closeAPOModal();
+        alert("ล้างข้อมูลเรียบร้อยแล้ว");
+      }
     }
 
     function closeAPOModal() {
@@ -1293,7 +1553,7 @@
     }
 
     /**
-     * ดึงข้อมูล Google Sheets แบบปลอดภัย และอ่านวันที่จาก A1:D1 และ A2:B2 โดยตรง
+     * ดึงข้อมูล Google Sheets ป้องกันแคช และดึงวันที่จาก A1:D1 และ A2:B2
      */
     async function fetchGoogleSheetData() {
       const syncBadge = document.getElementById('syncBadge');
@@ -1443,7 +1703,7 @@
 
           let codeVal = getVal(2) || getVal(1) || '';
           
-          // คอลัมน์สถานะ AZ (Index 51)
+          // คอลัมน์สถานะสต็อค AZ (Index 51)
           const statusVal = getVal(51);
           const isDisc = statusVal.includes('เลิก');
 
@@ -1459,10 +1719,10 @@
           const d68 = map68.get(codeVal) || map68.get(nameVal) || { tn: new Array(12).fill(0), cks: new Array(12).fill(0) };
           const d69 = map69.get(codeVal) || map69.get(nameVal) || { tn: new Array(12).fill(0), cks: new Array(12).fill(0) };
 
-          // มูลค่าสต็อคตามชีทจริง (AL=37, AM=38, AN=39)
-          const sValTn  = getNum(37); // AL
-          const sValCks = getNum(38); // AM
-          const sValTot = getNum(39) > 0 ? getNum(39) : (sValTn + sValCks); // AN
+          // มูลค่าสต็อคตามชีทจริง (AL=37, AM=38, AN=39)[cite: 8]
+          const sValTn  = getNum(37); // AL[cite: 8]
+          const sValCks = getNum(38); // AM[cite: 8]
+          const sValTot = getNum(39) > 0 ? getNum(39) : (sValTn + sValCks); // AN[cite: 8]
 
           parsedProducts.push({
             id: `P-${i}`,
