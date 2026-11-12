@@ -435,7 +435,6 @@
       return String(str).trim().replace(/^0+/, '').replace(/\s+/g, '').toLowerCase();
     }
 
-    // ฟังก์ชันช่วยล้างค่าว่าง/ขยะในช่องข้อความ (ถ้าเป็น 0, ., -, ทั่วไป ให้คืนค่าว่าง)
     function cleanTextField(val) {
       if (!val) return '';
       const s = String(val).trim();
@@ -517,19 +516,37 @@
 
         const [map68, map69] = await Promise.all([parseMonthly(res68), parseMonthly(res69)]);
 
-        // ตำแหน่งคอลัมน์ในชีท Forecast:
-        // CR = Index 95 (ชื่อสามัญ)
-        // CS = Index 96 (บริษัทคู่ค้า)
-        // CT = Index 97 (ประเภทสินค้า)
-        const GEN_COL_IDX = 95; // คอลัมน์ CR
-        const SUP_COL_IDX = 96; // คอลัมน์ CS
-        const CAT_COL_IDX = 97; // คอลัมน์ CT
+        // สแกนหาตำแหน่งคอลัมน์จากหัวตารางแถวที่ 1-5 อัตโนมัติ (พร้อม Fallback CR=95, CS=96, CT=97)
+        let GEN_COL_IDX = 95; // คอลัมน์ CR
+        let SUP_COL_IDX = 96; // คอลัมน์ CS
+        let CAT_COL_IDX = 97; // คอลัมน์ CT
+
+        for (let r = 0; r < Math.min(5, rowsMain.length); r++) {
+          const hRow = rowsMain[r] && rowsMain[r].c ? rowsMain[r].c : [];
+          hRow.forEach((cell, idx) => {
+            if (cell && (cell.v !== null || cell.f)) {
+              const title = String(cell.v || cell.f).trim().toLowerCase();
+              if (title.includes('สามัญ')) {
+                GEN_COL_IDX = idx;
+              } else if (title.includes('คู่ค้า') || title.includes('supplier') || title.includes('บริษัท')) {
+                if (idx > 50) SUP_COL_IDX = idx;
+              } else if (title.includes('ประเภท') || title.includes('หมวด')) {
+                if (idx > 50) CAT_COL_IDX = idx;
+              }
+            }
+          });
+        }
 
         const products = [];
         for (let i = 4; i < rowsMain.length; i++) {
           const c = rowsMain[i] ? rowsMain[i].c : null;
           if (!c) continue;
-          const getV = (idx) => (c[idx] && c[idx].v !== null) ? String(c[idx].v).trim() : '';
+          const getV = (idx) => {
+            if (!c[idx]) return '';
+            if (c[idx].v !== null && c[idx].v !== undefined) return String(c[idx].v).trim();
+            if (c[idx].f !== null && c[idx].f !== undefined) return String(c[idx].f).trim();
+            return '';
+          };
           const getN = (idx) => {
             if (!c[idx] || c[idx].v === null) return 0;
             let s = String(c[idx].v).replace(/,/g, '').trim().toLowerCase();
@@ -550,10 +567,9 @@
           const sValTn = getN(37), sValCks = getN(38);
           const sValTot = getN(39) > 0 ? getN(39) : (sValTn + sValCks);
 
-          // ดึงข้อมูลตามตำแหน่งคอลัมน์จริง CR, CS, CT และเว้นว่างหากไม่มีค่า
-          const genericVal  = cleanTextField(getV(GEN_COL_IDX)); // CR (Index 95)
-          const supplierVal = cleanTextField(getV(SUP_COL_IDX)); // CS (Index 96)
-          const categoryVal = cleanTextField(getV(CAT_COL_IDX)); // CT (Index 97)
+          const genericVal  = cleanTextField(getV(GEN_COL_IDX));
+          const supplierVal = cleanTextField(getV(SUP_COL_IDX));
+          const categoryVal = cleanTextField(getV(CAT_COL_IDX));
 
           products.push({
             id: `P-${i}`, code: codeVal, name: nameVal, statusRaw: statusVal,
@@ -837,7 +853,6 @@
 
         html += `
           <tr class="${p.isDiscontinued ? 'opacity-45 bg-gray-50' : 'hover:bg-cream-100/60'}">
-            <!-- คอลัมน์ 1: จัดเรียง 3 บรรทัดตามรูปแบบที่กำหนด -->
             <td class="sticky-col-1 px-2.5 py-2 border-r border-cream-300 align-top">
               <!-- บรรทัดที่ 1: ชื่อสินค้า -->
               <div class="font-semibold text-earth-900 leading-snug text-[11.5px]">${p.name}</div>
@@ -848,11 +863,11 @@
                 <span class="text-earth-600">(1*${mul} ${p.unitBig}/${cleanSub})</span>
               </div>
 
-              <!-- บรรทัดที่ 3: ประเภทสินค้า (CT) และ ชื่อสามัญ (CR) ถ้าไม่มีค่าให้เว้นว่างไว้ -->
+              <!-- บรรทัดที่ 3: ประเภทสินค้า และ ชื่อสามัญ -->
               ${(p.category || p.genericName) ? `
                 <div class="flex flex-wrap items-center gap-1 mt-1 text-[10px]">
                   ${p.category ? `<span class="px-1.5 py-0.2 rounded bg-leaf-50 text-leaf-800 border border-leaf-200 font-medium">${p.category}</span>` : ''}
-                  ${p.genericName ? `<span class="px-1.5 py-0.2 rounded bg-cream-200 text-earth-700 border border-cream-300">${p.genericName}</span>` : ''}
+                  ${p.genericName ? `<span class="px-1.5 py-0.2 rounded bg-cream-200 text-earth-800 border border-cream-300">${p.genericName}</span>` : ''}
                 </div>
               ` : ''}
             </td>
