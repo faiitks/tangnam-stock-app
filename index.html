@@ -212,8 +212,8 @@
                 จำนวนขายปี 2568 (เต็มปี)
               </th>
 
-              <!-- ยอดขาย 69 + 3 คอลัมน์เปรียบเทียบ YOY (YTD / ทั้งปี / เดือนเดียวกัน) -->
-              <th colspan="5" class="px-2 py-1.5 border-r-2 border-cream-400 text-center bg-amber-900 text-amber-100">
+              <!-- ยอดขายปี 69: แยกสาขา | รวม 69 (ใหญ่/ย่อย/บ. + YOY ทั้งปี) | YOY YTD | YOY เดือนเดียวกัน -->
+              <th colspan="4" class="px-2 py-1.5 border-r-2 border-cream-400 text-center bg-amber-900 text-amber-100">
                 <div>จำนวนขายปี 2569 & เปรียบเทียบ YOY (ปี 68 / ปี 69)</div>
                 <div id="lblSales69DateTime" class="text-[9.5px] font-normal text-amber-300">ข้อมูล: กำลังโหลด...</div>
               </th>
@@ -236,12 +236,11 @@
 
             <tr class="bg-earth-800 text-cream-200 text-[10px]">
               <th class="w-[95px] px-2 py-1 text-left border-r border-earth-700 bg-amber-950/90">แยกสาขา (ย่อย)</th>
-              <th class="w-[100px] px-2 py-1 text-right border-r-2 border-cream-400 bg-amber-950">รวม 68 (ใหญ่/ย่อย/บ.)</th>
+              <th class="w-[105px] px-2 py-1 text-right border-r-2 border-cream-400 bg-amber-950">รวม 68 (ใหญ่/ย่อย/บ.)</th>
 
               <th class="w-[95px] px-2 py-1 text-left border-r border-earth-700 bg-amber-900/90">แยกสาขา (ย่อย)</th>
-              <th class="w-[100px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900">รวม 69 (ใหญ่/ย่อย/บ.)</th>
+              <th class="w-[115px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900">รวม 69 (ใหญ่/ย่อย/บ./YOY)</th>
               <th class="w-[120px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900/80">YOY (ช่วงเดียวกัน YTD)</th>
-              <th class="w-[120px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900/90">YOY (ทั้งปี 68 vs 69)</th>
               <th class="w-[120px] px-2 py-1 text-right border-r-2 border-cream-400 bg-amber-900">YOY (เดือนเดียวกัน)</th>
 
               <th class="w-[100px] px-2 py-1 text-left border-r border-earth-700 bg-leaf-900/80">แยกคลัง (ย่อย)</th>
@@ -257,7 +256,7 @@
           </thead>
 
           <tbody id="tableBody" class="divide-y divide-cream-300 bg-white">
-            <tr><td colspan="16" class="text-center py-12 text-earth-600">กำลังโหลดข้อมูล...</td></tr>
+            <tr><td colspan="15" class="text-center py-12 text-earth-600">กำลังโหลดข้อมูล...</td></tr>
           </tbody>
         </table>
       </div>
@@ -432,7 +431,6 @@
       return unit ? String(unit).replace(/\s*\([^)]*\)/g, '').trim() : '';
     }
 
-    // ฟังก์ชันปรับรหัสสินค้าให้เป็นมาตรฐานเดียวกัน (เช่น 04-4000-00001 -> 4-4000-00001) เพื่อไม่ให้จับคู่พลาด
     function normalizeCode(str) {
       if (!str) return '';
       return String(str).trim().replace(/^0+/, '').replace(/\s+/g, '').toLowerCase();
@@ -478,7 +476,6 @@
           }
         }
 
-        // อ่านชีท ยอดขาย68 / ยอดขาย69 (A=รหัส, B=ชื่อ, C-N=TN 12 เดือน, O-Z=CKS 12 เดือน)
         async function parseMonthly(res) {
           const map = new Map();
           if (!res || !res.ok) return map;
@@ -688,9 +685,9 @@
       document.getElementById('badgeDraftCount').innerText = rawProducts.filter(p => p.orderBigQty > 0).length;
     }
 
-    // 1. YOY เทียบช่วงเวลาเดียวกัน (Year-to-Date: ม.ค. ถึงเดือนล่าสุดที่อัปเดต)
+    // 1. YOY เทียบช่วงเวลาเดียวกัน (Year-to-Date)
     function getYOY_YTDHtml(p, s69Sub, cleanSub) {
-      const mIdx = latestMonthIndex; // 0=ม.ค., 10=พ.ย.
+      const mIdx = latestMonthIndex;
       const mNames = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
       
       let ytd68 = 0;
@@ -714,23 +711,7 @@
       `;
     }
 
-    // 2. YOY เทียบทั้งปี 68 vs ปี 69
-    function getYOY_FullYearHtml(s68Sub, s69Sub, cleanSub) {
-      if (s68Sub === 0 && s69Sub === 0) return `<span class="text-earth-400">-</span>`;
-      const diff = s69Sub - s68Sub;
-      const pct = s68Sub > 0 ? Math.round((diff / s68Sub) * 100) : (s69Sub > 0 ? 100 : 0);
-      const color = pct >= 0 ? 'text-leaf-800' : 'text-red-600';
-
-      return `
-        <div class="text-[10.5px] leading-tight">
-          <div class="text-earth-700">ปี 68: <span class="font-mono font-medium">${s68Sub.toLocaleString()}</span> <span class="text-[9.5px] text-earth-500">${cleanSub}</span></div>
-          <div class="font-bold text-earth-900">ปี 69: <span class="font-mono">${s69Sub.toLocaleString()}</span> <span class="font-normal text-[9.5px] text-earth-600">${cleanSub}</span></div>
-          <div class="font-bold ${color} mt-0.5">${pct >= 0 ? '▲ +' : '▼ '}${pct}% <span class="font-normal text-earth-500">(ทั้งปี)</span></div>
-        </div>
-      `;
-    }
-
-    // 3. YOY เทียบเดือนเดียวกันแต่คนละปี (เช่น พ.ย. 68 vs พ.ย. 69)
+    // 2. YOY เทียบเดือนเดียวกันแต่คนละปี
     function getYOY_SameMonthHtml(p, cleanSub) {
       const mIdx = latestMonthIndex;
       const mNames = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -770,7 +751,7 @@
     function renderTable() {
       const tbody = document.getElementById('tableBody');
       if (currentFiltered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="16" class="text-center py-8 text-earth-600">ไม่พบข้อมูลสินค้า</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="15" class="text-center py-8 text-earth-600">ไม่พบข้อมูลสินค้า</td></tr>`;
         return;
       }
 
@@ -800,6 +781,17 @@
         const s68Big = Math.ceil(s68Sub / mul);
         const s69Big = Math.ceil(s69Sub / mul);
         const stkBig = Math.ceil(stkSub / mul);
+
+        // คำนวณ YOY ทั้งปี (68 vs 69) เพื่อนำไปแสดงต่อท้ายมูลค่าในช่อง รวม 69
+        let yoyFullHtml = '';
+        if (s68Sub > 0 || s69Sub > 0) {
+          const yoyDiff = s69Sub - s68Sub;
+          const yoyPct = s68Sub > 0 ? Math.round((yoyDiff / s68Sub) * 100) : (s69Sub > 0 ? 100 : 0);
+          const yoyColor = yoyPct >= 0 ? 'text-leaf-800' : 'text-red-600';
+          yoyFullHtml = `<div class="text-[10px] font-bold ${yoyColor} mt-0.5 pt-0.5 border-t border-amber-200/70">
+            ${yoyPct >= 0 ? '▲ +' : '▼ '}${yoyPct}% <span class="font-normal text-[9px] text-earth-600">(ทั้งปี)</span>
+          </div>`;
+        }
 
         let branch68Lines = [];
         if (activeCompanyFilter !== 'CKS') {
@@ -863,18 +855,18 @@
             <td class="px-2 py-1.5 align-top text-[10.5px] leading-tight">
               ${branch69Lines.length > 0 ? branch69Lines.join('') : '<span class="text-earth-400">-</span>'}
             </td>
+
+            <!-- ช่อง รวม 69 (ใหญ่ / ย่อย / มูลค่า(บาท) / YOY ทั้งปี 68 vs 69 บรรทัดล่างสุด) -->
             <td class="px-2 py-1.5 text-right align-top bg-amber-50/70">
               <div class="font-bold text-earth-900 text-[11.5px]">${s69Big > 0 ? `${s69Big.toLocaleString()} ${p.unitBig}` : '-'}</div>
               <div class="text-[10px] text-earth-700">${s69Sub > 0 ? `(${s69Sub.toLocaleString()} ${cleanSub})` : ''}</div>
               <div class="text-[10px] font-mono font-semibold text-amber-950 mt-0.5">${fmtZero(s69Val)}</div>
+              ${yoyFullHtml}
             </td>
 
-            <!-- 3 คอลัมน์เปรียบเทียบ YOY -->
+            <!-- YOY ช่วงเดียวกัน (YTD) และ YOY เดือนเดียวกัน -->
             <td class="px-2 py-1.5 text-right align-top bg-amber-50/30">
               ${getYOY_YTDHtml(p, s69Sub, cleanSub)}
-            </td>
-            <td class="px-2 py-1.5 text-right align-top bg-amber-50/40">
-              ${getYOY_FullYearHtml(s68Sub, s69Sub, cleanSub)}
             </td>
             <td class="px-2 py-1.5 text-right align-top border-r-2 border-cream-400 bg-amber-50/60">
               ${getYOY_SameMonthHtml(p, cleanSub)}
