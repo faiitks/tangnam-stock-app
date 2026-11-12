@@ -454,9 +454,9 @@
       const ts = Date.now();
 
       try {
-        // ใช้ tq=SELECT * เพื่อดึงทุกคอลัมน์จริงในชีทโดยไม่โดนตัดคอลัมน์ว่างคั่นกลาง
+        // เปิดช่วงดึงข้อมูล A1:CZ10000 เพื่อให้รองรับข้อมูล 3,626+ แถว และรายการที่จะเพิ่มในอนาคตครบทุกแถว
         const [resMain, res68, res69] = await Promise.all([
-          fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_MAIN)}&tq=${encodeURIComponent('SELECT *')}&t=${ts}`, { cache: 'no-store' }),
+          fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_MAIN)}&range=A1:CZ10000&t=${ts}`, { cache: 'no-store' }),
           fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_68)}&t=${ts}`, { cache: 'no-store' }).catch(() => null),
           fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_69)}&t=${ts}`, { cache: 'no-store' }).catch(() => null)
         ]);
@@ -466,27 +466,38 @@
         const colsMain = jsonMain.table.cols || [];
         const rowsMain = jsonMain.table.rows || [];
 
-        // ค้นหา Index จาก col.id และชื่อหัวตาราง (label)
-        const findColIdx = (colLetters, keywordList, fallbackIdx) => {
-          const targetId = colLetters.toUpperCase();
-          // 1. ค้นหาจาก col.id ตรงๆ (เช่น col.id === 'CR')
-          const byId = colsMain.findIndex(col => col && col.id && col.id.toUpperCase() === targetId);
-          if (byId !== -1) return byId;
+        // โครงสร้างชีท Forecast ที่ยืนยันแล้ว:
+        // แถวที่ 5 (Index 4) = บรรทัดหัวตาราง (Supplier, ชื่อสามัญ, บริษัทคู่ค้า, ประเภท)
+        // แถวที่ 6 (Index 5) = ข้อมูลสินค้ารายการแรก
+        const HEADER_ROW_IDX = 4; // แถวที่ 5
+        const DATA_START_IDX = 5; // แถวที่ 6
 
-          // 2. ค้นหาจาก col.label (หัวตารางที่ Google API อ่านได้)
-          const byLabel = colsMain.findIndex(col => {
-            if (!col || !col.label) return false;
-            const lbl = col.label.toLowerCase();
-            return keywordList.some(kw => lbl.includes(kw));
+        // 1. หา Index ของคอลัมน์จาก col.id ตรงๆ (CR=95, CS=96, CT=97)
+        let GEN_COL_IDX = colsMain.findIndex(col => col && col.id && col.id.toUpperCase() === 'CR');
+        let SUP_COL_IDX = colsMain.findIndex(col => col && col.id && col.id.toUpperCase() === 'CS');
+        let CAT_COL_IDX = colsMain.findIndex(col => col && col.id && col.id.toUpperCase() === 'CT');
+
+        // 2. ตรวจสอบซ้ำจากบรรทัดหัวตารางแถวที่ 5 (rowsMain[4]) เพื่อความแม่นยำ 100%
+        if (rowsMain[HEADER_ROW_IDX] && rowsMain[HEADER_ROW_IDX].c) {
+          rowsMain[HEADER_ROW_IDX].c.forEach((cell, idx) => {
+            if (cell && (cell.v !== null || cell.f)) {
+              const hText = String(cell.v || cell.f).trim();
+              if (hText === 'ชื่อสามัญ' || hText.includes('สามัญ')) GEN_COL_IDX = idx;
+              if (hText === 'บริษัทคู่ค้า' || (hText.includes('คู่ค้า') && idx > 50)) SUP_COL_IDX = idx;
+              if (hText === 'ประเภท' || (hText.includes('ประเภท') && idx > 50)) CAT_COL_IDX = idx;
+            }
           });
-          if (byLabel !== -1) return byLabel;
+        }
 
-          return fallbackIdx;
-        };
-
-        const GEN_COL_IDX = findColIdx('CR', ['สามัญ'], 95);           // ชื่อสามัญ (CR)
-        const SUP_COL_IDX = findColIdx('CS', ['คู่ค้า', 'supplier'], 96); // บริษัทคู่ค้า (CS)
-        const CAT_COL_IDX = findColIdx('CT', ['ประเภท', 'หมวด'], 97);   // ประเภทสินค้า (CT)
+        // 3. หากหา บริษัทคู่ค้า (CS) เจอแล้ว ให้ยืนยันตำแหน่งสัมพัทธ์: ชื่อสามัญ (CR) = CS - 1 และ ประเภท (CT) = CS + 1
+        if (SUP_COL_IDX > 50) {
+          if (GEN_COL_IDX === -1) GEN_COL_IDX = SUP_COL_IDX - 1;
+          if (CAT_COL_IDX === -1) CAT_COL_IDX = SUP_COL_IDX + 1;
+        } else {
+          if (GEN_COL_IDX === -1) GEN_COL_IDX = 95;
+          if (SUP_COL_IDX === -1) SUP_COL_IDX = 96;
+          if (CAT_COL_IDX === -1) CAT_COL_IDX = 97;
+        }
 
         const getCellStr = (r, c) => (rowsMain[r] && rowsMain[r].c && rowsMain[r].c[c] && rowsMain[r].c[c].v !== null) ? String(rowsMain[r].c[c].v).trim() : '';
         const sDate = getCellStr(0, 1);
@@ -541,7 +552,8 @@
         const [map68, map69] = await Promise.all([parseMonthly(res68), parseMonthly(res69)]);
 
         const products = [];
-        for (let i = 4; i < rowsMain.length; i++) {
+        // เริ่มวนลูปตั้งแต่แถวที่ 6 (DATA_START_IDX = 5) จนถึงบรรทัดสุดท้ายของชีท
+        for (let i = DATA_START_IDX; i < rowsMain.length; i++) {
           const c = rowsMain[i] ? rowsMain[i].c : null;
           if (!c) continue;
           const getV = (idx) => {
@@ -561,7 +573,7 @@
 
           const nameVal = getV(5);
           if (!nameVal || nameVal === '0' || nameVal === 'ชื่อสินค้า') continue;
-          const codeVal = getV(2) || getV(1) || `SKU-${i}`;
+          const codeVal = getV(2) || getV(1) || `SKU-${i + 1}`;
           const statusVal = getV(51); // คอลัมน์ AZ
 
           const d68 = map68.get(codeVal) || map68.get(normalizeCode(codeVal)) || map68.get(nameVal) || map68.get(nameVal.toLowerCase()) || { tn: Array(12).fill(0), cks: Array(12).fill(0) };
@@ -570,12 +582,12 @@
           const sValTn = getN(37), sValCks = getN(38);
           const sValTot = getN(39) > 0 ? getN(39) : (sValTn + sValCks);
 
-          const genericVal  = cleanTextField(getV(GEN_COL_IDX));
-          const supplierVal = cleanTextField(getV(SUP_COL_IDX));
-          const categoryVal = cleanTextField(getV(CAT_COL_IDX));
+          const genericVal  = cleanTextField(getV(GEN_COL_IDX)); // คอลัมน์ CR
+          const supplierVal = cleanTextField(getV(SUP_COL_IDX)); // คอลัมน์ CS
+          const categoryVal = cleanTextField(getV(CAT_COL_IDX)); // คอลัมน์ CT
 
           products.push({
-            id: `P-${i}`, code: codeVal, name: nameVal, statusRaw: statusVal,
+            id: `P-${i + 1}`, sheetRow: i + 1, code: codeVal, name: nameVal, statusRaw: statusVal,
             isDiscontinued: statusVal.includes('เลิก'),
             supplier: supplierVal,
             genericName: genericVal,
@@ -599,7 +611,7 @@
         initFilters();
         resetAndFilter();
         const genCount = products.filter(p => p.genericName).length;
-        syncText.innerText = `ซิงค์สำเร็จ (${products.length.toLocaleString()} รายการ | สามัญ ${genCount})`;
+        syncText.innerText = `ซิงค์สำเร็จ (${products.length.toLocaleString()} รายการ | สามัญ ${genCount.toLocaleString()})`;
         if (!document.getElementById('apoListModal').classList.contains('hidden')) {
           renderAPOList();
         }
