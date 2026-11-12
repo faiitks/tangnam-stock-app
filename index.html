@@ -197,7 +197,7 @@
           <span>Excel</span>
         </button>
 
-        <!-- ปุ่มเปิดดูใบขออนุมัติสั่งซื้อ (แสดง badge จำนวนรายการและสถานะ) -->
+        <!-- ปุ่มเปิดดูใบขออนุมัติสั่งซื้อ -->
         <button id="btnOpenAPO" onclick="openAPOModal()" class="hidden items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-earth-700 bg-earth-900 text-cream-50 hover:bg-black text-xs font-semibold shadow-sm">
           <span>ใบ APO</span>
           <span id="badgeAPOCount" class="px-1.5 py-0.2 rounded-full bg-leaf-500 text-white text-[10px]">0</span>
@@ -354,7 +354,6 @@
                 <div class="text-[9px] font-normal text-amber-300">(ใหญ่ / บาท)</div>
               </th>
 
-              <!-- หัวตารางยอดขาย 69 -->
               <th id="hdrSales69Group" colspan="4" class="px-2 py-1 border-r border-earth-700 text-center bg-earth-800 text-cream-100">
                 <div>จำนวนขายปี 2569 (หน่วยย่อย)</div>
                 <div id="lblSales69DateTime" class="text-[9.5px] font-normal text-amber-300">ข้อมูล: กำลังโหลด...</div>
@@ -364,7 +363,6 @@
                 <div class="text-[9px] font-normal text-amber-300">(ใหญ่ / บาท)</div>
               </th>
 
-              <!-- หัวตารางสินค้าคงเหลือ -->
               <th id="hdrStockGroup" colspan="5" class="px-2 py-1 border-r border-earth-700 text-center bg-leaf-800 text-cream-100">
                 <div>สินค้าคงเหลือตามคลัง (หน่วยย่อย)</div>
                 <div id="lblStockDateTime" class="text-[9.5px] font-normal text-leaf-200">สต็อค ณ วันที่: กำลังโหลด...</div>
@@ -497,7 +495,7 @@
     </div>
   </div>
 
-  <!-- ================= POP-UP APO PREVIEW & APPROVAL MODAL (ระบบขออนุมัติและไม่อนุมัติ) ================= -->
+  <!-- ================= POP-UP APO PREVIEW & APPROVAL MODAL (ระบบขออนุมัติ, ใส่ชื่อ, และส่งกลับชีท) ================= -->
   <div id="apoModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 no-print">
     <div class="bg-white rounded-2xl max-w-5xl w-full border border-cream-300 shadow-2xl flex flex-col max-h-[94vh] overflow-hidden">
       
@@ -512,14 +510,23 @@
 
       <div id="apoPrintArea" class="p-4 sm:p-6 overflow-y-auto flex-1 flex flex-col gap-4 text-xs">
         
-        <div class="flex flex-wrap justify-between items-start border-b border-cream-300 pb-3 gap-2">
+        <!-- ข้อมูลหัวเอกสารและช่องระบุชื่อผู้ขอสั่งซื้อ / ผู้อนุมัติ -->
+        <div class="flex flex-wrap justify-between items-start border-b border-cream-300 pb-3 gap-3">
           <div>
             <div class="font-prompt font-bold text-sm sm:text-base text-earth-900">บริษัท ตังนำเกษตร จำกัด / บริษัท ชาวเกษตร จำกัด</div>
             <div class="text-earth-700">ฝ่ายจัดซื้อและบริหารคลังสินค้ากลาง</div>
+            <div class="mt-2 flex items-center gap-1.5">
+              <label class="font-semibold text-earth-800">ผู้ขอสั่งซื้อ:</label>
+              <input type="text" id="apoRequesterInput" placeholder="ระบุชื่อผู้ขอสั่งซื้อ..." class="px-2 py-1 text-xs border border-cream-300 rounded bg-white w-48 focus:outline-none focus:border-leaf-600">
+            </div>
           </div>
-          <div class="text-right">
+          <div class="text-right flex flex-col items-end gap-1.5">
             <div><strong>วันที่สร้าง:</strong> <span id="apoDate">07/11/2026</span></div>
-            <div id="apoApproverInfo" class="text-earth-600 mt-0.5"></div>
+            <div class="flex items-center gap-1.5">
+              <label class="font-semibold text-earth-800">ผู้อนุมัติ:</label>
+              <input type="text" id="apoApproverInput" placeholder="ระบุชื่อผู้อนุมัติสั่งซื้อ..." class="px-2 py-1 text-xs border border-cream-300 rounded bg-white w-48 focus:outline-none focus:border-leaf-600">
+            </div>
+            <div id="apoApprovedAtLabel" class="text-[11px] text-earth-600 hidden"></div>
           </div>
         </div>
 
@@ -559,7 +566,6 @@
       <!-- Action Buttons -->
       <div class="px-5 py-3 bg-cream-100 border-t border-cream-300 flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-2">
-          <!-- ปุ่มล้างข้อมูลร่างใบ APO -->
           <button onclick="clearSavedAPO()" class="px-3 py-1.5 rounded-lg border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 text-xs font-semibold">
             ล้างข้อมูลใบนี้
           </button>
@@ -570,9 +576,10 @@
           <button id="btnSaveDraftAPO" onclick="saveDraftAPO()" class="px-4 py-1.5 rounded-lg border border-amber-600 bg-amber-600 text-white hover:bg-amber-700 text-xs font-semibold shadow-xs">
             💾 บันทึกใบขออนุมัติ
           </button>
-          <!-- ผู้อนุมัติกดยืนยัน -->
-          <button id="btnConfirmApproval" onclick="confirmApprovalAction()" class="px-4 py-1.5 rounded-lg border border-leaf-600 bg-leaf-700 text-white hover:bg-leaf-800 text-xs font-semibold shadow-xs">
-            ✓ ยืนยันผลการพิจารณา
+          <!-- ผู้อนุมัติกดยืนยัน & ส่งกลับชีท -->
+          <button id="btnConfirmApproval" onclick="confirmApprovalAction()" class="px-4 py-1.5 rounded-lg border border-leaf-600 bg-leaf-700 text-white hover:bg-leaf-800 text-xs font-semibold shadow-xs flex items-center gap-1.5">
+            <span id="btnApprovalSpinner" class="hidden w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            <span>✓ ยืนยันผลการพิจารณา & ส่งกลับชีท</span>
           </button>
           <button onclick="window.print()" class="px-4 py-1.5 rounded-lg border border-earth-600 bg-white text-earth-800 hover:bg-cream-200 text-xs font-semibold">
             พิมพ์ใบอนุมัติ
@@ -589,6 +596,9 @@
   <script>
     const GOOGLE_SHEET_ID = "1uWVLiEs2qzXu6gb0RCaX-WSSOl5bxna2_RS8skTJ0vs";
     
+    // หากสร้าง Google Apps Script Web App แล้ว นำลิงก์ Web App URL มาใส่ที่นี่เพื่อส่งข้อมูลกลับชีทอัตโนมัติ
+    const GOOGLE_SCRIPT_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxdCjm7_fK7WS0kxxLrwpjxJTCK7MeKswktTCqy4VJ76W_mNhdWSpUuJlGZAe1SMUX6/exec"; 
+
     const GOOGLE_SHEET_NAME_MAIN = "Forecast";
     const GOOGLE_SHEET_NAME_68   = "ยอดขาย68"; 
     const GOOGLE_SHEET_NAME_69   = "ยอดขาย69"; 
@@ -910,7 +920,6 @@
       document.getElementById('kpiOptimalCount').innerText = optimalCount.toLocaleString();
       document.getElementById('kpiOverstockCount').innerText = overstockCount.toLocaleString();
       
-      // อัปเดตตัวเลข badge บนปุ่ม APO
       const totalAPOItems = savedAPODocument ? savedAPODocument.items.length : orderItemsCount;
       document.getElementById('badgeAPOCount').innerText = totalAPOItems;
     }
@@ -1245,7 +1254,7 @@
     }
 
     // =========================================================================
-    // ระบบบันทึกและพิจารณาอนุมัติใบขออนุมัติสั่งซื้อ (APO)
+    // ระบบบันทึกและพิจารณาอนุมัติใบขออนุมัติสั่งซื้อ (APO) + ส่งกลับชีท
     // =========================================================================
 
     function loadSavedAPOFromStorage() {
@@ -1275,25 +1284,30 @@
 
     function openAPOModal() {
       let items = [];
-      
-      // ถ้ามีเอกสารที่บันทึกไว้ในระบบ ให้ดึงขึ้นมาตรวจพิจารณา
+      const requesterInput = document.getElementById('apoRequesterInput');
+      const approverInput = document.getElementById('apoApproverInput');
+      const approvedAtLabel = document.getElementById('apoApprovedAtLabel');
+
       if (savedAPODocument && savedAPODocument.items && savedAPODocument.items.length > 0) {
         items = savedAPODocument.items;
         document.getElementById('apoDocId').innerText = savedAPODocument.docId || 'APO-DRAFT';
         document.getElementById('apoDate').innerText = savedAPODocument.createdAt || new Date().toLocaleDateString('th-TH');
         
+        requesterInput.value = savedAPODocument.requester || '';
+        approverInput.value = savedAPODocument.approver || '';
+
         const badge = document.getElementById('apoStatusBadge');
         if (savedAPODocument.status === 'APPROVED') {
           badge.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-leaf-600 text-white';
           badge.innerText = 'อนุมัติแล้ว';
-          document.getElementById('apoApproverInfo').innerText = `อนุมัติเมื่อ: ${savedAPODocument.approvedAt || '-'}`;
+          approvedAtLabel.classList.remove('hidden');
+          approvedAtLabel.innerText = `อนุมัติเมื่อ: ${savedAPODocument.approvedAt || '-'}`;
         } else {
           badge.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-500 text-white';
           badge.innerText = 'รออนุมัติ';
-          document.getElementById('apoApproverInfo').innerText = 'สถานะ: รอผู้อนุมัติพิจารณา';
+          approvedAtLabel.classList.add('hidden');
         }
       } else {
-        // ถ้าร่างใหม่ ดึงรายการที่กำลังกรอกอยู่ปัจจุบัน
         const toOrder = rawProducts.filter(p => (p.orderBigQty || 0) > 0 || (p.orderValManual || 0) > 0);
         items = toOrder.map(p => {
           const mul = p.unitMultiplier || 1;
@@ -1311,7 +1325,7 @@
             freeBigQty: p.freeBigQty || 0,
             val: val,
             notes: p.notes || '',
-            approvalStatus: 'APPROVED', // ค่าเริ่มต้นคือต้องการอนุมัติ
+            approvalStatus: 'APPROVED',
             rejectReason: ''
           };
         });
@@ -1321,7 +1335,7 @@
         document.getElementById('apoDate').innerText = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
         document.getElementById('apoStatusBadge').className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-500 text-white';
         document.getElementById('apoStatusBadge').innerText = 'ฉบับร่างใหม่';
-        document.getElementById('apoApproverInfo').innerText = 'ยังไม่ได้บันทึกลงระบบ';
+        approvedAtLabel.classList.add('hidden');
       }
 
       renderAPOTable(items);
@@ -1364,7 +1378,6 @@
               ${fmtZero(item.val)}
             </td>
             
-            <!-- ตัวเลือก อนุมัติ / ไม่อนุมัติ รายสินค้า -->
             <td class="p-1.5 text-center border-r border-cream-200">
               <select onchange="updateItemApprovalStatus(${idx}, this.value)" class="w-full px-2 py-1 text-xs font-semibold rounded border ${isApproved ? 'border-leaf-500 text-leaf-800 bg-leaf-50' : 'border-red-400 text-red-700 bg-red-100'} focus:outline-none">
                 <option value="APPROVED" ${isApproved ? 'selected' : ''}>✓ อนุมัติสั่ง</option>
@@ -1372,7 +1385,6 @@
               </select>
             </td>
 
-            <!-- ช่องระบุหมายเหตุ / เหตุผลไม่อนุมัติ -->
             <td class="p-1.5">
               ${!isApproved ? `
                 <input type="text" value="${item.rejectReason || ''}" placeholder="ระบุเหตุผลที่ไม่อนุมัติ..." oninput="updateItemRejectReason(${idx}, this.value)" class="w-full px-2 py-1 text-[11px] border border-red-300 rounded bg-white text-red-900 focus:outline-none focus:border-red-500 placeholder-red-300">
@@ -1389,16 +1401,8 @@
       document.getElementById('apoApprovedTotal').innerText = Math.round(approvedTotal).toLocaleString();
     }
 
-    function getActiveAPOItems() {
-      if (savedAPODocument && savedAPODocument.items) return savedAPODocument.items;
-      return [];
-    }
-
     function updateItemApprovalStatus(idx, status) {
-      if (!savedAPODocument) {
-        // ถ้าร่างยังไม่ถูกบันทึก ให้สร้างออบเจกต์ชั่วคราว
-        buildCurrentAPOFromInputs();
-      }
+      if (!savedAPODocument) buildCurrentAPOFromInputs();
       if (savedAPODocument && savedAPODocument.items[idx]) {
         savedAPODocument.items[idx].approvalStatus = status;
         renderAPOTable(savedAPODocument.items);
@@ -1441,15 +1445,19 @@
       });
 
       const now = new Date();
+      const reqVal = document.getElementById('apoRequesterInput').value || '';
+      const appVal = document.getElementById('apoApproverInput').value || '';
+
       savedAPODocument = {
         docId: document.getElementById('apoDocId').innerText || `APO-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}-001`,
         createdAt: `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`,
+        requester: reqVal,
+        approver: appVal,
         status: 'PENDING',
         items: items
       };
     }
 
-    // ฟังก์ชันบันทึกร่างใบขออนุมัติสั่งซื้อลงในหน้าแอป (รอผู้อนุมัติ)
     function saveDraftAPO() {
       buildCurrentAPOFromInputs();
       if (!savedAPODocument || savedAPODocument.items.length === 0) {
@@ -1457,20 +1465,28 @@
         return;
       }
       savedAPODocument.status = 'PENDING';
+      savedAPODocument.requester = document.getElementById('apoRequesterInput').value || '';
+      savedAPODocument.approver = document.getElementById('apoApproverInput').value || '';
+      
       localStorage.setItem('TANGNAM_SAVED_APO', JSON.stringify(savedAPODocument));
       updateAPOHeaderBadge();
       alert(`บันทึกใบขออนุมัติเลขที่ ${savedAPODocument.docId} เรียบร้อยแล้ว\nสถานะ: รอผู้อนุมัติมาพิจารณา`);
       openAPOModal();
     }
 
-    // ผู้อนุมัติกดยืนยันผลการพิจารณา (อนุมัติ / ไม่อนุมัติ)
-    function confirmApprovalAction() {
+    async function confirmApprovalAction() {
       if (!savedAPODocument || !savedAPODocument.items || savedAPODocument.items.length === 0) {
         alert("ไม่พบรายการสินค้าที่ขออนุมัติ");
         return;
       }
 
-      // เช็คว่ามีรายการที่ไม่อนุมัติแต่ไม่ได้ใส่เหตุผลหรือไม่
+      const approverName = document.getElementById('apoApproverInput').value.trim();
+      if (!approverName) {
+        alert("กรุณาระบุ 'ชื่อผู้อนุมัติ' ก่อนยืนยันผลการพิจารณา");
+        document.getElementById('apoApproverInput').focus();
+        return;
+      }
+
       const missingReason = savedAPODocument.items.find(it => it.approvalStatus === 'REJECTED' && !it.rejectReason.trim());
       if (missingReason) {
         alert(`กรุณาระบุเหตุผลที่ไม่อนุมัติ สำหรับรายการ:\n"${missingReason.name}"`);
@@ -1479,15 +1495,39 @@
 
       const now = new Date();
       savedAPODocument.status = 'APPROVED';
+      savedAPODocument.requester = document.getElementById('apoRequesterInput').value.trim();
+      savedAPODocument.approver = approverName;
       savedAPODocument.approvedAt = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} น.`;
-      
+
+      // บันทึกลงเครื่อง
       localStorage.setItem('TANGNAM_SAVED_APO', JSON.stringify(savedAPODocument));
       updateAPOHeaderBadge();
-      alert("บันทึกผลการอนุมัติสั่งซื้อเรียบร้อยแล้ว!");
+
+      // ส่งข้อมูลกลับชีทผ่าน Google Apps Script Web App
+      if (GOOGLE_SCRIPT_WEBAPP_URL) {
+        const spinner = document.getElementById('btnApprovalSpinner');
+        spinner.classList.remove('hidden');
+        try {
+          await fetch(GOOGLE_SCRIPT_WEBAPP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(savedAPODocument)
+          });
+          alert("✓ บันทึกผลการอนุมัติและส่งข้อมูลกลับเข้า Google Sheets เรียบร้อยแล้ว!");
+        } catch (err) {
+          console.error("ส่งกลับชีทล้มเหลว:", err);
+          alert("บันทึกในระบบเรียบร้อย แต่ไม่สามารถเชื่อมต่อส่งกลับชีทได้ (โปรดตรวจสอบ Web App URL)");
+        } finally {
+          spinner.classList.add('hidden');
+        }
+      } else {
+        alert("✓ บันทึกผลการอนุมัติในระบบเรียบร้อยแล้ว!\n(หากต้องการให้บันทึกลงชีทอัตโนมัติ ให้ใส่ Google Script Web App URL ในโค้ด)");
+      }
+
       openAPOModal();
     }
 
-    // ล้างข้อมูลใบขออนุมัติ
     function clearSavedAPO() {
       if (confirm("ต้องการล้างข้อมูลใบขออนุมัตินี้ใช่หรือไม่?")) {
         localStorage.removeItem('TANGNAM_SAVED_APO');
@@ -1703,7 +1743,7 @@
 
           let codeVal = getVal(2) || getVal(1) || '';
           
-          // คอลัมน์สถานะสต็อค AZ (Index 51)
+          // คอลัมน์สถานะ AZ (Index 51)
           const statusVal = getVal(51);
           const isDisc = statusVal.includes('เลิก');
 
