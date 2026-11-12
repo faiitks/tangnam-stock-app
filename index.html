@@ -65,7 +65,6 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <!-- สลับโหมด -->
         <div class="bg-cream-200 p-1 rounded-lg flex items-center border border-cream-300">
           <button id="btnModeStock" onclick="setViewMode('stock')" class="px-3 py-1 rounded-md text-xs font-semibold shadow-sm bg-white text-earth-900">
             ดูสต็อคอย่างเดียว
@@ -75,13 +74,11 @@
           </button>
         </div>
 
-        <!-- ปุ่มสร้างใบ APO -->
         <button id="btnCreateAPO" onclick="openCreateAPOModal()" class="hidden items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-leaf-700 hover:bg-leaf-800 text-white text-xs font-semibold shadow-sm">
           <span>+ สร้างใบ APO</span>
           <span id="badgeDraftCount" class="px-1.5 py-0.2 rounded-full bg-white text-leaf-800 text-[10px] font-bold">0</span>
         </button>
 
-        <!-- ปุ่มรายการใบ APO -->
         <button onclick="openAPOListModal()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-earth-700 bg-earth-900 text-cream-50 hover:bg-black text-xs font-semibold shadow-sm">
           <span>📋 รายการใบ APO</span>
           <span id="badgeSavedAPOCount" class="px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[10px] font-bold">0</span>
@@ -202,7 +199,7 @@
       </div>
     </div>
 
-    <!-- ================= COMPACT DATA GRID (ล็อคหัวตาราง + ขนาดช่องกระชับ) ================= -->
+    <!-- ================= COMPACT DATA GRID ================= -->
     <div class="bg-white rounded-xl border border-cream-300 shadow-sm overflow-hidden flex-1 flex flex-col">
       <div class="table-scroll-container flex-1">
         <table class="grid-table text-left border-collapse text-xs">
@@ -212,29 +209,24 @@
                 รายการสินค้า / คู่ค้า / หน่วยขาย
               </th>
 
-              <!-- ยอดขายปี 68 -->
               <th colspan="2" class="px-2 py-1.5 border-r-2 border-cream-400 text-center bg-amber-950 text-amber-200">
                 จำนวนขายปี 2568
               </th>
 
-              <!-- ยอดขายปี 69 + ช่องเปรียบเทียบ MOM และ YOY (อย่างละ 1 คอลัมน์) -->
               <th colspan="4" class="px-2 py-1.5 border-r-2 border-cream-400 text-center bg-amber-900 text-amber-100">
                 <div>จำนวนขายปี 2569 & เปรียบเทียบ (68 vs 69)</div>
                 <div id="lblSales69DateTime" class="text-[9.5px] font-normal text-amber-300">ข้อมูล: กำลังโหลด...</div>
               </th>
 
-              <!-- สินค้าคงเหลือ -->
               <th colspan="2" class="px-2 py-1.5 border-r-2 border-leaf-400 text-center bg-leaf-900 text-leaf-100">
                 <div>สินค้าคงเหลือตามคลัง</div>
                 <div id="lblStockDateTime" class="text-[9.5px] font-normal text-leaf-300">สต็อค ณ วันที่: กำลังโหลด...</div>
               </th>
 
-              <!-- พยากรณ์ & สถานะ -->
               <th colspan="2" class="px-2 py-1.5 border-r border-earth-700 text-center bg-earth-800 text-cream-100">
                 พยากรณ์ & สถานะ
               </th>
 
-              <!-- โหมดขออนุมัติสั่งซื้อ -->
               <th colspan="3" class="col-po-only hidden px-2 py-1.5 text-center bg-leaf-800 text-cream-100 border-r border-earth-700">
                 รายการขออนุมัติสั่งซื้อ
               </th>
@@ -243,25 +235,20 @@
             </tr>
 
             <tr class="bg-earth-800 text-cream-200 text-[10px]">
-              <!-- 68 Sub-headers (กระชับ) -->
               <th class="w-[100px] px-2 py-1 text-left border-r border-earth-700 bg-amber-950/90">แยกสาขา (ย่อย)</th>
               <th class="w-[105px] px-2 py-1 text-right border-r-2 border-cream-400 bg-amber-950">รวม 68 (ใหญ่/ย่อย/บ.)</th>
 
-              <!-- 69 Sub-headers + MOM (68 vs 69) + YOY (68 vs 69) -->
               <th class="w-[100px] px-2 py-1 text-left border-r border-earth-700 bg-amber-900/90">แยกสาขา (ย่อย)</th>
               <th class="w-[105px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900">รวม 69 (ใหญ่/ย่อย/บ.)</th>
               <th class="w-[115px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900/80">ขาย MOM (68 vs 69)</th>
               <th class="w-[115px] px-2 py-1 text-right border-r-2 border-cream-400 bg-amber-900/95">ขาย YOY (68 vs 69)</th>
 
-              <!-- Stock Sub-headers -->
               <th class="w-[105px] px-2 py-1 text-left border-r border-earth-700 bg-leaf-900/80">แยกคลัง (ย่อย)</th>
               <th class="w-[105px] px-2 py-1 text-right border-r-2 border-leaf-400 bg-leaf-900">รวมคงเหลือ (ใหญ่/ย่อย/บ.)</th>
 
-              <!-- Forecast & Status -->
               <th class="w-[105px] px-2 py-1 text-left border-r border-earth-700 bg-earth-800">พยากรณ์เป้า (ใหญ่)</th>
               <th class="w-[82px] px-1.5 py-1 text-center border-r border-earth-700 bg-earth-800">สถานะ</th>
 
-              <!-- PO Sub-headers -->
               <th class="col-po-only hidden w-[125px] px-2 py-1 text-center border-r border-earth-700 bg-leaf-800">สั่ง / แถม (ใหญ่)</th>
               <th class="col-po-only hidden w-[125px] px-2 py-1 text-right border-r border-earth-700 bg-leaf-800">ราคา/หน่วย & รวม</th>
               <th class="col-po-only hidden w-[135px] px-2 py-1 text-left border-r border-earth-700 bg-leaf-800">หมายเหตุ</th>
@@ -307,7 +294,6 @@
           </div>
           <div>
             <label class="block font-semibold text-earth-800 mb-1">ชื่อผู้ขออนุมัติสั่งซื้อ *</label>
-            <!-- ดรอปดาวน์ 2 ชื่อตามที่ระบุ -->
             <select id="newApoRequester" class="w-full px-2.5 py-1.5 bg-white border border-cream-400 rounded-lg font-semibold text-earth-900">
               <option value="">-- เลือกผู้ขออนุมัติสั่งซื้อ --</option>
               <option value="กุลธิดา(ฝ้าย)">กุลธิดา(ฝ้าย)</option>
@@ -466,7 +452,6 @@
         const jsonMain = JSON.parse(textMain.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/)[1]);
         const rowsMain = jsonMain.table.rows;
 
-        // อ่านวันที่จาก A1:D1 และ A2:B2
         const getCellStr = (r, c) => (rowsMain[r] && rowsMain[r].c && rowsMain[r].c[c] && rowsMain[r].c[c].v !== null) ? String(rowsMain[r].c[c].v).trim() : '';
         const sDate = getCellStr(0, 1);
         const sTime = getCellStr(0, 3);
@@ -680,7 +665,6 @@
       document.getElementById('badgeDraftCount').innerText = rawProducts.filter(p => p.orderBigQty > 0).length;
     }
 
-    // ข้อ 3 & ข้อ 7: คำนวณ MOM (เปรียบเทียบเดือนล่าสุดของปี 68 vs ปี 69 ในช่องเดียว พร้อมแสดงหน่วยขาย)
     function getCompareMOMHtml(p, cleanSub) {
       const mIdx = latestMonthIndex;
       const mNames = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -709,7 +693,6 @@
       `;
     }
 
-    // ข้อ 7: คำนวณ YOY (เปรียบเทียบยอดสะสมทั้งปี 68 vs ปี 69 ในช่องเดียว)
     function getCompareYOYHtml(s68Sub, s69Sub, cleanSub) {
       if (s68Sub === 0 && s69Sub === 0) return `<span class="text-earth-400">-</span>`;
       const diff = s69Sub - s68Sub;
@@ -741,7 +724,6 @@
         const cleanSub = getCleanUnitName(p.unitSub);
         const st = getStatusObj(p);
 
-        // คำนวณยอดตามมุมมองบริษัท
         let s68Sub = 0, s68Val = 0, s69Sub = 0, s69Val = 0, stkSub = 0, stkVal = 0;
         if (activeCompanyFilter === 'TN') {
           s68Sub = p.sales68_tn_1_5 + p.sales68_tn_6; s68Val = p.sales68_val_tn;
@@ -761,7 +743,6 @@
         const s69Big = Math.ceil(s69Sub / mul);
         const stkBig = Math.ceil(stkSub / mul);
 
-        // ข้อ 2: จำนวนย่อย ถ้าเป็น 0 ไม่ต้องแสดงเลย
         let branch68Lines = [];
         if (activeCompanyFilter !== 'CKS') {
           if (p.sales68_tn_1_5 > 0) branch68Lines.push(`<div>TN(1-5): <b>${p.sales68_tn_1_5.toLocaleString()}</b></div>`);
@@ -780,7 +761,6 @@
           if (p.sales69_cks > 0)    branch69Lines.push(`<div class="text-leaf-800">CKS: <b>${p.sales69_cks.toLocaleString()}</b></div>`);
         }
 
-        // ข้อ 2 & 4: สินค้าแยกคลัง ให้อยู่คนละบรรทัด และถ้า 0 ไม่ต้องแสดง
         let stockLines = [];
         if (activeCompanyFilter !== 'CKS') {
           if (p.stock_pc > 0)  stockLines.push(`<div>ปากช่อง: <b>${p.stock_pc.toLocaleString()}</b></div>`);
@@ -791,7 +771,6 @@
           if (p.stock_cks > 0) stockLines.push(`<div class="text-leaf-800">CKS(41): <b>${p.stock_cks.toLocaleString()}</b></div>`);
         }
 
-        // ข้อ 4: พยากรณ์ ให้อยู่คนละบรรทัด
         const runRate = (s69Sub / 10) || 0;
         const fc1 = Math.ceil((runRate * 1) / mul);
         const fc1_5 = Math.ceil((runRate * 1.5) / mul);
@@ -803,7 +782,6 @@
 
         html += `
           <tr class="${p.isDiscontinued ? 'opacity-45 bg-gray-50' : 'hover:bg-cream-100/60'}">
-            <!-- 1. รายการสินค้า -->
             <td class="sticky-col-1 px-2.5 py-2 border-r border-cream-300 align-top">
               <div class="font-semibold text-earth-900 leading-snug text-[11.5px]">${p.name}</div>
               <div class="flex flex-wrap items-center gap-1 mt-1 text-[10px]">
@@ -813,7 +791,6 @@
               </div>
             </td>
 
-            <!-- 2. ขายปี 68 -->
             <td class="px-2 py-1.5 align-top text-[10.5px] leading-tight">
               ${branch68Lines.length > 0 ? branch68Lines.join('') : '<span class="text-earth-400">-</span>'}
             </td>
@@ -823,7 +800,6 @@
               <div class="text-[10px] font-mono font-semibold text-amber-900 mt-0.5">${fmtZero(s68Val)}</div>
             </td>
 
-            <!-- 3. ขายปี 69 + MOM + YOY -->
             <td class="px-2 py-1.5 align-top text-[10.5px] leading-tight">
               ${branch69Lines.length > 0 ? branch69Lines.join('') : '<span class="text-earth-400">-</span>'}
             </td>
@@ -832,16 +808,13 @@
               <div class="text-[10px] text-earth-700">${s69Sub > 0 ? `(${s69Sub.toLocaleString()} ${cleanSub})` : ''}</div>
               <div class="text-[10px] font-mono font-semibold text-amber-950 mt-0.5">${fmtZero(s69Val)}</div>
             </td>
-            <!-- MOM (เปรียบเทียบ 68 vs 69) -->
             <td class="px-2 py-1.5 text-right align-top bg-amber-50/30">
               ${getCompareMOMHtml(p, cleanSub)}
             </td>
-            <!-- YOY (เปรียบเทียบ 68 vs 69) -->
             <td class="px-2 py-1.5 text-right align-top border-r-2 border-cream-400 bg-amber-50/50">
               ${getCompareYOYHtml(s68Sub, s69Sub, cleanSub)}
             </td>
 
-            <!-- 4. สินค้าคงเหลือ (คนละบรรทัด) -->
             <td class="px-2 py-1.5 align-top text-[10.5px] leading-tight">
               ${stockLines.length > 0 ? stockLines.join('') : '<span class="text-earth-400">-</span>'}
             </td>
@@ -851,7 +824,6 @@
               <div class="text-[10px] font-mono font-semibold text-leaf-900 mt-0.5">${fmtZero(stkVal)}</div>
             </td>
 
-            <!-- 5. พยากรณ์ (คนละบรรทัด) -->
             <td class="px-2 py-1.5 align-top text-[10.5px] leading-tight">
               <div>1 ด.: <b>${fc1}</b> ${p.unitBig}</div>
               <div>1.5 ด.: <b>${fc1_5}</b> ${p.unitBig}</div>
@@ -862,7 +834,7 @@
               <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold border ${st.badge}">${st.label}</span>
             </td>
 
-            <!-- 6. โหมดขออนุมัติสั่งซื้อ -->
+            <!-- โหมดขออนุมัติสั่งซื้อ (อัปเดตเฉพาะช่องตัวเลข ไม่วาดตารางใหม่ทั้งหน้า เพื่อไม่ให้เคอร์เซอร์เด้ง) -->
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 align-top bg-leaf-50/30">
               <div class="flex items-center justify-between gap-1 mb-1">
                 <span class="text-[10px] text-earth-700">สั่ง:</span>
@@ -874,7 +846,9 @@
                 <input type="number" min="0" step="any" value="${p.freeBigQty || ''}" placeholder="0" oninput="onPOInput('${p.id}', 'free', this.value)" class="w-14 px-1 py-0.5 text-right font-semibold border border-cream-300 rounded bg-white">
                 <span class="text-[10px] text-earth-600">${p.unitBig}</span>
               </div>
-              ${orderSubTotal > 0 ? `<div class="text-[9.5px] text-right text-earth-600 mt-0.5">รวม ${orderSubTotal.toLocaleString()} ${cleanSub}</div>` : ''}
+              <div id="subTotal_${p.id}" class="text-[9.5px] text-right text-earth-600 mt-0.5">
+                ${orderSubTotal > 0 ? `รวม ${orderSubTotal.toLocaleString()} ${cleanSub}` : ''}
+              </div>
             </td>
 
             <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 align-top text-right bg-leaf-50/30">
@@ -882,7 +856,7 @@
                 <span class="text-[10px] text-earth-600">@</span>
                 <input type="number" min="0" step="any" value="${p.unitPriceInput || ''}" placeholder="ราคา" oninput="onPOInput('${p.id}', 'price', this.value)" class="w-16 px-1 py-0.5 text-right font-mono border border-cream-400 rounded bg-white">
               </div>
-              <div class="text-[11px] font-mono font-bold text-leaf-800">
+              <div id="totalVal_${p.id}" class="text-[11px] font-mono font-bold text-leaf-800">
                 ${calcTotalVal > 0 ? `${calcTotalVal.toLocaleString()} บ.` : '0 บ.'}
               </div>
             </td>
@@ -891,7 +865,6 @@
               <textarea rows="2" placeholder="หมายเหตุ..." oninput="onPOInput('${p.id}', 'notes', this.value)" class="w-full px-1.5 py-1 text-[10.5px] border border-cream-300 rounded bg-white">${p.notes || ''}</textarea>
             </td>
 
-            <!-- 7. กราฟ YOY -->
             <td class="px-1 py-1.5 text-center align-middle">
               <button onclick="openMonthlyModal('${p.id}')" class="px-1.5 py-1 rounded bg-cream-200 hover:bg-cream-300 text-earth-800 text-[11px] font-semibold">📊</button>
             </td>
@@ -905,6 +878,7 @@
       document.getElementById('btnLoadAll').classList.toggle('hidden', visibleLimit >= currentFiltered.length);
     }
 
+    // แก้ไข: อัปเดตเฉพาะตัวเลขผลลัพธ์ของแถวนั้นโดยไม่เรียก renderTable() เพื่อไม่ให้เคอร์เซอร์หลุด
     function onPOInput(id, field, val) {
       const p = rawProducts.find(x => x.id === id);
       if (!p) return;
@@ -915,7 +889,17 @@
 
       const subQty = Math.round((p.orderBigQty || 0) * (p.unitMultiplier || 1));
       p.orderTotalVal = subQty * (p.unitPriceInput || 0);
-      renderTable();
+
+      const subEl = document.getElementById(`subTotal_${id}`);
+      if (subEl) {
+        subEl.innerText = subQty > 0 ? `รวม ${subQty.toLocaleString()} ${getCleanUnitName(p.unitSub)}` : '';
+      }
+
+      const valEl = document.getElementById(`totalVal_${id}`);
+      if (valEl) {
+        valEl.innerText = p.orderTotalVal > 0 ? `${p.orderTotalVal.toLocaleString()} บ.` : '0 บ.';
+      }
+
       updateKPICards();
     }
 
@@ -993,7 +977,6 @@
           unitBig: p.unitBig, unitSub: cleanSub, mul: mul,
           orderBigQty: p.orderBigQty, subQty: subQty, freeBigQty: p.freeBigQty || 0,
           unitPrice: p.unitPriceInput || 0, val: val, notes: p.notes || '',
-          // ข้อ 6: ข้อมูลสถิติจัดวางเป็น 2 กลุ่ม (ขาย 68,69+YOY และ คงเหลือ+พยากรณ์)
           statSalesYOY: `68: ${s68.toLocaleString()} | 69: ${s69.toLocaleString()} ${cleanSub} (${yoyPct >= 0 ? '+' : ''}${yoyPct}% YOY)`,
           statStockFc: `คงเหลือ: ${Math.ceil(stk/mul)} ${p.unitBig} (${stk.toLocaleString()} ${cleanSub}) | เป้า 2 ด.: ${fc2} ${p.unitBig}`,
           approvalStatus: 'APPROVED',
@@ -1120,7 +1103,6 @@
                       <tr>
                         <th class="p-2 border-b border-r text-center w-8">#</th>
                         <th class="p-2 border-b border-r">รายการสินค้า</th>
-                        <!-- ข้อ 6: แยกคอลัมน์สถิติ 2 ส่วนชัดเจน -->
                         <th class="p-2 border-b border-r bg-amber-50/70">ยอดขาย 68 / 69 & YOY</th>
                         <th class="p-2 border-b border-r bg-leaf-50/70">คงเหลือ & พยากรณ์</th>
                         <th class="p-2 border-b border-r text-right">สั่ง / แถม</th>
@@ -1137,11 +1119,9 @@
                             <td class="p-2 text-center border-r">${idx + 1}</td>
                             <td class="p-2 border-r font-semibold text-earth-900">${it.name}</td>
                             
-                            <!-- ช่อง 1: ขาย 68,69 + YOY -->
                             <td class="p-2 border-r text-[10.5px] leading-snug bg-amber-50/20">
                               ${it.statSalesYOY || `<div>68: ${it.stat68 || '-'}</div><div>69: ${it.stat69 || '-'}</div>`}
                             </td>
-                            <!-- ช่อง 2: คงเหลือ + พยากรณ์ -->
                             <td class="p-2 border-r text-[10.5px] leading-snug bg-leaf-50/20">
                               ${it.statStockFc || `<div>${it.statStock || '-'}</div><div>${it.statForecast || ''}</div>`}
                             </td>
