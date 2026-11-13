@@ -1238,9 +1238,11 @@
           <tr>
             <td style="text-align:center; font-size:9px;">${idx + 1}</td>
             <td>
-              <div style="font-size:10px;">${p.name}</div>
-              <div style="font-size:9.5px; color:#444;">${p.supplier || '-'} | (1*${mul} ${p.unitBig}/${cleanSub})</div>
-            </td>
+              <div style="font-weight:bold; font-size:11px;">${p.name}</div>
+              <div style="font-size:9.5px; color:#444;">
+    ${p.category ? `[${p.category}] ` : ''}${p.genericName ? `${p.genericName} | ` : ''}(1*${mul} ${p.unitBig}/${cleanSub})
+  </div>
+</td>
             <td style="font-size:9.5px; line-height:1.3;">${b68Html.length > 0 ? b68Html.join('<br>') : '-'}</td>
             <td style="text-align:right; line-height:1.3; background:#E7DCFC;">
               <b style="font-size:11px;">${s68Big.toLocaleString()} ${p.unitBig}</b><br>
@@ -1275,15 +1277,15 @@
               <span style="font-size:9.5px;">(${stkSub.toLocaleString()} ${cleanSub})</span><br>
               <span style="font-size:9.5px; font-weight:600;">${fmtZero(p.stock_val)}</span>
             </td>
-            <td style="text-align:center; font-size:9.5px; ${noSales3M.isNoSales3M ? 'background:#fee2e2; color:#991b1b; font-weight:bold;' : ''}">
-              ${noSales3M.isNoSales3M ? `⚠️ ไม่ขาย 3 ด.` : `✓ ขาย ${noSales3M.total3M.toLocaleString()} ${cleanSub}`}
-            </td>
             <td style="font-size:9.5px; line-height:1.35;">
               1ด: <b>${fc1}</b> | 1.5ด: <b>${fc1_5}</b><br>
               2ด: <b>${fc2}</b> | 3ด: <b>${fc3}</b> (${p.unitBig})<br>
               <span style="color:#333;">ย้อนหลัง: ${getNext2MonthsHistoryText(p)}</span>
             </td>
-            <td style="text-align:center; font-size:8.5px; font-weight:bold;">${st.label}</td>
+            <td style="text-align:center; font-size:9.5px;">
+  <div style="font-weight:bold;">${st.label}</div>
+  ${noSales3M.isNoSales3M ? `<div style="margin-top:2px; background:#fee2e2; color:#991b1b; padding:1px 2px; border-radius:3px; font-weight:bold;">⚠️ ไม่ขาย 3 ด.</div>` : ''}
+</td>
           </tr>
         `;
       });
@@ -1293,7 +1295,7 @@
         <html><head><title>รายงานสต็อคสำหรับ MR</title>
         <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
-          @page { size: A4 portrait; margin: 5mm; }
+          @page { size: A4 portrait; margin: 5mm; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           body { font-family: 'Sarabun', sans-serif; font-size: 9px; color: #111; margin: 0; } -webkit-print-color-adjust: exact; print-color-adjust: exact;
           .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #4A3B32; padding-bottom: 5px; margin-bottom: 6px; }
           table { width: 100%; border-collapse: collapse; table-layout: fixed; }
@@ -1312,7 +1314,7 @@
             <thead>
               <tr>
                 <th style="width:2.5%;">#</th>
-                <th style="width:16.5%;">รายการสินค้า / คู่ค้า / หน่วย</th>
+                <th style="width:16.5%;">รายการสินค้า / ประเภท / ชื่อสามัญ</th>
                 <th style="width:7.5%;">ขาย 68<br>(แยกสาขา)</th>
                 <th style="width:7.5%;">รวมขาย 68</th>
                 <th style="width:7.5%;">ขาย 69<br>(แยกสาขา)</th>
@@ -1321,9 +1323,8 @@
                 <th style="width:6.5%;">YOY<br>(เดือนนี้)</th>
                 <th style="width:8%;">คงเหลือ<br>แยกคลัง</th>
                 <th style="width:7.5%;">รวมคงเหลือ</th>
-                <th style="width:5.5%;">ไม่ขาย<br>3 ด.</th>
                 <th style="width:11%;">พยากรณ์ & ย้อนหลัง 2 ด.</th>
-                <th style="width:5%;">สถานะ</th>
+                <th style="width:8%;">สถานะ /<br>ไม่ขาย 3 ด.</th>
               </tr>
             </thead>
             <tbody>${rowsHtml}</tbody>
@@ -1426,12 +1427,12 @@
         <html><head><title>รายงานสต็อคสำหรับฝ่ายขาย (เซลล์)</title>
         <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
-          @page { size: A4 portrait; margin: 6mm; }
+          @page { size: A4 portrait; margin: 6mm; } * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           body { font-family: 'Sarabun', sans-serif; font-size: 11px; color: #111; margin: 0; } -webkit-print-color-adjust: exact; print-color-adjust: exact;
           .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #386641; padding-bottom: 5px; margin-bottom: 6px; }
           table { width: 100%; border-collapse: collapse; table-layout: fixed; }
           th, td { border: 1px solid #bbb; padding: 4px 4.5px; vertical-align: top; word-wrap: break-word; }
-          th { background: #CDC6BC; color: #000; font-size: 10px; text-align: center; font-weight: 700; }
+          th { background: #FCF6BD; color: #000; font-size: 10px; text-align: center; font-weight: 700; }
           tr { page-break-inside: avoid; }
         </style></head><body>
           <div class="header">
