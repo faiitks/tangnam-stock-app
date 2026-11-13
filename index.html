@@ -492,6 +492,12 @@
       return s;
     }
 
+    function checkDiscontinuedFlag(statusStr, nameStr) {
+      const r = (statusStr || '').trim();
+      const n = (nameStr || '').trim();
+      return r.includes('เลิก') || r.includes('ยกเลิก') || r.includes('หยุดขาย') || n.includes('เลิกขาย') || n.includes('ยกเลิก');
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       loadAPODocumentsFromStorage();
       fetchGoogleSheetData();
@@ -685,7 +691,7 @@
 
           products.push({
             id: `P-${i + 1}`, sheetRow: i + 1, code: codeVal, name: nameVal, statusRaw: statusVal,
-            isDiscontinued: statusVal.includes('เลิก'),
+            isDiscontinued: checkDiscontinuedFlag(statusVal, nameVal),
             supplier: supplierVal,
             genericName: genericVal,
             category: categoryVal,
@@ -807,17 +813,15 @@
     }
 
     function getStatusObj(p) {
-function getStatusObj(p) {
-  const r = (p.statusRaw || '').trim();
-  const n = (p.name || '').trim();
-  if (p.isDiscontinued: statusVal.includes('เลิก') || statusVal.includes('หยุดขาย') || nameVal.includes('เลิกขาย'),) {
-    return { label: '⚪ เลิกขาย', badge: 'bg-gray-200 text-gray-700 border-gray-400', code: 'DISCONTINUED' };
-  }
-  if (r.includes('สั่งด่วน')) return { label: '🔴 สั่งด่วน', badge: 'bg-red-50 text-red-700 border-red-200', code: 'CRITICAL' };
-  if (r.includes('ควรสั่ง')) return { label: '🟡 ควรสั่ง', badge: 'bg-amber-50 text-amber-800 border-amber-200', code: 'REORDER' };
-  if (r.includes('เกิน') || r.includes('ล้น')) return { label: '🔵 เกินสต็อค', badge: 'bg-blue-50 text-blue-700 border-blue-200', code: 'OVERSTOCK' };
-  return { label: '🟢 ปกติ', badge: 'bg-leaf-50 text-leaf-800 border-leaf-200', code: 'OPTIMAL' };
-}
+      const r = (p.statusRaw || '').trim();
+      if (p.isDiscontinued || checkDiscontinuedFlag(r, p.name)) {
+        return { label: '⚪ เลิกขาย', badge: 'bg-gray-200 text-gray-700 border-gray-400', code: 'DISCONTINUED' };
+      }
+      if (r.includes('สั่งด่วน')) return { label: '🔴 สั่งด่วน', badge: 'bg-red-50 text-red-700 border-red-200', code: 'CRITICAL' };
+      if (r.includes('ควรสั่ง')) return { label: '🟡 ควรสั่ง', badge: 'bg-amber-50 text-amber-800 border-amber-200', code: 'REORDER' };
+      if (r.includes('เกิน') || r.includes('ล้น')) return { label: '🔵 เกินสต็อค', badge: 'bg-blue-50 text-blue-700 border-blue-200', code: 'OVERSTOCK' };
+      return { label: '🟢 ปกติ', badge: 'bg-leaf-50 text-leaf-800 border-leaf-200', code: 'OPTIMAL' };
+    }
 
     function updateKPICards() {
       let s68 = 0, s69 = 0, stk = 0, crit = 0, reord = 0, opt = 0, over = 0;
@@ -850,7 +854,6 @@ function getStatusObj(p) {
       document.getElementById('badgeDraftCount').innerText = rawProducts.filter(p => p.orderBigQty > 0).length;
     }
 
-    // ช่อง YOY (YTD): มีคำว่า "ปี 68:" / "ปี 69:" และถ้าเป็น 0 ให้เว้นว่าง
     function getYOY_YTDHtml(p, s69Sub, cleanSub) {
       const mIdx = latestMonthIndex;
       const mNames = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -876,7 +879,6 @@ function getStatusObj(p) {
       `;
     }
 
-    // ช่อง YOY (เดือนเดียวกัน): มีคำว่า "ปี 68:" / "ปี 69:" และถ้าเป็น 0 ให้เว้นว่าง
     function getYOY_SameMonthHtml(p, cleanSub) {
       const mIdx = latestMonthIndex;
       const mNames = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -1005,13 +1007,12 @@ function getStatusObj(p) {
         const calcTotalVal  = orderSubTotal * (p.unitPriceInput || 0);
         const subSummaryText = formatSubUnitSummary(orderSubTotal, freeSubTotal, cleanSub);
 
-        // ข้อความสถานะ "ไม่ขาย 3 ด." แบบเดิมครบถ้วน (ถ้าเป็น 0 แสดงป้าย ⚠️ ไม่ขาย 3 ด. ถ้ามีขายและ > 0 แสดงยอดขายพร้อมหน่วย)
         const noSalesBadgeHtml = noSales3M.isNoSales3M
           ? `<div class="mt-1"><span class="inline-block px-1 py-0.5 rounded bg-red-100 text-red-800 border border-red-300 text-[9px] font-bold leading-tight">⚠️ ไม่ขาย 3 ด.<br><span class="font-normal">(${noSales3M.rangeLabel})</span></span></div>`
           : (noSales3M.total3M > 0 ? `<div class="mt-1 text-[9px] text-leaf-700 font-medium leading-tight">✓ ขาย ${noSales3M.total3M.toLocaleString()} ${cleanSub}<br><span class="text-[8.5px] text-earth-500">(${noSales3M.rangeLabel})</span></div>` : '');
 
         html += `
-          <tr class="${p.isDiscontinued ? 'opacity-45 bg-gray-50' : 'hover:bg-cream-100/60'}">
+          <tr class="${p.isDiscontinued ? 'opacity-55 bg-gray-50' : 'hover:bg-cream-100/60'}">
             <td class="sticky-col-1 px-2 py-1.5 border-r border-cream-300 align-top">
               <div class="font-semibold text-earth-900 leading-snug text-[10.5px]">${p.name}</div>
               <div class="flex flex-wrap items-center gap-1 mt-1 text-[9.5px]">
@@ -1083,7 +1084,6 @@ function getStatusObj(p) {
               </div>
             </td>
 
-            <!-- ย้าย ไม่ขาย 3 ด. มารวมกับสถานะ โดยแสดงค่าตามเดิมครบถ้วน -->
             <td class="px-1 py-1.5 text-center align-middle ${noSales3M.isNoSales3M ? 'bg-red-50/50' : ''}">
               <span class="inline-block px-1 py-0.5 rounded text-[9.5px] font-semibold border ${st.badge}">${st.label}</span>
               ${noSalesBadgeHtml}
@@ -1173,7 +1173,7 @@ function getStatusObj(p) {
       document.getElementById('cksBranchModal').classList.add('hidden');
     }
 
-    // ================= ส่วนที่ 2: ระบบส่งออก PDF ทั้ง 2 มุมมอง (แนวตั้งทั้งคู่, วนลูปปกติ, ซ่อนค่า 0, มีคำว่า ปี 68/69) =================
+    // ================= ส่วนที่ 2: ระบบส่งออก PDF ทั้ง 2 มุมมอง (แนวตั้งทั้งคู่, วนลูปปกติ, ซ่อนค่า 0, แสดงเลิกขายในช่องสถานะ) =================
     function getNext2MonthsHistoryText(p) {
       const mShort = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
       const curM = latestMonthIndex;
@@ -1191,7 +1191,7 @@ function getStatusObj(p) {
       return `${getStr(1)} | ${getStr(2)} ${p.unitBig}`;
     }
 
-    // 1. ส่งออก PDF สำหรับ MR (กระดาษ A4 แนวตั้ง - วนลูปตามปกติ)
+    // 1. ส่งออก PDF สำหรับ MR (กระดาษ A4 แนวตั้ง - วนลูปตามปกติ + แสดงป้ายเลิกขายเด่นชัด)
     function exportPDF_MR() {
       if (currentFiltered.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก PDF");
       const supFilter = document.getElementById('supplierFilter').value;
@@ -1241,8 +1241,12 @@ function getStatusObj(p) {
         if (p.sales69_tn_6 > 0)   b69Html.push(`TN(6): <b>${p.sales69_tn_6.toLocaleString()}</b>`);
         if (p.sales69_cks > 0)    b69Html.push(`CKS(${cksBranchCount}): <b>${p.sales69_cks.toLocaleString()}</b>`);
 
+        const discStyle = st.code === 'DISCONTINUED'
+          ? 'background:#e5e7eb; color:#374151; padding:1px 3px; border-radius:3px; border:1px solid #9ca3af;'
+          : '';
+
         rowsHtml += `
-          <tr>
+          <tr style="${st.code === 'DISCONTINUED' ? 'background:#f9fafb; color:#4b5563;' : ''}">
             <td style="text-align:center; font-size:8.5px;">${idx + 1}</td>
             <td>
               <div style="font-weight:bold; font-size:9.5px;">${p.name}</div>
@@ -1293,7 +1297,7 @@ function getStatusObj(p) {
               <span style="color:#333;">ย้อนหลัง: ${getNext2MonthsHistoryText(p)}</span>
             </td>
             <td style="text-align:center; font-size:8px; line-height:1.25;">
-              <div style="font-weight:bold;">${st.label}</div>
+              <div style="font-weight:bold; ${discStyle}">${st.label}</div>
               ${noSales3M.isNoSales3M ? `<div style="margin-top:2px; background:#fee2e2; color:#991b1b; padding:1px 2px; border-radius:3px; font-weight:bold;">⚠️ ไม่ขาย 3 ด.</div>` : ''}
             </td>
           </tr>
@@ -1346,7 +1350,7 @@ function getStatusObj(p) {
       win.document.close();
     }
 
-    // 2. ส่งออก PDF สำหรับเซลล์ (กระดาษ A4 แนวตั้ง - วนลูปตามปกติ, รายการสินค้าแสดง ประเภท/ชื่อสามัญ เหมือน MR, ซ่อนค่า 0)
+    // 2. ส่งออก PDF สำหรับเซลล์ (กระดาษ A4 แนวตั้ง - วนลูปตามปกติ + แสดงป้ายเลิกขายเด่นชัด)
     function exportPDF_Sales() {
       if (currentFiltered.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก PDF");
       const supFilter = document.getElementById('supplierFilter').value;
@@ -1395,8 +1399,12 @@ function getStatusObj(p) {
         const stkSub = p.stock_pc + p.stock_kr + p.stock_cyp + p.stock_cks;
         const stkBig = Math.ceil(stkSub / mul);
 
+        const discStyle = st.code === 'DISCONTINUED'
+          ? 'background:#e5e7eb; color:#374151; padding:1px 3px; border-radius:3px; border:1px solid #9ca3af;'
+          : '';
+
         rowsHtml += `
-          <tr>
+          <tr style="${st.code === 'DISCONTINUED' ? 'background:#f9fafb; color:#4b5563;' : ''}">
             <td style="text-align:center; font-size:9px;">${idx + 1}</td>
             <td>
               <div style="font-weight:bold; font-size:10px;">${p.name}</div>
@@ -1431,8 +1439,8 @@ function getStatusObj(p) {
               <b>${fmtZero(p.stock_val) ? `${fmtZero(p.stock_val)} บ.` : ''}</b>
             </td>
             <td style="text-align:center; font-size:8.5px; line-height:1.25;">
-  <div style="font-weight:bold;">${st.label}</div>
-  ${noSales3M.isNoSales3M ? `<div style="margin-top:2px; background:#fee2e2; color:#991b1b; padding:1px 2px; border-radius:3px; font-weight:bold;">⚠️ ไม่ขาย 3 ด.</div>` : ''}
+              <div style="font-weight:bold; ${discStyle}">${st.label}</div>
+              ${noSales3M.isNoSales3M ? `<div style="margin-top:2px; background:#fee2e2; color:#991b1b; padding:1px 2px; border-radius:3px; font-weight:bold;">⚠️ ไม่ขาย 3 ด.</div>` : ''}
             </td>
           </tr>
         `;
