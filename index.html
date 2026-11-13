@@ -211,13 +211,13 @@
       </div>
     </div>
 
-    <!-- ================= COMPACT DATA GRID ================= -->
+    <!-- ================= COMPACT DATA GRID (ปรับความกว้างแต่ละคอลัมน์ให้พอดีกับข้อมูล) ================= -->
     <div class="bg-white rounded-xl border border-cream-300 shadow-sm overflow-hidden flex-1 flex flex-col">
       <div class="table-scroll-container flex-1">
         <table class="grid-table text-left border-collapse text-xs">
           <thead>
             <tr class="bg-earth-900 text-cream-50 text-[11px] font-semibold">
-              <th rowspan="2" class="sticky-corner-1 w-[240px] px-2.5 py-2 border-r border-earth-700 text-center">
+              <th rowspan="2" class="sticky-corner-1 w-[215px] px-2 py-2 border-r border-earth-700 text-center">
                 รายการสินค้า / คู่ค้า / หน่วยขาย
               </th>
 
@@ -243,28 +243,28 @@
                 รายการขออนุมัติสั่งซื้อ
               </th>
 
-              <th rowspan="2" class="w-[46px] px-1 py-1.5 text-center bg-earth-900">กราฟ</th>
+              <th rowspan="2" class="w-[40px] px-1 py-1.5 text-center bg-earth-900">กราฟ</th>
             </tr>
 
             <tr class="bg-earth-800 text-cream-200 text-[10px]">
-              <th class="w-[95px] px-2 py-1 text-left border-r border-earth-700 bg-amber-950/90">แยกสาขา (ย่อย)</th>
-              <th class="w-[105px] px-2 py-1 text-right border-r-2 border-cream-400 bg-amber-950">รวม 68 (ใหญ่/ย่อย/บ.)</th>
+              <th class="w-[82px] px-1.5 py-1 text-left border-r border-earth-700 bg-amber-950/90">แยกสาขา</th>
+              <th class="w-[95px] px-1.5 py-1 text-right border-r-2 border-cream-400 bg-amber-950">รวม 68</th>
 
-              <th class="w-[95px] px-2 py-1 text-left border-r border-earth-700 bg-amber-900/90">แยกสาขา (ย่อย)</th>
-              <th class="w-[115px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900">รวม 69 (ใหญ่/ย่อย/บ./YOY)</th>
-              <th class="w-[120px] px-2 py-1 text-right border-r border-earth-700 bg-amber-900/80">YOY (ช่วงเดียวกัน YTD)</th>
-              <th class="w-[120px] px-2 py-1 text-right border-r-2 border-cream-400 bg-amber-900">YOY (เดือนเดียวกัน)</th>
+              <th class="w-[82px] px-1.5 py-1 text-left border-r border-earth-700 bg-amber-900/90">แยกสาขา</th>
+              <th class="w-[100px] px-1.5 py-1 text-right border-r border-earth-700 bg-amber-900">รวม 69 & YOY</th>
+              <th class="w-[105px] px-1.5 py-1 text-right border-r border-earth-700 bg-amber-900/80">YOY (YTD)</th>
+              <th class="w-[105px] px-1.5 py-1 text-right border-r-2 border-cream-400 bg-amber-900">YOY (เดือนนี้)</th>
 
-              <th class="w-[110px] px-2 py-1 text-left border-r border-earth-700 bg-leaf-900/80">แยกคลัง (ย่อย)</th>
-              <th class="w-[100px] px-2 py-1 text-right border-r border-earth-700 bg-leaf-900">รวมคงเหลือ (ใหญ่/ย่อย/บ.)</th>
-              <th class="w-[105px] px-2 py-1 text-center border-r-2 border-leaf-400 bg-leaf-950 text-amber-200">ไม่มีขาย 3 ด. (69)</th>
+              <th class="w-[96px] px-1.5 py-1 text-left border-r border-earth-700 bg-leaf-900/80">แยกคลัง</th>
+              <th class="w-[95px] px-1.5 py-1 text-right border-r border-earth-700 bg-leaf-900">รวมคงเหลือ</th>
+              <th class="w-[88px] px-1 py-1 text-center border-r-2 border-leaf-400 bg-leaf-950 text-amber-200">ไม่ขาย 3 ด.</th>
 
-              <th class="w-[138px] px-2 py-1 text-center border-r border-earth-700 bg-earth-800">พยากรณ์เป้า (แบ่ง 4 ช่วง)</th>
-              <th class="w-[80px] px-1.5 py-1 text-center border-r border-earth-700 bg-earth-800">สถานะ</th>
+              <th class="w-[132px] px-1.5 py-1 text-center border-r border-earth-700 bg-earth-800">พยากรณ์ (4 ช่วง)</th>
+              <th class="w-[74px] px-1 py-1 text-center border-r border-earth-700 bg-earth-800">สถานะ</th>
 
-              <th class="col-po-only hidden w-[135px] px-2 py-1 text-center border-r border-earth-700 bg-leaf-800">สั่ง / แถม (ใหญ่)</th>
-              <th class="col-po-only hidden w-[125px] px-2 py-1 text-right border-r border-earth-700 bg-leaf-800">ราคา/หน่วย & รวม</th>
-              <th class="col-po-only hidden w-[135px] px-2 py-1 text-left border-r border-earth-700 bg-leaf-800">หมายเหตุ</th>
+              <th class="col-po-only hidden w-[128px] px-1.5 py-1 text-center border-r border-earth-700 bg-leaf-800">สั่ง / แถม (ใหญ่)</th>
+              <th class="col-po-only hidden w-[115px] px-1.5 py-1 text-right border-r border-earth-700 bg-leaf-800">ราคา & รวม</th>
+              <th class="col-po-only hidden w-[125px] px-1.5 py-1 text-left border-r border-earth-700 bg-leaf-800">หมายเหตุ</th>
             </tr>
           </thead>
 
@@ -481,13 +481,10 @@
       return s;
     }
 
-    // ล้างชื่อสาขาจากหัวตาราง Pivot Table ให้สั้นกระชับ (เช่น ตัดคำนำหน้า Pivot ส่วนเกินออก)
     function cleanPivotBranchName(rawLabel) {
       if (!rawLabel) return '';
       let s = String(rawLabel).trim();
-      // ตัดคำนำหน้า Pivot ที่ Google Sheets ชอบรวมมา เช่น "ยอดคงเหลือ " หรือ "SUM of "
       s = s.replace(/^(ยอดคงเหลือ|คงเหลือ|sum of|count of)\s*[-:]?\s*/i, '').trim();
-      // ถ้ามีขึ้นบรรทัดใหม่ในหัวตาราง Pivot ให้เอาบรรทัดสุดท้ายซึ่งเป็นชื่อสาขาจริง
       if (s.includes('\n')) {
         const parts = s.split('\n').map(x => x.trim()).filter(Boolean);
         s = parts[parts.length - 1] || s;
@@ -511,7 +508,6 @@
           fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_MAIN)}&range=A1:CZ10000&t=${ts}`, { cache: 'no-store' }),
           fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_68)}&t=${ts}`, { cache: 'no-store' }).catch(() => null),
           fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_69)}&t=${ts}`, { cache: 'no-store' }).catch(() => null),
-          // ใส่ &headers=2 เพื่อให้ Google API รู้ว่าแถวที่ 1-2 คือหัวตาราง Pivot ของชีท คงเหลือCKSแยกสาขา
           fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_CKS_BRANCH)}&headers=2&t=${ts}`, { cache: 'no-store' }).catch(() => null)
         ]);
 
@@ -593,7 +589,6 @@
           return map;
         }
 
-        // อ่านตาราง Pivot "คงเหลือCKSแยกสาขา" (A=ชื่อสินค้า, B=รหัสสินค้า, D เป็นต้นไป = รายชื่อสาขา)
         async function parseCKSBranchPivotSheet(res) {
           const map = new Map();
           if (!res || !res.ok) return map;
@@ -604,11 +599,9 @@
             const cols = j.table.cols || [];
             if (rows.length === 0) return map;
 
-            // 1. ดึงรายชื่อสาขาจาก cols[].label (ซึ่ง Google API แยกจากแถว 1-2 ของ Pivot ให้แล้ว)
             const branchHeaders = [];
             for (let colIdx = 3; colIdx < cols.length; colIdx++) {
               let bName = cols[colIdx] && cols[colIdx].label ? cleanPivotBranchName(cols[colIdx].label) : '';
-              // สำรอง: หาก cols[].label ว่าง ให้ตรวจดูแถวแรกของ rows เผื่อหัวตารางอยู่แถวที่ 3
               if (!bName && rows[0] && rows[0].c && rows[0].c[colIdx]) {
                 const cellVal = rows[0].c[colIdx].v || rows[0].c[colIdx].f;
                 if (cellVal && isNaN(parseFloat(String(cellVal).replace(/,/g, '')))) {
@@ -617,20 +610,17 @@
               }
 
               const lowerB = bName.toLowerCase();
-              // กรองคอลัมน์ Grand Total / รวมทั้งหมด ทิ้ง
               if (bName && !lowerB.includes('grand total') && !lowerB.includes('รวม') && lowerB !== 'total') {
                 branchHeaders.push({ idx: colIdx, name: bName });
               }
             }
 
-            // 2. วนลูปอ่านข้อมูลสินค้าในตาราง Pivot (A = ชื่อสินค้า, B = รหัสสินค้า)
             for (let r = 0; r < rows.length; r++) {
               const rc = rows[r].c;
               if (!rc) continue;
               const nameRaw = rc[0] && (rc[0].v !== null || rc[0].f) ? String(rc[0].v || rc[0].f).trim() : '';
               const codeRaw = rc[1] && (rc[1].v !== null || rc[1].f) ? String(rc[1].v || rc[1].f).trim() : '';
 
-              // ข้ามแถวหัวตารางหรือแถว Grand Total ของ Pivot
               const lowerName = nameRaw.toLowerCase();
               if ((!nameRaw && !codeRaw) || lowerName.includes('grand total') || lowerName.includes('รวมทั้งหมด') || nameRaw === 'ชื่อสินค้า') continue;
 
@@ -873,10 +863,10 @@
       const color = pct >= 0 ? 'text-leaf-800' : 'text-red-600';
 
       return `
-        <div class="text-[10.5px] leading-tight">
-          <div class="text-earth-700">ปี 68: <span class="font-mono font-medium">${ytd68.toLocaleString()}</span> <span class="text-[9.5px] text-earth-500">${cleanSub}</span></div>
-          <div class="font-bold text-earth-900">ปี 69: <span class="font-mono">${s69Sub.toLocaleString()}</span> <span class="font-normal text-[9.5px] text-earth-600">${cleanSub}</span></div>
-          <div class="font-bold ${color} mt-0.5">${pct >= 0 ? '▲ +' : '▼ '}${pct}% <span class="font-normal text-earth-500">(ม.ค.-${mNames[mIdx]})</span></div>
+        <div class="text-[10px] leading-tight">
+          <div class="text-earth-700">68: <span class="font-mono font-medium">${ytd68.toLocaleString()}</span> <span class="text-[9px] text-earth-500">${cleanSub}</span></div>
+          <div class="font-bold text-earth-900">69: <span class="font-mono">${s69Sub.toLocaleString()}</span> <span class="font-normal text-[9px] text-earth-600">${cleanSub}</span></div>
+          <div class="font-bold ${color} mt-0.5">${pct >= 0 ? '▲ +' : '▼ '}${pct}% <span class="font-normal text-[9px] text-earth-500">(ม.ค.-${mNames[mIdx]})</span></div>
         </div>
       `;
     }
@@ -900,10 +890,10 @@
       const color = pct >= 0 ? 'text-leaf-800' : 'text-red-600';
 
       return `
-        <div class="text-[10.5px] leading-tight">
-          <div class="text-earth-700">ปี 68: <span class="font-mono font-medium">${v68.toLocaleString()}</span> <span class="text-[9.5px] text-earth-500">${cleanSub}</span></div>
-          <div class="font-bold text-earth-900">ปี 69: <span class="font-mono">${v69.toLocaleString()}</span> <span class="font-normal text-[9.5px] text-earth-600">${cleanSub}</span></div>
-          <div class="font-bold ${color} mt-0.5">${pct >= 0 ? '▲ +' : '▼ '}${pct}% <span class="font-normal text-earth-500">(${mNames[mIdx]})</span></div>
+        <div class="text-[10px] leading-tight">
+          <div class="text-earth-700">68: <span class="font-mono font-medium">${v68.toLocaleString()}</span> <span class="text-[9px] text-earth-500">${cleanSub}</span></div>
+          <div class="font-bold text-earth-900">69: <span class="font-mono">${v69.toLocaleString()}</span> <span class="font-normal text-[9px] text-earth-600">${cleanSub}</span></div>
+          <div class="font-bold ${color} mt-0.5">${pct >= 0 ? '▲ +' : '▼ '}${pct}% <span class="font-normal text-[9px] text-earth-500">(${mNames[mIdx]})</span></div>
         </div>
       `;
     }
@@ -990,8 +980,8 @@
           const activeBranchCount = p.cksBranches.length;
           stockLines.push(`
             <div class="mt-0.5">
-              <button onclick="openCKSBranchModal('${p.id}')" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-leaf-100 hover:bg-leaf-200 text-leaf-900 border border-leaf-300 text-[10px] font-semibold transition">
-                <span>CKS${activeBranchCount > 0 ? ` (${activeBranchCount} สาขา)` : ' แยกสาขา'}</span>
+              <button onclick="openCKSBranchModal('${p.id}')" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-leaf-100 hover:bg-leaf-200 text-leaf-900 border border-leaf-300 text-[9.5px] font-semibold transition">
+                <span>CKS${activeBranchCount > 0 ? ` (${activeBranchCount})` : ' แยกสาขา'}</span>
                 <span>🔍</span>
               </button>
             </div>
@@ -1011,120 +1001,120 @@
 
         html += `
           <tr class="${p.isDiscontinued ? 'opacity-45 bg-gray-50' : 'hover:bg-cream-100/60'}">
-            <td class="sticky-col-1 px-2.5 py-2 border-r border-cream-300 align-top">
-              <div class="font-semibold text-earth-900 leading-snug text-[11.5px]">${p.name}</div>
-              <div class="flex flex-wrap items-center gap-1.5 mt-1 text-[10px]">
+            <td class="sticky-col-1 px-2 py-1.5 border-r border-cream-300 align-top">
+              <div class="font-semibold text-earth-900 leading-snug text-[11px]">${p.name}</div>
+              <div class="flex flex-wrap items-center gap-1 mt-1 text-[9.5px]">
                 ${p.supplier ? `<span class="px-1.5 py-0.2 rounded bg-earth-100 text-earth-800 font-medium">${p.supplier}</span>` : ''}
                 <span class="text-earth-600">(1*${mul} ${p.unitBig}/${cleanSub})</span>
               </div>
               ${(p.category || p.genericName) ? `
-                <div class="flex flex-wrap items-center gap-1 mt-1 text-[10px]">
+                <div class="flex flex-wrap items-center gap-1 mt-0.5 text-[9.5px]">
                   ${p.category ? `<span class="px-1.5 py-0.2 rounded bg-leaf-50 text-leaf-800 border border-leaf-200 font-medium">${p.category}</span>` : ''}
                   ${p.genericName ? `<span class="px-1.5 py-0.2 rounded bg-cream-200 text-earth-800 border border-cream-300">${p.genericName}</span>` : ''}
                 </div>
               ` : ''}
             </td>
 
-            <td class="px-2 py-1.5 align-top text-[10.5px] leading-tight">
+            <td class="px-1.5 py-1.5 align-top text-[10px] leading-tight">
               ${branch68Lines.length > 0 ? branch68Lines.join('') : '<span class="text-earth-400">-</span>'}
             </td>
-            <td class="px-2 py-1.5 text-right align-top bg-amber-50/50 border-r-2 border-cream-400">
-              <div class="font-bold text-earth-900 text-[11.5px]">${s68Big > 0 ? `${s68Big.toLocaleString()} ${p.unitBig}` : '-'}</div>
-              <div class="text-[10px] text-earth-700">${s68Sub > 0 ? `(${s68Sub.toLocaleString()} ${cleanSub})` : ''}</div>
-              <div class="text-[10px] font-mono font-semibold text-amber-900 mt-0.5">${fmtZero(s68Val)}</div>
+            <td class="px-1.5 py-1.5 text-right align-top bg-amber-50/50 border-r-2 border-cream-400">
+              <div class="font-bold text-earth-900 text-[11px]">${s68Big > 0 ? `${s68Big.toLocaleString()} ${p.unitBig}` : '-'}</div>
+              <div class="text-[9.5px] text-earth-700">${s68Sub > 0 ? `(${s68Sub.toLocaleString()} ${cleanSub})` : ''}</div>
+              <div class="text-[9.5px] font-mono font-semibold text-amber-900 mt-0.5">${fmtZero(s68Val)}</div>
             </td>
 
-            <td class="px-2 py-1.5 align-top text-[10.5px] leading-tight">
+            <td class="px-1.5 py-1.5 align-top text-[10px] leading-tight">
               ${branch69Lines.length > 0 ? branch69Lines.join('') : '<span class="text-earth-400">-</span>'}
             </td>
 
-            <td class="px-2 py-1.5 text-right align-top bg-amber-50/70">
-              <div class="font-bold text-earth-900 text-[11.5px]">${s69Big > 0 ? `${s69Big.toLocaleString()} ${p.unitBig}` : '-'}</div>
-              <div class="text-[10px] text-earth-700">${s69Sub > 0 ? `(${s69Sub.toLocaleString()} ${cleanSub})` : ''}</div>
-              <div class="text-[10px] font-mono font-semibold text-amber-950 mt-0.5">${fmtZero(s69Val)}</div>
+            <td class="px-1.5 py-1.5 text-right align-top bg-amber-50/70">
+              <div class="font-bold text-earth-900 text-[11px]">${s69Big > 0 ? `${s69Big.toLocaleString()} ${p.unitBig}` : '-'}</div>
+              <div class="text-[9.5px] text-earth-700">${s69Sub > 0 ? `(${s69Sub.toLocaleString()} ${cleanSub})` : ''}</div>
+              <div class="text-[9.5px] font-mono font-semibold text-amber-950 mt-0.5">${fmtZero(s69Val)}</div>
               ${yoyFullHtml}
             </td>
 
-            <td class="px-2 py-1.5 text-right align-top bg-amber-50/30">
+            <td class="px-1.5 py-1.5 text-right align-top bg-amber-50/30">
               ${getYOY_YTDHtml(p, s69Sub, cleanSub)}
             </td>
-            <td class="px-2 py-1.5 text-right align-top border-r-2 border-cream-400 bg-amber-50/60">
+            <td class="px-1.5 py-1.5 text-right align-top border-r-2 border-cream-400 bg-amber-50/60">
               ${getYOY_SameMonthHtml(p, cleanSub)}
             </td>
 
-            <td class="px-2 py-1.5 align-top text-[10.5px] leading-tight">
+            <td class="px-1.5 py-1.5 align-top text-[10px] leading-tight">
               ${stockLines.length > 0 ? stockLines.join('') : '<span class="text-earth-400">-</span>'}
             </td>
-            <td class="px-2 py-1.5 text-right align-top bg-leaf-100/60">
-              <div class="font-bold text-leaf-900 text-[11.5px]">${stkBig > 0 ? `${stkBig.toLocaleString()} ${p.unitBig}` : '-'}</div>
-              <div class="text-[10px] text-leaf-800">${stkSub > 0 ? `(${stkSub.toLocaleString()} ${cleanSub})` : ''}</div>
-              <div class="text-[10px] font-mono font-semibold text-leaf-900 mt-0.5">${fmtZero(stkVal)}</div>
+            <td class="px-1.5 py-1.5 text-right align-top bg-leaf-100/60">
+              <div class="font-bold text-leaf-900 text-[11px]">${stkBig > 0 ? `${stkBig.toLocaleString()} ${p.unitBig}` : '-'}</div>
+              <div class="text-[9.5px] text-leaf-800">${stkSub > 0 ? `(${stkSub.toLocaleString()} ${cleanSub})` : ''}</div>
+              <div class="text-[9.5px] font-mono font-semibold text-leaf-900 mt-0.5">${fmtZero(stkVal)}</div>
             </td>
 
-            <td class="px-1.5 py-1.5 text-center align-middle border-r-2 border-leaf-400 ${noSales3M.isNoSales3M ? 'bg-red-50/70' : ''}">
+            <td class="px-1 py-1.5 text-center align-middle border-r-2 border-leaf-400 ${noSales3M.isNoSales3M ? 'bg-red-50/70' : ''}">
               ${noSales3M.isNoSales3M
-                ? `<span class="inline-block px-1.5 py-0.5 rounded bg-red-100 text-red-800 border border-red-300 text-[9.5px] font-bold leading-tight">⚠️ ไม่ขาย 3 ด.<br><span class="font-normal">(${noSales3M.rangeLabel})</span></span>`
-                : `<span class="text-[10px] text-leaf-700 font-medium">✓ ขาย ${noSales3M.total3M.toLocaleString()}<br><span class="text-[9px] text-earth-500">(${noSales3M.rangeLabel})</span></span>`
+                ? `<span class="inline-block px-1 py-0.5 rounded bg-red-100 text-red-800 border border-red-300 text-[9px] font-bold leading-tight">⚠️ ไม่ขาย 3 ด.<br><span class="font-normal">(${noSales3M.rangeLabel})</span></span>`
+                : `<span class="text-[9.5px] text-leaf-700 font-medium">✓ ขาย ${noSales3M.total3M.toLocaleString()}<br><span class="text-[8.5px] text-earth-500">(${noSales3M.rangeLabel})</span></span>`
               }
             </td>
 
             <td class="p-1 align-middle">
-              <div class="grid grid-cols-2 gap-1 text-[10px]">
-                <div class="bg-cream-100/80 border border-cream-300 rounded px-1.5 py-0.5">
-                  <div class="text-[9px] text-earth-600 leading-none">1 เดือน</div>
-                  <div class="font-bold text-earth-900 leading-tight mt-0.5">${fc1} <span class="font-normal text-[9px]">${p.unitBig}</span></div>
+              <div class="grid grid-cols-2 gap-1 text-[9.5px]">
+                <div class="bg-cream-100/80 border border-cream-300 rounded px-1 py-0.5">
+                  <div class="text-[8.5px] text-earth-600 leading-none">1 ด.</div>
+                  <div class="font-bold text-earth-900 leading-tight mt-0.5">${fc1} <span class="font-normal text-[8.5px]">${p.unitBig}</span></div>
                 </div>
-                <div class="bg-cream-100/80 border border-cream-300 rounded px-1.5 py-0.5">
-                  <div class="text-[9px] text-earth-600 leading-none">1.5 เดือน</div>
-                  <div class="font-bold text-earth-900 leading-tight mt-0.5">${fc1_5} <span class="font-normal text-[9px]">${p.unitBig}</span></div>
+                <div class="bg-cream-100/80 border border-cream-300 rounded px-1 py-0.5">
+                  <div class="text-[8.5px] text-earth-600 leading-none">1.5 ด.</div>
+                  <div class="font-bold text-earth-900 leading-tight mt-0.5">${fc1_5} <span class="font-normal text-[8.5px]">${p.unitBig}</span></div>
                 </div>
-                <div class="bg-leaf-50/70 border border-leaf-200 rounded px-1.5 py-0.5">
-                  <div class="text-[9px] text-leaf-800 leading-none">2 เดือน</div>
-                  <div class="font-bold text-leaf-900 leading-tight mt-0.5">${fc2} <span class="font-normal text-[9px]">${p.unitBig}</span></div>
+                <div class="bg-leaf-50/70 border border-leaf-200 rounded px-1 py-0.5">
+                  <div class="text-[8.5px] text-leaf-800 leading-none">2 ด.</div>
+                  <div class="font-bold text-leaf-900 leading-tight mt-0.5">${fc2} <span class="font-normal text-[8.5px]">${p.unitBig}</span></div>
                 </div>
-                <div class="bg-amber-50/70 border border-amber-200 rounded px-1.5 py-0.5">
-                  <div class="text-[9px] text-amber-800 leading-none">3 เดือน</div>
-                  <div class="font-bold text-amber-950 leading-tight mt-0.5">${fc3} <span class="font-normal text-[9px]">${p.unitBig}</span></div>
+                <div class="bg-amber-50/70 border border-amber-200 rounded px-1 py-0.5">
+                  <div class="text-[8.5px] text-amber-800 leading-none">3 ด.</div>
+                  <div class="font-bold text-amber-950 leading-tight mt-0.5">${fc3} <span class="font-normal text-[8.5px]">${p.unitBig}</span></div>
                 </div>
               </div>
             </td>
 
-            <td class="px-1.5 py-1.5 text-center align-middle">
-              <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold border ${st.badge}">${st.label}</span>
+            <td class="px-1 py-1.5 text-center align-middle">
+              <span class="inline-block px-1 py-0.5 rounded text-[9.5px] font-semibold border ${st.badge}">${st.label}</span>
             </td>
 
-            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 align-top bg-leaf-50/30">
+            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-1.5 py-1.5 align-top bg-leaf-50/30">
               <div class="flex items-center justify-between gap-1 mb-1">
-                <span class="text-[10px] text-earth-700">สั่ง:</span>
-                <input type="number" min="0" step="any" value="${p.orderBigQty || ''}" placeholder="0" oninput="onPOInput('${p.id}', 'order', this.value)" class="w-14 px-1 py-0.5 text-right font-bold border border-cream-400 rounded bg-white">
-                <span class="text-[10px] text-earth-600">${p.unitBig}</span>
+                <span class="text-[9.5px] text-earth-700">สั่ง:</span>
+                <input type="number" min="0" step="any" value="${p.orderBigQty || ''}" placeholder="0" oninput="onPOInput('${p.id}', 'order', this.value)" class="w-12 px-1 py-0.5 text-right font-bold border border-cream-400 rounded bg-white">
+                <span class="text-[9.5px] text-earth-600">${p.unitBig}</span>
               </div>
               <div class="flex items-center justify-between gap-1">
-                <span class="text-[10px] text-leaf-700">แถม:</span>
-                <input type="number" min="0" step="any" value="${p.freeBigQty || ''}" placeholder="0" oninput="onPOInput('${p.id}', 'free', this.value)" class="w-14 px-1 py-0.5 text-right font-semibold border border-cream-300 rounded bg-white">
-                <span class="text-[10px] text-earth-600">${p.unitBig}</span>
+                <span class="text-[9.5px] text-leaf-700">แถม:</span>
+                <input type="number" min="0" step="any" value="${p.freeBigQty || ''}" placeholder="0" oninput="onPOInput('${p.id}', 'free', this.value)" class="w-12 px-1 py-0.5 text-right font-semibold border border-cream-300 rounded bg-white">
+                <span class="text-[9.5px] text-earth-600">${p.unitBig}</span>
               </div>
-              <div id="subTotal_${p.id}" class="text-[9px] text-right text-earth-500 mt-0.5 leading-tight">
+              <div id="subTotal_${p.id}" class="text-[8.5px] text-right text-earth-500 mt-0.5 leading-tight">
                 ${subSummaryText}
               </div>
             </td>
 
-            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 align-top text-right bg-leaf-50/30">
+            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-1.5 py-1.5 align-top text-right bg-leaf-50/30">
               <div class="flex items-center justify-end gap-1 mb-1">
-                <span class="text-[10px] text-earth-600">@</span>
-                <input type="number" min="0" step="any" value="${p.unitPriceInput || ''}" placeholder="ราคา" oninput="onPOInput('${p.id}', 'price', this.value)" class="w-16 px-1 py-0.5 text-right font-mono border border-cream-400 rounded bg-white">
+                <span class="text-[9.5px] text-earth-600">@</span>
+                <input type="number" min="0" step="any" value="${p.unitPriceInput || ''}" placeholder="ราคา" oninput="onPOInput('${p.id}', 'price', this.value)" class="w-14 px-1 py-0.5 text-right font-mono border border-cream-400 rounded bg-white">
               </div>
-              <div id="totalVal_${p.id}" class="text-[11px] font-mono font-bold text-leaf-800">
+              <div id="totalVal_${p.id}" class="text-[10.5px] font-mono font-bold text-leaf-800">
                 ${calcTotalVal > 0 ? `${calcTotalVal.toLocaleString()} บ.` : '0 บ.'}
               </div>
             </td>
 
-            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-2 py-1.5 align-top bg-leaf-50/30">
-              <textarea rows="2" placeholder="หมายเหตุ..." oninput="onPOInput('${p.id}', 'notes', this.value)" class="w-full px-1.5 py-1 text-[10.5px] border border-cream-300 rounded bg-white">${p.notes || ''}</textarea>
+            <td class="col-po-only ${activeViewMode === 'stock' ? 'hidden' : ''} px-1.5 py-1.5 align-top bg-leaf-50/30">
+              <textarea rows="2" placeholder="หมายเหตุ..." oninput="onPOInput('${p.id}', 'notes', this.value)" class="w-full px-1 py-0.5 text-[10px] border border-cream-300 rounded bg-white">${p.notes || ''}</textarea>
             </td>
 
             <td class="px-1 py-1.5 text-center align-middle">
-              <button onclick="openMonthlyModal('${p.id}')" class="px-1.5 py-1 rounded bg-cream-200 hover:bg-cream-300 text-earth-800 text-[11px] font-semibold">📊</button>
+              <button onclick="openMonthlyModal('${p.id}')" class="px-1 py-0.5 rounded bg-cream-200 hover:bg-cream-300 text-earth-800 text-[10.5px] font-semibold">📊</button>
             </td>
           </tr>
         `;
@@ -1177,7 +1167,7 @@
       document.getElementById('cksBranchModal').classList.add('hidden');
     }
 
-    // ================= ส่วนที่ 2: ระบบส่งออก PDF ทั้ง 2 มุมมอง =================
+    // ================= ส่วนที่ 2: ระบบส่งออก PDF ทั้ง 2 มุมมอง (ขยายตัวหนังสือใหญ่ชัดเจน + จัดช่องให้พอดี) =================
     function getNext2MonthsHistoryText(p) {
       const mShort = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
       const curM = latestMonthIndex;
@@ -1194,7 +1184,7 @@
       return `${getStr(1)} | ${getStr(2)} ${p.unitBig}`;
     }
 
-    // 1. ส่งออก PDF สำหรับ MR (กระดาษ A4 แนวนอน - แสดงแยกสาขา TN(1-5), TN(6), CKS(xxสาขา))
+    // 1. ส่งออก PDF สำหรับ MR (กระดาษ A4 แนวนอน - ขยายขนาดตัวอักษรให้อ่านง่ายชัดเจน)
     function exportPDF_MR() {
       if (currentFiltered.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก PDF");
       const supFilter = document.getElementById('supplierFilter').value;
@@ -1234,68 +1224,66 @@
         const fc2 = Math.ceil((runRate * 2) / mul);
         const fc3 = Math.ceil((runRate * 3) / mul);
 
-        // แยกสาขายอดขาย 68: TN(1-5), TN(6), CKS(xxสาขา)
         let b68Html = [];
         if (p.sales68_tn_1_5 > 0) b68Html.push(`TN(1-5): <b>${p.sales68_tn_1_5.toLocaleString()}</b>`);
         if (p.sales68_tn_6 > 0)   b68Html.push(`TN(6): <b>${p.sales68_tn_6.toLocaleString()}</b>`);
-        if (p.sales68_cks > 0)    b68Html.push(`CKS(${cksBranchCount}สาขา): <b>${p.sales68_cks.toLocaleString()}</b>`);
+        if (p.sales68_cks > 0)    b68Html.push(`CKS(${cksBranchCount}): <b>${p.sales68_cks.toLocaleString()}</b>`);
 
-        // แยกสาขายอดขาย 69: TN(1-5), TN(6), CKS(xxสาขา)
         let b69Html = [];
         if (p.sales69_tn_1_5 > 0) b69Html.push(`TN(1-5): <b>${p.sales69_tn_1_5.toLocaleString()}</b>`);
         if (p.sales69_tn_6 > 0)   b69Html.push(`TN(6): <b>${p.sales69_tn_6.toLocaleString()}</b>`);
-        if (p.sales69_cks > 0)    b69Html.push(`CKS(${cksBranchCount}สาขา): <b>${p.sales69_cks.toLocaleString()}</b>`);
+        if (p.sales69_cks > 0)    b69Html.push(`CKS(${cksBranchCount}): <b>${p.sales69_cks.toLocaleString()}</b>`);
 
         rowsHtml += `
           <tr>
             <td style="text-align:center;">${idx + 1}</td>
             <td>
-              <b>${p.name}</b><br>
-              <span style="font-size:8px; color:#555;">${p.supplier || '-'} | (1*${mul} ${p.unitBig}/${cleanSub})</span>
+              <div style="font-weight:bold; font-size:11px;">${p.name}</div>
+              <div style="font-size:9.5px; color:#444;">${p.supplier || '-'} | (1*${mul} ${p.unitBig}/${cleanSub})</div>
             </td>
-            <td style="font-size:8px;">${b68Html.length > 0 ? b68Html.join('<br>') : '-'}</td>
-            <td style="text-align:right;">
-              <b>${s68Big.toLocaleString()} ${p.unitBig}</b><br>
-              <span style="font-size:8px;">(${s68Sub.toLocaleString()} ${cleanSub})</span><br>
-              <span style="font-size:8px; color:#78350f;">${fmtZero(p.sales68_val)}</span>
+            <td style="font-size:9.5px; line-height:1.3;">${b68Html.length > 0 ? b68Html.join('<br>') : '-'}</td>
+            <td style="text-align:right; line-height:1.3;">
+              <b style="font-size:11px;">${s68Big.toLocaleString()} ${p.unitBig}</b><br>
+              <span style="font-size:9.5px;">(${s68Sub.toLocaleString()} ${cleanSub})</span><br>
+              <span style="font-size:9.5px; color:#78350f; font-weight:600;">${fmtZero(p.sales68_val)}</span>
             </td>
-            <td style="font-size:8px;">${b69Html.length > 0 ? b69Html.join('<br>') : '-'}</td>
-            <td style="text-align:right;">
-              <b>${s69Big.toLocaleString()} ${p.unitBig}</b><br>
-              <span style="font-size:8px;">(${s69Sub.toLocaleString()} ${cleanSub})</span><br>
-              <span style="font-size:8px; color:#78350f;">${fmtZero(p.sales69_val)}</span><br>
-              <b style="font-size:8px; color:${yoyPct >= 0 ? '#166534' : '#dc2626'};">${yoyPct >= 0 ? '+' : ''}${yoyPct}% (ทั้งปี)</b>
+            <td style="font-size:9.5px; line-height:1.3;">${b69Html.length > 0 ? b69Html.join('<br>') : '-'}</td>
+            <td style="text-align:right; line-height:1.3;">
+              <b style="font-size:11px;">${s69Big.toLocaleString()} ${p.unitBig}</b><br>
+              <span style="font-size:9.5px;">(${s69Sub.toLocaleString()} ${cleanSub})</span><br>
+              <span style="font-size:9.5px; color:#78350f; font-weight:600;">${fmtZero(p.sales69_val)}</span><br>
+              <b style="font-size:9.5px; color:${yoyPct >= 0 ? '#166534' : '#dc2626'};">${yoyPct >= 0 ? '▲ +' : '▼ '}${yoyPct}% (ทั้งปี)</b>
             </td>
-            <td style="text-align:right; font-size:8px;">
+            <td style="text-align:right; font-size:9.5px; line-height:1.3;">
               68: ${ytd68.toLocaleString()}<br>
               69: <b>${s69Sub.toLocaleString()}</b><br>
-              <b style="color:${ytdPct >= 0 ? '#166534' : '#dc2626'};">${ytdPct >= 0 ? '+' : ''}${ytdPct}%</b>
+              <b style="color:${ytdPct >= 0 ? '#166534' : '#dc2626'};">${ytdPct >= 0 ? '▲ +' : '▼ '}${ytdPct}%</b>
             </td>
-            <td style="text-align:right; font-size:8px;">
+            <td style="text-align:right; font-size:9.5px; line-height:1.3;">
               68: ${m68.toLocaleString()}<br>
               69: <b>${m69.toLocaleString()}</b><br>
-              <b style="color:${mPct >= 0 ? '#166534' : '#dc2626'};">${mPct >= 0 ? '+' : ''}${mPct}%</b>
+              <b style="color:${mPct >= 0 ? '#166534' : '#dc2626'};">${mPct >= 0 ? '▲ +' : '▼ '}${mPct}%</b>
             </td>
-            <td style="font-size:8px;">
+            <td style="font-size:9.5px; line-height:1.3;">
               ${p.stock_pc > 0 ? `ปากช่อง: <b>${p.stock_pc.toLocaleString()}</b><br>` : ''}
               ${p.stock_kr > 0 ? `โคราช: <b>${p.stock_kr.toLocaleString()}</b><br>` : ''}
               ${p.stock_cyp > 0 ? `ชัยภูมิ: <b>${p.stock_cyp.toLocaleString()}</b><br>` : ''}
-              ${p.stock_cks > 0 ? `CKS(${cksBranchCount}สาขา): <b>${p.stock_cks.toLocaleString()}</b>` : ''}
+              ${p.stock_cks > 0 ? `CKS(${cksBranchCount}): <b>${p.stock_cks.toLocaleString()}</b>` : ''}
             </td>
-            <td style="text-align:right; background:#f4f8f0;">
-              <b>${stkBig.toLocaleString()} ${p.unitBig}</b><br>
-              <span style="font-size:8px;">(${stkSub.toLocaleString()} ${cleanSub})</span><br>
-              <span style="font-size:8px;">${fmtZero(p.stock_val)}</span>
+            <td style="text-align:right; background:#f4f8f0; line-height:1.3;">
+              <b style="font-size:11px;">${stkBig.toLocaleString()} ${p.unitBig}</b><br>
+              <span style="font-size:9.5px;">(${stkSub.toLocaleString()} ${cleanSub})</span><br>
+              <span style="font-size:9.5px; font-weight:600;">${fmtZero(p.stock_val)}</span>
             </td>
-            <td style="text-align:center; font-size:8px; ${noSales3M.isNoSales3M ? 'background:#fee2e2; color:#991b1b; font-weight:bold;' : ''}">
+            <td style="text-align:center; font-size:9.5px; ${noSales3M.isNoSales3M ? 'background:#fee2e2; color:#991b1b; font-weight:bold;' : ''}">
               ${noSales3M.isNoSales3M ? `⚠️ ไม่ขาย 3 ด.` : `✓ ขาย ${noSales3M.total3M.toLocaleString()}`}
             </td>
-            <td style="font-size:8px;">
+            <td style="font-size:9.5px; line-height:1.35;">
               1ด: <b>${fc1}</b> | 1.5ด: <b>${fc1_5}</b><br>
               2ด: <b>${fc2}</b> | 3ด: <b>${fc3}</b> (${p.unitBig})<br>
-              <span style="color:#444;">ย้อนหลัง: ${getNext2MonthsHistoryText(p)}</span>
+              <span style="color:#333;">ย้อนหลัง: ${getNext2MonthsHistoryText(p)}</span>
             </td>
-            <td style="text-align:center; font-size:8px; font-weight:bold;">${st.label}</td>
+            <td style="text-align:center; font-size:9.5px; font-weight:bold;">${st.label}</td>
           </tr>
         `;
       });
@@ -1305,36 +1293,37 @@
         <html><head><title>รายงานสต็อคสำหรับ MR</title>
         <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
-          @page { size: A4 landscape; margin: 7mm; }
-          body { font-family: 'Sarabun', sans-serif; font-size: 9px; color: #222; margin: 0; }
-          .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #4A3B32; padding-bottom: 4px; margin-bottom: 5px; }
-          table { width: 100%; border-collapse: collapse; }
-          th, td { border: 1px solid #ccc; padding: 2.5px 3px; vertical-align: top; }
-          th { background: #4A3B32; color: #fff; font-size: 8.5px; text-align: center; }
+          @page { size: A4 landscape; margin: 6mm; }
+          body { font-family: 'Sarabun', sans-serif; font-size: 10.5px; color: #111; margin: 0; }
+          .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #4A3B32; padding-bottom: 5px; margin-bottom: 6px; }
+          table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+          th, td { border: 1px solid #bbb; padding: 3.5px 4px; vertical-align: top; word-wrap: break-word; }
+          th { background: #4A3B32; color: #fff; font-size: 10px; text-align: center; font-weight: 700; }
+          tr { page-break-inside: avoid; }
         </style></head><body>
           <div class="header">
             <div>
-              <div style="font-size:13px; font-weight:bold; color:#4A3B32;">รายงานบริหารสต็อคและพยากรณ์ขาย (มุมมองสำหรับ MR)</div>
-              <div>บริษัทคู่ค้า: <b>${supLabel}</b> | ข้อมูลยอดขาย: <b>${salesPeriodStr}</b> | สต็อค ณ วันที่: <b>${stockDateStr}</b></div>
+              <div style="font-size:15px; font-weight:bold; color:#4A3B32;">รายงานบริหารสต็อคและพยากรณ์ขาย (มุมมองสำหรับ MR)</div>
+              <div style="font-size:11px; margin-top:2px;">บริษัทคู่ค้า: <b>${supLabel}</b> | ข้อมูลยอดขาย: <b>${salesPeriodStr}</b> | สต็อค ณ วันที่: <b>${stockDateStr}</b></div>
             </div>
-            <div style="text-align:right;">พิมพ์เมื่อ: <b>${printTime}</b><br>จำนวนทั้งหมด: <b>${currentFiltered.length}</b> รายการ</div>
+            <div style="text-align:right; font-size:10.5px;">พิมพ์เมื่อ: <b>${printTime}</b><br>จำนวนทั้งหมด: <b>${currentFiltered.length}</b> รายการ</div>
           </div>
           <table>
             <thead>
               <tr>
-                <th width="20">#</th>
-                <th width="140">รายการสินค้า / คู่ค้า / หน่วย</th>
-                <th width="68">ขาย 68<br>(แยกสาขา)</th>
-                <th width="65">รวมขาย 68</th>
-                <th width="68">ขาย 69<br>(แยกสาขา)</th>
-                <th width="70">รวมขาย 69 & YOY</th>
-                <th width="58">YOY (YTD)</th>
-                <th width="58">YOY (เดือนนี้)</th>
-                <th width="75">คงเหลือแยกคลัง</th>
-                <th width="65">รวมคงเหลือ</th>
-                <th width="55">ไม่มีขาย 3 ด.</th>
-                <th width="105">พยากรณ์ & ย้อนหลัง 2 ด.</th>
-                <th width="50">สถานะ</th>
+                <th style="width:2.5%;">#</th>
+                <th style="width:16.5%;">รายการสินค้า / คู่ค้า / หน่วย</th>
+                <th style="width:7.5%;">ขาย 68<br>(แยกสาขา)</th>
+                <th style="width:7.5%;">รวมขาย 68</th>
+                <th style="width:7.5%;">ขาย 69<br>(แยกสาขา)</th>
+                <th style="width:8.5%;">รวมขาย 69 & YOY</th>
+                <th style="width:6.5%;">YOY<br>(YTD)</th>
+                <th style="width:6.5%;">YOY<br>(เดือนนี้)</th>
+                <th style="width:8%;">คงเหลือ<br>แยกคลัง</th>
+                <th style="width:7.5%;">รวมคงเหลือ</th>
+                <th style="width:5.5%;">ไม่ขาย<br>3 ด.</th>
+                <th style="width:11%;">พยากรณ์ & ย้อนหลัง 2 ด.</th>
+                <th style="width:5%;">สถานะ</th>
               </tr>
             </thead>
             <tbody>${rowsHtml}</tbody>
@@ -1345,7 +1334,7 @@
       win.document.close();
     }
 
-    // 2. ส่งออก PDF สำหรับเซลล์ (กระดาษ A4 แนวตั้ง - ปากช่อง/โคราช/ชัยภูมิ บรรทัดเดียว และ CKS เรียงทีละ 3 สาขา)
+    // 2. ส่งออก PDF สำหรับเซลล์ (กระดาษ A4 แนวตั้ง - ตัวหนังสือใหญ่ขึ้น + ปากช่อง โคราช ชัยภูมิ บรรทัดแรก และ CKS เรียงไหลต่อเนื่อง)
     function exportPDF_Sales() {
       if (currentFiltered.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก PDF");
       const supFilter = document.getElementById('supplierFilter').value;
@@ -1371,7 +1360,6 @@
         const curM69 = (p.monthly69_tn[latestMonthIndex] || 0) + (p.monthly69_cks[latestMonthIndex] || 0);
         const curMPct = curM68 > 0 ? Math.round(((curM69 - curM68) / curM68) * 100) : (curM69 > 0 ? 100 : 0);
 
-        // จัดรูปแบบคงเหลือแยกคลังใหม่ตามที่กำหนด:
         // 1) บรรทัดแรก: ปากช่อง โคราช ชัยภูมิ ไว้บรรทัดเดียวกัน
         let tnWarehouses = [];
         if (p.stock_pc > 0)  tnWarehouses.push(`ปากช่อง: <b>${p.stock_pc.toLocaleString()}</b>`);
@@ -1380,15 +1368,13 @@
 
         let stockCompactHtml = [];
         if (tnWarehouses.length > 0) {
-          stockCompactHtml.push(`<div>${tnWarehouses.join(' | ')}</div>`);
+          stockCompactHtml.push(`<div style="margin-bottom:2px;">${tnWarehouses.join(' | ')}</div>`);
         }
 
-        // 2) บรรทัดถัดมา: สาขาของชาวเกษตร เรียงทีละ 3 สาขาไล่ตามลำดับ
+        // 2) บรรทัดถัดมา: ชาวเกษตร เรียงลำดับต่อเนื่องไปตามความกว้างช่อง (ไม่บังคับตัดทุก 3 สาขา)
         if (p.cksBranches && p.cksBranches.length > 0) {
           const cksTokens = p.cksBranches.map(b => `${b.branch}: <b>${b.qty.toLocaleString()}</b>`);
-          for (let k = 0; k < cksTokens.length; k += 3) {
-            stockCompactHtml.push(`<div style="color:#1e3a2f;">${cksTokens.slice(k, k + 3).join(' | ')}</div>`);
-          }
+          stockCompactHtml.push(`<div style="color:#1e3a2f;">${cksTokens.join(' | ')}</div>`);
         } else if (p.stock_cks > 0) {
           stockCompactHtml.push(`<div style="color:#1e3a2f;">CKS(รวม): <b>${p.stock_cks.toLocaleString()}</b></div>`);
         }
@@ -1400,36 +1386,36 @@
           <tr>
             <td style="text-align:center;">${idx + 1}</td>
             <td>
-              <b>${p.name}</b><br>
-              <span style="font-size:8px; color:#555;">คู่ค้า: ${p.supplier || '-'} | (1*${mul} ${p.unitBig}/${cleanSub})</span><br>
-              <span style="font-size:8px; color:#444;">ย้อนหลัง: ${getNext2MonthsHistoryText(p)}</span>
+              <div style="font-weight:bold; font-size:11.5px;">${p.name}</div>
+              <div style="font-size:10px; color:#444; margin-top:1px;">คู่ค้า: ${p.supplier || '-'} | (1*${mul} ${p.unitBig}/${cleanSub})</div>
+              <div style="font-size:9.5px; color:#333; margin-top:1px;">ย้อนหลัง: ${getNext2MonthsHistoryText(p)}</div>
             </td>
-            <td style="font-size:8.5px;">
+            <td style="font-size:10px; line-height:1.35;">
               TN: <b>${s68_tn.toLocaleString()}</b><br>
               CKS: <b>${s68_cks.toLocaleString()}</b><br>
-              <span style="color:#666;">รวม: ${(s68_tn+s68_cks).toLocaleString()}</span>
+              <span style="color:#555;">รวม: ${(s68_tn+s68_cks).toLocaleString()}</span>
             </td>
-            <td style="font-size:8.5px;">
+            <td style="font-size:10px; line-height:1.35;">
               TN: <b>${s69_tn.toLocaleString()}</b><br>
               CKS: <b>${s69_cks.toLocaleString()}</b><br>
-              <span style="color:#666;">รวม: ${(s69_tn+s69_cks).toLocaleString()}</span>
+              <span style="color:#555;">รวม: ${(s69_tn+s69_cks).toLocaleString()}</span>
             </td>
-            <td style="text-align:right; font-size:8.5px;">
+            <td style="text-align:right; font-size:10px; line-height:1.35;">
               68: ${curM68.toLocaleString()}<br>
               69: <b>${curM69.toLocaleString()}</b><br>
-              <b style="color:${curMPct >= 0 ? '#166534' : '#dc2626'};">${curMPct >= 0 ? '+' : ''}${curMPct}%</b>
+              <b style="color:${curMPct >= 0 ? '#166534' : '#dc2626'};">${curMPct >= 0 ? '▲ +' : '▼ '}${curMPct}%</b>
             </td>
-            <td style="font-size:8px; line-height:1.35;">
+            <td style="font-size:10px; line-height:1.4;">
               ${stockCompactHtml.length > 0 ? stockCompactHtml.join('') : '<span style="color:#999;">ไม่มีสต็อค</span>'}
             </td>
-            <td style="text-align:right; font-size:8.5px;">
-              <b>${stkBig.toLocaleString()} ${p.unitBig}</b><br>
+            <td style="text-align:right; font-size:10px; line-height:1.35;">
+              <b style="font-size:11px;">${stkBig.toLocaleString()} ${p.unitBig}</b><br>
               (${stkSub.toLocaleString()} ${cleanSub})<br>
               <b>${fmtZero(p.stock_val) || '0'} บ.</b>
             </td>
-            <td style="text-align:center; font-size:8px;">
+            <td style="text-align:center; font-size:9.5px;">
               <div style="font-weight:bold;">${st.label}</div>
-              ${noSales3M.isNoSales3M ? `<div style="margin-top:2px; background:#fee2e2; color:#991b1b; padding:1px 2px; border-radius:3px; font-weight:bold;">⚠️ ไม่ขาย 3 ด.</div>` : ''}
+              ${noSales3M.isNoSales3M ? `<div style="margin-top:3px; background:#fee2e2; color:#991b1b; padding:1.5px 2px; border-radius:3px; font-weight:bold;">⚠️ ไม่ขาย 3 ด.</div>` : ''}
             </td>
           </tr>
         `;
@@ -1440,31 +1426,32 @@
         <html><head><title>รายงานสต็อคสำหรับฝ่ายขาย (เซลล์)</title>
         <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
-          @page { size: A4 portrait; margin: 7mm; }
-          body { font-family: 'Sarabun', sans-serif; font-size: 9px; color: #222; margin: 0; }
-          .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #386641; padding-bottom: 4px; margin-bottom: 5px; }
-          table { width: 100%; border-collapse: collapse; }
-          th, td { border: 1px solid #ccc; padding: 3px 4px; vertical-align: top; }
-          th { background: #386641; color: #fff; font-size: 8.5px; text-align: center; }
+          @page { size: A4 portrait; margin: 6mm; }
+          body { font-family: 'Sarabun', sans-serif; font-size: 11px; color: #111; margin: 0; }
+          .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #386641; padding-bottom: 5px; margin-bottom: 6px; }
+          table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+          th, td { border: 1px solid #bbb; padding: 4px 4.5px; vertical-align: top; word-wrap: break-word; }
+          th { background: #386641; color: #fff; font-size: 10px; text-align: center; font-weight: 700; }
+          tr { page-break-inside: avoid; }
         </style></head><body>
           <div class="header">
             <div>
-              <div style="font-size:13.5px; font-weight:bold; color:#386641;">รายงานสต็อคสินค้าคงเหลือแยกคลัง & สาขา (สำหรับฝ่ายขาย)</div>
-              <div>บริษัทคู่ค้า: <b>${supLabel}</b> | ข้อมูลยอดขาย: <b>${salesPeriodStr}</b> | สต็อค ณ วันที่: <b>${stockDateStr}</b></div>
+              <div style="font-size:15px; font-weight:bold; color:#386641;">รายงานสต็อคสินค้าคงเหลือแยกคลัง & สาขา (สำหรับฝ่ายขาย)</div>
+              <div style="font-size:11px; margin-top:2px;">บริษัทคู่ค้า: <b>${supLabel}</b> | ข้อมูลยอดขาย: <b>${salesPeriodStr}</b> | สต็อค ณ วันที่: <b>${stockDateStr}</b></div>
             </div>
-            <div style="text-align:right;">วันที่พิมพ์: <b>${printTime}</b><br>จำนวน: <b>${currentFiltered.length}</b> รายการ</div>
+            <div style="text-align:right; font-size:10.5px;">วันที่พิมพ์: <b>${printTime}</b><br>จำนวน: <b>${currentFiltered.length}</b> รายการ</div>
           </div>
           <table>
             <thead>
               <tr>
-                <th width="20">#</th>
-                <th width="135">รายการสินค้า / คู่ค้า / ย้อนหลัง 2 ด.</th>
-                <th width="54">ขายปี 68<br>(TN / CKS)</th>
-                <th width="54">ขายปี 69<br>(TN / CKS)</th>
-                <th width="54">เดือน ${curMonthName}<br>(68 vs 69)</th>
-                <th width="175">คงเหลือแยกคลัง & สาขา CKS</th>
-                <th width="62">รวมคงเหลือ & มูลค่า</th>
-                <th width="52">สถานะ / ไม่ขาย 3 ด.</th>
+                <th style="width:3.5%;">#</th>
+                <th style="width:21.5%;">รายการสินค้า / คู่ค้า / ย้อนหลัง 2 ด.</th>
+                <th style="width:8.5%;">ขายปี 68<br>(TN / CKS)</th>
+                <th style="width:8.5%;">ขายปี 69<br>(TN / CKS)</th>
+                <th style="width:8.5%;">เดือน ${curMonthName}<br>(68 vs 69)</th>
+                <th style="width:31.5%;">คงเหลือแยกคลัง & สาขา CKS</th>
+                <th style="width:10%;">รวมคงเหลือ<br>& มูลค่า</th>
+                <th style="width:8%;">สถานะ /<br>ไม่ขาย 3 ด.</th>
               </tr>
             </thead>
             <tbody>${rowsHtml}</tbody>
