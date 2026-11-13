@@ -457,7 +457,6 @@
     let expandedAPODocId = null;
     let apoForecastMonths = 2;
 
-    // ฟังก์ชันแสดงตัวเลข: ถ้าเป็น 0 ให้คืนค่าว่าง '' เสมอ
     function fmtZero(val) {
       if (val === null || val === undefined) return '';
       const num = typeof val === 'number' ? val : parseFloat(String(val).replace(/,/g, ''));
@@ -1173,7 +1172,7 @@
       document.getElementById('cksBranchModal').classList.add('hidden');
     }
 
-    // ================= ส่วนที่ 2: ระบบส่งออก PDF ทั้ง 2 มุมมอง (แนวตั้งทั้งคู่, วนลูปปกติ, ซ่อนค่า 0, แสดงเลิกขายในช่องสถานะ) =================
+    // ================= ส่วนที่ 2: ระบบส่งออก PDF ทั้ง 2 มุมมอง (แสดงผลรวมที่หัวกระดาษ) =================
     function getNext2MonthsHistoryText(p) {
       const mShort = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
       const curM = latestMonthIndex;
@@ -1191,7 +1190,33 @@
       return `${getStr(1)} | ${getStr(2)} ${p.unitBig}`;
     }
 
-    // 1. ส่งออก PDF สำหรับ MR (กระดาษ A4 แนวตั้ง - วนลูปตามปกติ + แสดงป้ายเลิกขายเด่นชัด)
+    // สร้างแถบสรุปผลรวมสำหรับหัวกระดาษรายงานทั้ง 2 ฉบับ
+    function buildReportHeaderSummaryHtml(sum68Val, sum69Val, sumStkVal) {
+      const yoyDiff = sum69Val - sum68Val;
+      const yoyPct = sum68Val > 0 ? Math.round((yoyDiff / sum68Val) * 100) : (sum69Val > 0 ? 100 : 0);
+      const yoyBadge = (sum68Val > 0 || sum69Val > 0)
+        ? `<span style="font-size:9px; font-weight:bold; color:${yoyPct >= 0 ? '#166534' : '#dc2626'};">(${yoyPct >= 0 ? '▲ +' : '▼ '}${yoyPct}%)</span>`
+        : '';
+
+      return `
+        <div style="display:flex; gap:6px; margin-top:4px; margin-bottom:5px;">
+          <div style="flex:1; background:#FEF3C7; border:1px solid #F59E0B; border-radius:4px; padding:3px 6px;">
+            <div style="font-size:8.5px; color:#78350f; font-weight:bold;">รวมมูลค่าขายปี 68 (เต็มปี)</div>
+            <div style="font-size:11px; font-weight:bold; color:#451a03;">${fmtZero(Math.round(sum68Val))} <span style="font-size:8.5px; font-weight:normal;">บาท</span></div>
+          </div>
+          <div style="flex:1; background:#FFEDD5; border:1px solid #F97316; border-radius:4px; padding:3px 6px;">
+            <div style="font-size:8.5px; color:#7c2d12; font-weight:bold;">รวมมูลค่าขายปี 69 (สะสม) ${yoyBadge}</div>
+            <div style="font-size:11px; font-weight:bold; color:#431407;">${fmtZero(Math.round(sum69Val))} <span style="font-size:8.5px; font-weight:normal;">บาท</span></div>
+          </div>
+          <div style="flex:1; background:#DCFCE7; border:1px solid #22C55E; border-radius:4px; padding:3px 6px;">
+            <div style="font-size:8.5px; color:#14532d; font-weight:bold;">รวมมูลค่าสินค้าคงเหลือ</div>
+            <div style="font-size:11px; font-weight:bold; color:#052e16;">${fmtZero(Math.round(sumStkVal))} <span style="font-size:8.5px; font-weight:normal;">บาท</span></div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 1. ส่งออก PDF สำหรับ MR (กระดาษ A4 แนวตั้ง - แสดงผลรวมที่หัวกระดาษ)
     function exportPDF_MR() {
       if (currentFiltered.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก PDF");
       const supFilter = document.getElementById('supplierFilter').value;
@@ -1200,7 +1225,13 @@
       const printTime = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} น.`;
 
       let rowsHtml = '';
+      let sum68Val = 0, sum69Val = 0, sumStkVal = 0;
+
       currentFiltered.forEach((p, idx) => {
+        sum68Val  += (p.sales68_val || 0);
+        sum69Val  += (p.sales69_val || 0);
+        sumStkVal += (p.stock_val || 0);
+
         const mul = p.unitMultiplier || 1;
         const cleanSub = getCleanUnitName(p.unitSub);
         const st = getStatusObj(p);
@@ -1304,6 +1335,8 @@
         `;
       });
 
+      const headerSummaryHtml = buildReportHeaderSummaryHtml(sum68Val, sum69Val, sumStkVal);
+
       const win = window.open('', '_blank');
       win.document.write(`
         <html><head><title>รายงานสต็อคสำหรับ MR</title>
@@ -1312,7 +1345,7 @@
           @page { size: A4 portrait; margin: 4mm; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           body { font-family: 'Sarabun', sans-serif; font-size: 9px; color: #111; margin: 0; }
-          .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #4A3B32; padding-bottom: 4px; margin-bottom: 5px; }
+          .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #4A3B32; padding-bottom: 3px; }
           table { width: 100%; border-collapse: collapse; table-layout: fixed; }
           th, td { border: 1px solid #bbb; padding: 2.5px 2.5px; vertical-align: top; word-wrap: break-word; }
           th { background: #E8E3D7 !important; color: #000000 !important; font-size: 8.5px; text-align: center; font-weight: 700; }
@@ -1325,6 +1358,7 @@
             </div>
             <div style="text-align:right; font-size:9.5px;">พิมพ์เมื่อ: <b>${printTime}</b><br>จำนวนทั้งหมด: <b>${currentFiltered.length}</b> รายการ</div>
           </div>
+          ${headerSummaryHtml}
           <table>
             <thead>
               <tr>
@@ -1350,7 +1384,7 @@
       win.document.close();
     }
 
-    // 2. ส่งออก PDF สำหรับเซลล์ (กระดาษ A4 แนวตั้ง - วนลูปตามปกติ + แสดงป้ายเลิกขายเด่นชัด)
+    // 2. ส่งออก PDF สำหรับเซลล์ (กระดาษ A4 แนวตั้ง - แสดงผลรวมที่หัวกระดาษ)
     function exportPDF_Sales() {
       if (currentFiltered.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก PDF");
       const supFilter = document.getElementById('supplierFilter').value;
@@ -1361,7 +1395,13 @@
       const curMonthName = mShort[latestMonthIndex] || '';
 
       let rowsHtml = '';
+      let sum68Val = 0, sum69Val = 0, sumStkVal = 0;
+
       currentFiltered.forEach((p, idx) => {
+        sum68Val  += (p.sales68_val || 0);
+        sum69Val  += (p.sales69_val || 0);
+        sumStkVal += (p.stock_val || 0);
+
         const mul = p.unitMultiplier || 1;
         const cleanSub = getCleanUnitName(p.unitSub);
         const st = getStatusObj(p);
@@ -1446,6 +1486,8 @@
         `;
       });
 
+      const headerSummaryHtml = buildReportHeaderSummaryHtml(sum68Val, sum69Val, sumStkVal);
+
       const win = window.open('', '_blank');
       win.document.write(`
         <html><head><title>รายงานสต็อคสำหรับฝ่ายขาย (เซลล์)</title>
@@ -1454,7 +1496,7 @@
           @page { size: A4 portrait; margin: 5mm; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           body { font-family: 'Sarabun', sans-serif; font-size: 10px; color: #111; margin: 0; }
-          .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #386641; padding-bottom: 4px; margin-bottom: 5px; }
+          .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #386641; padding-bottom: 3px; }
           table { width: 100%; border-collapse: collapse; table-layout: fixed; }
           th, td { border: 1px solid #bbb; padding: 2.5px 4px; vertical-align: top; word-wrap: break-word; }
           th { background: #D4E7C5 !important; color: #000000 !important; font-size: 9.5px; text-align: center; font-weight: 700; }
@@ -1467,6 +1509,7 @@
             </div>
             <div style="text-align:right; font-size:10px;">วันที่พิมพ์: <b>${printTime}</b><br>จำนวนทั้งหมด: <b>${currentFiltered.length}</b> รายการ</div>
           </div>
+          ${headerSummaryHtml}
           <table>
             <thead>
               <tr>
