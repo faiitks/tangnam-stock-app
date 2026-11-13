@@ -28,7 +28,7 @@
   </script>
 
   <style>
-    body { background-color: #FAF8F5; color: #4A3B32; font-family: 'Sarabun', sans-serif; }
+    body { background-color: #FAF8F5; color: #4A3B32; -family: 'Sarabun', sans-serif; }
     .grid-table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; min-width: 100%; }
     .grid-table th, .grid-table td { border-right: 1px solid #E8E3D7; border-bottom: 1px solid #E8E3D7; box-sizing: border-box; }
     
@@ -51,7 +51,7 @@
     <div class="max-w-[1920px] mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-leaf-600 flex items-center justify-center text-white font-prompt font-bold text-lg shadow-xs">T</div>
+          <div class="w-8 h-8 rounded-lg bg-leaf-600 flex items-center justify-center text-white -prompt -bold text-lg shadow-xs">T</div>
           <div>
             <div class="font-prompt font-bold text-sm text-earth-900 leading-tight">ระบบสต็อคสินค้าและพยากรณ์ขาย</div>
             <div class="text-[11px] text-earth-600">ตังนำเกษตร & ชาวเกษตร</div>
@@ -1238,7 +1238,7 @@
           <tr>
             <td style="text-align:center;">${idx + 1}</td>
             <td>
-              <div style="font-weight:bold; font-size:11px;">${p.name}</div>
+              <div style="font-size:10px;">${p.name}</div>
               <div style="font-size:9.5px; color:#444;">${p.supplier || '-'} | (1*${mul} ${p.unitBig}/${cleanSub})</div>
             </td>
             <td style="font-size:9.5px; line-height:1.3;">${b68Html.length > 0 ? b68Html.join('<br>') : '-'}</td>
@@ -1298,7 +1298,7 @@
           .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #4A3B32; padding-bottom: 5px; margin-bottom: 6px; }
           table { width: 100%; border-collapse: collapse; table-layout: fixed; }
           th, td { border: 1px solid #bbb; padding: 3.5px 4px; vertical-align: top; word-wrap: break-word; }
-          th { background: #4A3B32; color: #fff; font-size: 10px; text-align: center; font-weight: 700; }
+          th { background: #4A3B32; color: #000; font-size: 10px; text-align: center; font-weight: 700; }
           tr { page-break-inside: avoid; }
         </style></head><body>
           <div class="header">
@@ -1386,7 +1386,7 @@
           <tr>
             <td style="text-align:center;">${idx + 1}</td>
             <td>
-              <div style="font-weight:bold; font-size:11.5px;">${p.name}</div>
+              <div style="font-size:10px;">${p.name}</div>
               <div style="font-size:10px; color:#444; margin-top:1px;">คู่ค้า: ${p.supplier || '-'} | (1*${mul} ${p.unitBig}/${cleanSub})</div>
               <div style="font-size:9.5px; color:#333; margin-top:1px;">ย้อนหลัง: ${getNext2MonthsHistoryText(p)}</div>
             </td>
@@ -1431,7 +1431,7 @@
           .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #386641; padding-bottom: 5px; margin-bottom: 6px; }
           table { width: 100%; border-collapse: collapse; table-layout: fixed; }
           th, td { border: 1px solid #bbb; padding: 4px 4.5px; vertical-align: top; word-wrap: break-word; }
-          th { background: #386641; color: #fff; font-size: 10px; text-align: center; font-weight: 700; }
+          th { background: #386641; color: #000; font-size: 10px; text-align: center; font-weight: 700; }
           tr { page-break-inside: avoid; }
         </style></head><body>
           <div class="header">
