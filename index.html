@@ -807,13 +807,17 @@
     }
 
     function getStatusObj(p) {
-      const r = (p.statusRaw || '').trim();
-      if (p.isDiscontinued || r.includes('เลิก')) return { label: '⚪ เลิกขาย', badge: 'bg-gray-100 text-gray-500 border-gray-300', code: 'DISCONTINUED' };
-      if (r.includes('สั่งด่วน')) return { label: '🔴 สั่งด่วน', badge: 'bg-red-50 text-red-700 border-red-200', code: 'CRITICAL' };
-      if (r.includes('ควรสั่ง')) return { label: '🟡 ควรสั่ง', badge: 'bg-amber-50 text-amber-800 border-amber-200', code: 'REORDER' };
-      if (r.includes('เกิน') || r.includes('ล้น')) return { label: '🔵 เกินสต็อค', badge: 'bg-blue-50 text-blue-700 border-blue-200', code: 'OVERSTOCK' };
-      return { label: '🟢 ปกติ', badge: 'bg-leaf-50 text-leaf-800 border-leaf-200', code: 'OPTIMAL' };
-    }
+function getStatusObj(p) {
+  const r = (p.statusRaw || '').trim();
+  const n = (p.name || '').trim();
+  if (p.isDiscontinued: statusVal.includes('เลิก') || statusVal.includes('หยุดขาย') || nameVal.includes('เลิกขาย'),) {
+    return { label: '⚪ เลิกขาย', badge: 'bg-gray-200 text-gray-700 border-gray-400', code: 'DISCONTINUED' };
+  }
+  if (r.includes('สั่งด่วน')) return { label: '🔴 สั่งด่วน', badge: 'bg-red-50 text-red-700 border-red-200', code: 'CRITICAL' };
+  if (r.includes('ควรสั่ง')) return { label: '🟡 ควรสั่ง', badge: 'bg-amber-50 text-amber-800 border-amber-200', code: 'REORDER' };
+  if (r.includes('เกิน') || r.includes('ล้น')) return { label: '🔵 เกินสต็อค', badge: 'bg-blue-50 text-blue-700 border-blue-200', code: 'OVERSTOCK' };
+  return { label: '🟢 ปกติ', badge: 'bg-leaf-50 text-leaf-800 border-leaf-200', code: 'OPTIMAL' };
+}
 
     function updateKPICards() {
       let s68 = 0, s69 = 0, stk = 0, crit = 0, reord = 0, opt = 0, over = 0;
@@ -1427,8 +1431,8 @@
               <b>${fmtZero(p.stock_val) ? `${fmtZero(p.stock_val)} บ.` : ''}</b>
             </td>
             <td style="text-align:center; font-size:8.5px; line-height:1.25;">
-              <div style="font-weight:bold;">${st.label}</div>
-              ${noSales3M.isNoSales3M ? `<div style="margin-top:2px; background:#fee2e2; color:#991b1b; padding:1px 2px; border-radius:3px; font-weight:bold;">⚠️ ไม่ขาย 3 ด.</div>` : ''}
+  <div style="font-weight:bold;">${st.label}</div>
+  ${noSales3M.isNoSales3M ? `<div style="margin-top:2px; background:#fee2e2; color:#991b1b; padding:1px 2px; border-radius:3px; font-weight:bold;">⚠️ ไม่ขาย 3 ด.</div>` : ''}
             </td>
           </tr>
         `;
