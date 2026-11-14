@@ -421,6 +421,7 @@
         <div class="flex flex-wrap items-center gap-1.5">
           <span class="text-xs font-semibold text-earth-800 mr-1">แยกดูตามสาขา:</span>
           <button onclick="setMonthlyBranchTab('ALL')" id="mTabALL" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-earth-900 text-white">รวมทั้งหมด</button>
+          <button onclick="setMonthlyBranchTab('TN15_CKS')" id="mTabTN15_CKS" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-cream-300 text-earth-800">รวม TN(1-5)+CKS</button>
           <button onclick="setMonthlyBranchTab('TN_ALL')" id="mTabTN_ALL" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-cream-300 text-earth-800">รวม TN</button>
           <button onclick="setMonthlyBranchTab('TN_1_5')" id="mTabTN_1_5" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-cream-300 text-earth-800">TN(1-5)</button>
           <button onclick="setMonthlyBranchTab('TN_6')" id="mTabTN_6" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-cream-300 text-earth-800">TN(6)</button>
@@ -2068,7 +2069,7 @@
       document.getElementById('modalProductName').innerText = p.name;
 
       // อัปเดตสถานะปุ่มเลือกสาขา
-      const tabs = ['ALL', 'TN_ALL', 'TN_1_5', 'TN_6', 'CKS'];
+      const tabs = ['ALL', 'TN15_CKS', 'TN_ALL', 'TN_1_5', 'TN_6', 'CKS'];
       tabs.forEach(t => {
         const el = document.getElementById('mTab' + t);
         if (!el) return;
@@ -2081,6 +2082,7 @@
 
       const tabLabels = {
         'ALL': 'รวมทั้งหมด (TN + CKS)',
+        'TN15_CKS': 'รวม TN(1-5) + CKS (ไม่รวม TN 6)',
         'TN_ALL': 'รวมตังนำเกษตร (TN 1-5 + TN 6)',
         'TN_1_5': 'ตังนำเกษตร สาขา 1-5 (TN 1-5)',
         'TN_6': 'ตังนำเกษตร สาขา 6 (TN 6)',
@@ -2089,23 +2091,29 @@
       document.getElementById('modalChartTitle').innerText = `กราฟเปรียบเทียบยอดขายรายเดือน: ${tabLabels[activeMonthlyBranchTab]} (หน่วย: ${cleanSub})`;
 
       const getMonthPair = (i) => {
-        if (activeMonthlyBranchTab === 'TN_1_5') {
-          return { v68: p.monthly68_tn_1_5[i] || 0, v69: p.monthly69_tn_1_5[i] || 0 };
-        }
-        if (activeMonthlyBranchTab === 'TN_6') {
-          return { v68: p.monthly68_tn_6[i] || 0, v69: p.monthly69_tn_6[i] || 0 };
-        }
-        if (activeMonthlyBranchTab === 'TN_ALL') {
-          return { v68: p.monthly68_tn[i] || 0, v69: p.monthly69_tn[i] || 0 };
-        }
-        if (activeMonthlyBranchTab === 'CKS') {
-          return { v68: p.monthly68_cks[i] || 0, v69: p.monthly69_cks[i] || 0 };
-        }
-        return {
-          v68: (p.monthly68_tn[i] || 0) + (p.monthly68_cks[i] || 0),
-          v69: (p.monthly69_tn[i] || 0) + (p.monthly69_cks[i] || 0)
-        };
-      };
+  if (activeMonthlyBranchTab === 'TN15_CKS') {
+    return {
+      v68: (p.monthly68_tn_1_5[i] || 0) + (p.monthly68_cks[i] || 0),
+      v69: (p.monthly69_tn_1_5[i] || 0) + (p.monthly69_cks[i] || 0)
+    };
+  }
+  if (activeMonthlyBranchTab === 'TN_1_5') {
+    return { v68: p.monthly68_tn_1_5[i] || 0, v69: p.monthly69_tn_1_5[i] || 0 };
+  }
+  if (activeMonthlyBranchTab === 'TN_6') {
+    return { v68: p.monthly68_tn_6[i] || 0, v69: p.monthly69_tn_6[i] || 0 };
+  }
+  if (activeMonthlyBranchTab === 'TN_ALL') {
+    return { v68: p.monthly68_tn[i] || 0, v69: p.monthly69_tn[i] || 0 };
+  }
+  if (activeMonthlyBranchTab === 'CKS') {
+    return { v68: p.monthly68_cks[i] || 0, v69: p.monthly69_cks[i] || 0 };
+  }
+  return {
+    v68: (p.monthly68_tn[i] || 0) + (p.monthly68_cks[i] || 0),
+    v69: (p.monthly69_tn[i] || 0) + (p.monthly69_cks[i] || 0)
+  };
+};
 
       const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
       let html = '', chartHtml = '', t68 = 0, t69 = 0;
