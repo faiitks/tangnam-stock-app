@@ -204,9 +204,13 @@
             <span>เฉพาะไม่มีการขาย 3 เดือน (69)</span>
           </label>
           <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs text-earth-700">
-            <input type="checkbox" id="hideDiscontinued" onchange="resetAndFilter()" class="rounded border-cream-300 text-leaf-600">
-            <span>ซ่อนสินค้าเลิกขาย</span>
-          </label>
+  <input type="checkbox" id="hideDiscontinued" onchange="resetAndFilter()" class="rounded border-cream-300 text-leaf-600">
+  <span>ซ่อนสินค้าเลิกขาย</span>
+</label>
+          <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs text-leaf-800 font-semibold">
+  <input type="checkbox" id="mrShowForecast" checked class="rounded border-leaf-300 text-leaf-600">
+  <span>แสดงพยากรณ์ใน PDF (MR)</span>
+</label>
         </div>
       </div>
     </div>
@@ -1261,6 +1265,7 @@
       const supLabel = supFilter === 'ALL' ? 'ทั้งหมด' : supFilter;
       const now = new Date();
       const printTime = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} น.`;
+      const showForecast = document.getElementById('mrShowForecast')?.checked ?? true;
 
       let rowsHtml = '';
       let sum68Val = 0, sum69Val = 0, sumStkVal = 0;
@@ -1361,10 +1366,12 @@
               ${stkSub > 0 ? `<span style="font-size:8.5px;">(${stkSub.toLocaleString()} ${cleanSub})</span><br>` : ''}
               <span style="font-size:8.5px; font-weight:600;">${fmtZero(p.stock_val)}</span>
             </td>
+            ${showForecast ? `
             <td style="font-size:8.5px; line-height:1.25;">
               ${s69Sub > 0 ? `1ด:<b>${fc1}</b> | 1.5ด:<b>${fc1_5}</b><br>2ด:<b>${fc2}</b> | 3ด:<b>${fc3}</b> (${p.unitBig})<br>` : ''}
               <span style="color:#333;">ย้อนหลัง: ${getNext2MonthsHistoryText(p)}</span>
             </td>
+            ` : ''}
             <td style="text-align:center; font-size:8px; line-height:1.25;">
               <div style="font-weight:bold; ${discStyle}">${st.label}</div>
               ${noSales3M.isNoSales3M ? `<div style="margin-top:2px; background:#fee2e2; color:#991b1b; padding:1px 2px; border-radius:3px; font-weight:bold;">⚠️ ไม่ขาย 3 ด.</div>` : ''}
@@ -1399,20 +1406,21 @@
           ${headerSummaryHtml}
           <table>
             <thead>
-              <tr>
-                <th style="width:2.5%;">#</th>
-                <th style="width:16.5%;">รายการสินค้า / ประเภท / ชื่อสามัญ</th>
-                <th style="width:7.5%;">ขาย 68<br>(แยกสาขา)</th>
-                <th style="width:8%;">รวมขาย 68</th>
-                <th style="width:7.5%;">ขาย 69<br>(แยกสาขา)</th>
-                <th style="width:8.5%;">รวมขาย 69 & YOY</th>
-                <th style="width:7%;">YOY<br>(YTD)</th>
-                <th style="width:7%;">YOY<br>(เดือนนี้)</th>
-                <th style="width:8%;">คงเหลือ<br>แยกคลัง</th>
-                <th style="width:8%;">รวมคงเหลือ</th>
-                <th style="width:12.5%;">พยากรณ์ & ย้อนหลัง 2 ด.</th>
-                <th style="width:7%;">สถานะ /<br>ไม่ขาย 3 ด.</th>
-              </tr>
+  <tr>
+    <th style="width:2.5%;">#</th>
+    <th style="width:${showForecast ? '16.5%' : '29%'};">รายการสินค้า / ประเภท / ชื่อสามัญ</th>
+    <th style="width:7.5%;">ขาย 68<br>(แยกสาขา)</th>
+    <th style="width:8%;">รวมขาย 68</th>
+    <th style="width:7.5%;">ขาย 69<br>(แยกสาขา)</th>
+    <th style="width:8.5%;">รวมขาย 69 & YOY</th>
+    <th style="width:7%;">YOY<br>(YTD)</th>
+    <th style="width:7%;">YOY<br>(เดือนนี้)</th>
+    <th style="width:8%;">คงเหลือ<br>แยกคลัง</th>
+    <th style="width:8%;">รวมคงเหลือ</th>
+    ${showForecast ? `<th style="width:12.5%;">พยากรณ์ & ย้อนหลัง 2 ด.</th>` : ''}
+    <th style="width:7%;">สถานะ /<br>ไม่ขาย 3 ด.</th>
+  </tr>
+</thead>
             </thead>
             <tbody>${rowsHtml}</tbody>
           </table>
