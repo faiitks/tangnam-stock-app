@@ -1092,7 +1092,7 @@
               ${getYOY_SameMonthHtml(p, cleanSub)}
             </td>
 
-            <td class="px-1.5 py-1.5 align-top text-[10px] leading-tight">
+            <td class="px-1.5 py-1.5 align-top text-[10px] leading-tight bg-leaf-100/60">
               ${stockLines.length > 0 ? stockLines.join('') : ''}
             </td>
             <td class="px-1.5 py-1.5 text-right align-top bg-leaf-100/60 border-r-2 border-leaf-400">
@@ -1350,7 +1350,7 @@
                 <b style="color:${mPct >= 0 ? '#166534' : '#dc2626'};">${mPct >= 0 ? '▲ +' : '▼ '}${mPct}%</b>
               ` : ''}
             </td>
-            <td style="font-size:8.5px; line-height:1.25;">
+            <td style="font-size:8.5px; line-height:1.25; background:#DCFCE7;">
               ${p.stock_pc > 0 ? `ปากช่อง: <b>${p.stock_pc.toLocaleString()}</b><br>` : ''}
               ${p.stock_kr > 0 ? `โคราช: <b>${p.stock_kr.toLocaleString()}</b><br>` : ''}
               ${p.stock_cyp > 0 ? `ชัยภูมิ: <b>${p.stock_cyp.toLocaleString()}</b><br>` : ''}
