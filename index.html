@@ -405,9 +405,9 @@
     </div>
   </div>
 
-  <!-- ================= MODAL 3: กราฟ/ตารางยอดขายรายเดือน YOY ================= -->
-  <div id="monthlyModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 no-print">
-    <div class="bg-white rounded-2xl max-w-3xl w-full border border-cream-300 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+  <!-- ================= MODAL 3: กราฟและตารางยอดขายรายเดือนแยกสาขา (TN(1-5) / TN(6) / CKS) ================= -->
+  <div id="monthlyModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-4xl w-full border border-cream-300 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
       <div class="px-5 py-3 bg-earth-900 text-cream-50 flex items-center justify-between">
         <div>
           <div class="text-xs text-leaf-300 font-semibold" id="modalProductCode">หมวดหมู่</div>
@@ -415,7 +415,31 @@
         </div>
         <button onclick="closeMonthlyModal()" class="text-cream-300 hover:text-white text-2xl font-bold leading-none">&times;</button>
       </div>
-      <div class="p-4 overflow-y-auto flex-1">
+
+      <!-- แถบปุ่มสลับกลุ่มสาขา: รวมทั้งหมด / รวม TN / TN(1-5) / TN(6) / CKS -->
+      <div class="px-5 py-2.5 bg-cream-100 border-b border-cream-300 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span class="text-xs font-semibold text-earth-800 mr-1">แยกดูตามสาขา:</span>
+          <button onclick="setMonthlyBranchTab('ALL')" id="mTabALL" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-earth-900 text-white">รวมทั้งหมด</button>
+          <button onclick="setMonthlyBranchTab('TN_ALL')" id="mTabTN_ALL" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-cream-300 text-earth-800">รวม TN</button>
+          <button onclick="setMonthlyBranchTab('TN_1_5')" id="mTabTN_1_5" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-cream-300 text-earth-800">TN(1-5)</button>
+          <button onclick="setMonthlyBranchTab('TN_6')" id="mTabTN_6" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-cream-300 text-earth-800">TN(6)</button>
+          <button onclick="setMonthlyBranchTab('CKS')" id="mTabCKS" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-cream-300 text-leaf-800">CKS</button>
+        </div>
+        <div class="flex items-center gap-3 text-[11px]">
+          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-amber-400 inline-block"></span> ปี 2568</span>
+          <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-leaf-600 inline-block"></span> ปี 2569</span>
+        </div>
+      </div>
+
+      <div class="p-4 overflow-y-auto flex-1 flex flex-col gap-4">
+        <!-- กราฟแท่งเปรียบเทียบรายเดือน -->
+        <div class="bg-cream-50 p-3 rounded-xl border border-cream-300">
+          <div class="text-[11px] font-semibold text-earth-700 mb-2" id="modalChartTitle">กราฟเปรียบเทียบยอดขายรายเดือน (หน่วยย่อย)</div>
+          <div id="modalBarChartContainer" class="h-36 flex items-end justify-between gap-1.5 pt-4 pb-1 px-1 border-b border-cream-400"></div>
+        </div>
+
+        <!-- ตารางตัวเลขรายเดือน -->
         <table class="w-full text-xs text-left border border-cream-300">
           <thead class="bg-cream-200 font-semibold">
             <tr>
@@ -456,6 +480,9 @@
     let activeAPOFilter = 'ALL';
     let expandedAPODocId = null;
     let apoForecastMonths = 2;
+
+    let activeMonthlyProductId = null;
+    let activeMonthlyBranchTab = 'ALL';
 
     function fmtZero(val) {
       if (val === null || val === undefined) return '';
@@ -568,6 +595,8 @@
           }
         }
 
+        // อ่านชีท ยอดขาย68 และ ยอดขาย69 แบบแยก 3 กลุ่ม:
+        // Index 2-13 = tn_1_5 (12 เดือน), Index 14-25 = tn_6 (12 เดือน), Index 26-37 = cks (12 เดือน)
         async function parseMonthly(res) {
           const map = new Map();
           if (!res || !res.ok) return map;
@@ -582,11 +611,18 @@
               if ((!codeRaw && !nameRaw) || codeRaw === 'รหัสสินค้า' || nameRaw === 'ชื่อสินค้า') continue;
 
               const getN = (idx) => (mc[idx] && mc[idx].v !== null) ? parseFloat(String(mc[idx].v).replace(/,/g, '')) || 0 : 0;
-              const tn = [], cks = [];
-              for (let i = 2; i <= 13; i++) tn.push(getN(i));   
-              for (let i = 14; i <= 25; i++) cks.push(getN(i)); 
+              const tn_1_5 = [], tn_6 = [], cks = [], tn_total = [];
+              for (let m = 0; m < 12; m++) {
+                const v1_5 = getN(2 + m);   // C - N
+                const v6   = getN(14 + m);  // O - Z
+                const vCks = getN(26 + m);  // AA - AL
+                tn_1_5.push(v1_5);
+                tn_6.push(v6);
+                cks.push(vCks);
+                tn_total.push(v1_5 + v6);
+              }
 
-              const obj = { tn, cks };
+              const obj = { tn: tn_total, tn_1_5, tn_6, cks };
               if (codeRaw) { map.set(codeRaw, obj); map.set(normalizeCode(codeRaw), obj); }
               if (nameRaw) { map.set(nameRaw, obj); map.set(nameRaw.toLowerCase(), obj); }
             }
@@ -653,6 +689,8 @@
           parseCKSBranchPivotSheet(resCksBranch)
         ]);
 
+        const emptyMonthly = { tn: Array(12).fill(0), tn_1_5: Array(12).fill(0), tn_6: Array(12).fill(0), cks: Array(12).fill(0) };
+
         const products = [];
         for (let i = DATA_START_IDX; i < rowsMain.length; i++) {
           const c = rowsMain[i] ? rowsMain[i].c : null;
@@ -677,8 +715,8 @@
           const codeVal = getV(2) || getV(1) || `SKU-${i + 1}`;
           const statusVal = getV(51);
 
-          const d68 = map68.get(codeVal) || map68.get(normalizeCode(codeVal)) || map68.get(nameVal) || map68.get(nameVal.toLowerCase()) || { tn: Array(12).fill(0), cks: Array(12).fill(0) };
-          const d69 = map69.get(codeVal) || map69.get(normalizeCode(codeVal)) || map69.get(nameVal) || map69.get(nameVal.toLowerCase()) || { tn: Array(12).fill(0), cks: Array(12).fill(0) };
+          const d68 = map68.get(codeVal) || map68.get(normalizeCode(codeVal)) || map68.get(nameVal) || map68.get(nameVal.toLowerCase()) || emptyMonthly;
+          const d69 = map69.get(codeVal) || map69.get(normalizeCode(codeVal)) || map69.get(nameVal) || map69.get(nameVal.toLowerCase()) || emptyMonthly;
           const cksBranches = mapCksBranches.get(codeVal) || mapCksBranches.get(normalizeCode(codeVal)) || mapCksBranches.get(nameVal) || mapCksBranches.get(nameVal.toLowerCase()) || [];
 
           const sValTn = getN(37), sValCks = getN(38);
@@ -703,8 +741,8 @@
             sales69_val_tn: getN(27), sales69_val_cks: getN(28), sales69_val: getN(29),
             stock_pc: getN(30), stock_kr: getN(31), stock_cyp: getN(32), stock_cks: getN(33),
             stock_val_tn: sValTn, stock_val_cks: sValCks, stock_val: sValTot,
-            monthly68_tn: d68.tn, monthly68_cks: d68.cks,
-            monthly69_tn: d69.tn, monthly69_cks: d69.cks,
+            monthly68_tn: d68.tn, monthly68_tn_1_5: d68.tn_1_5, monthly68_tn_6: d68.tn_6, monthly68_cks: d68.cks,
+            monthly69_tn: d69.tn, monthly69_tn_1_5: d69.tn_1_5, monthly69_tn_6: d69.tn_6, monthly69_cks: d69.cks,
             cksBranches: cksBranches,
             orderBigQty: 0, freeBigQty: 0, unitPriceInput: 0, orderTotalVal: 0, notes: ''
           });
@@ -1190,7 +1228,6 @@
       return `${getStr(1)} | ${getStr(2)} ${p.unitBig}`;
     }
 
-    // สร้างแถบสรุปผลรวมสำหรับหัวกระดาษรายงานทั้ง 2 ฉบับ
     function buildReportHeaderSummaryHtml(sum68Val, sum69Val, sumStkVal) {
       const yoyDiff = sum69Val - sum68Val;
       const yoyPct = sum68Val > 0 ? Math.round((yoyDiff / sum68Val) * 100) : (sum69Val > 0 ? 100 : 0);
@@ -1216,7 +1253,7 @@
       `;
     }
 
-    // 1. ส่งออก PDF สำหรับ MR (กระดาษ A4 แนวตั้ง - แสดงผลรวมที่หัวกระดาษ)
+    // 1. ส่งออก PDF สำหรับ MR (กระดาษ A4 แนวตั้ง)
     function exportPDF_MR() {
       if (currentFiltered.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก PDF");
       const supFilter = document.getElementById('supplierFilter').value;
@@ -1384,7 +1421,7 @@
       win.document.close();
     }
 
-    // 2. ส่งออก PDF สำหรับเซลล์ (กระดาษ A4 แนวตั้ง - แสดงผลรวมที่หัวกระดาษ)
+    // 2. ส่งออก PDF สำหรับเซลล์ (กระดาษ A4 แนวตั้ง)
     function exportPDF_Sales() {
       if (currentFiltered.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก PDF");
       const supFilter = document.getElementById('supplierFilter').value;
@@ -2009,21 +2046,97 @@
       renderAPOList();
     }
 
-    // ================= 5. Modal ดูกราฟรายเดือน YOY & Export Excel =================
+    // ================= 5. Modal ดูกราฟรายเดือนแยกสาขา (รวมทั้งหมด / รวม TN / TN(1-5) / TN(6) / CKS) =================
     function openMonthlyModal(productId) {
-      const p = rawProducts.find(x => x.id === productId);
+      activeMonthlyProductId = productId;
+      activeMonthlyBranchTab = 'ALL';
+      renderMonthlyModalContent();
+      document.getElementById('monthlyModal').classList.remove('hidden');
+    }
+
+    function setMonthlyBranchTab(tab) {
+      activeMonthlyBranchTab = tab;
+      renderMonthlyModalContent();
+    }
+
+    function renderMonthlyModalContent() {
+      const p = rawProducts.find(x => x.id === activeMonthlyProductId);
       if (!p) return;
-      document.getElementById('modalProductCode').innerText = `${p.category || 'สินค้าเกษตร'} ${p.supplier ? `| คู่ค้า: ${p.supplier}` : ''}`;
+
+      const cleanSub = getCleanUnitName(p.unitSub);
+      document.getElementById('modalProductCode').innerText = `${p.category || 'สินค้าเกษตร'} ${p.supplier ? `| คู่ค้า: ${p.supplier}` : ''} | หน่วยขาย: ${cleanSub}`;
       document.getElementById('modalProductName').innerText = p.name;
 
+      // อัปเดตสถานะปุ่มเลือกสาขา
+      const tabs = ['ALL', 'TN_ALL', 'TN_1_5', 'TN_6', 'CKS'];
+      tabs.forEach(t => {
+        const el = document.getElementById('mTab' + t);
+        if (!el) return;
+        if (t === activeMonthlyBranchTab) {
+          el.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-earth-900 text-white shadow-2xs";
+        } else {
+          el.className = `px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-cream-300 ${t === 'CKS' ? 'text-leaf-800' : 'text-earth-800'} hover:bg-cream-200`;
+        }
+      });
+
+      const tabLabels = {
+        'ALL': 'รวมทั้งหมด (TN + CKS)',
+        'TN_ALL': 'รวมตังนำเกษตร (TN 1-5 + TN 6)',
+        'TN_1_5': 'ตังนำเกษตร สาขา 1-5 (TN 1-5)',
+        'TN_6': 'ตังนำเกษตร สาขา 6 (TN 6)',
+        'CKS': 'ชาวเกษตร (CKS)'
+      };
+      document.getElementById('modalChartTitle').innerText = `กราฟเปรียบเทียบยอดขายรายเดือน: ${tabLabels[activeMonthlyBranchTab]} (หน่วย: ${cleanSub})`;
+
+      const getMonthPair = (i) => {
+        if (activeMonthlyBranchTab === 'TN_1_5') {
+          return { v68: p.monthly68_tn_1_5[i] || 0, v69: p.monthly69_tn_1_5[i] || 0 };
+        }
+        if (activeMonthlyBranchTab === 'TN_6') {
+          return { v68: p.monthly68_tn_6[i] || 0, v69: p.monthly69_tn_6[i] || 0 };
+        }
+        if (activeMonthlyBranchTab === 'TN_ALL') {
+          return { v68: p.monthly68_tn[i] || 0, v69: p.monthly69_tn[i] || 0 };
+        }
+        if (activeMonthlyBranchTab === 'CKS') {
+          return { v68: p.monthly68_cks[i] || 0, v69: p.monthly69_cks[i] || 0 };
+        }
+        return {
+          v68: (p.monthly68_tn[i] || 0) + (p.monthly68_cks[i] || 0),
+          v69: (p.monthly69_tn[i] || 0) + (p.monthly69_cks[i] || 0)
+        };
+      };
+
       const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-      let html = '', t68 = 0, t69 = 0;
+      let html = '', chartHtml = '', t68 = 0, t69 = 0;
+
+      // หาค่าสูงสุดเพื่อคำนวณสัดส่วนความสูงแท่งกราฟ
+      let maxVal = 0;
+      for (let i = 0; i < 12; i++) {
+        const { v68, v69 } = getMonthPair(i);
+        if (v68 > maxVal) maxVal = v68;
+        if (v69 > maxVal) maxVal = v69;
+      }
+
       months.forEach((m, i) => {
-        const v68 = (p.monthly68_tn[i] || 0) + (p.monthly68_cks[i] || 0);
-        const v69 = (p.monthly69_tn[i] || 0) + (p.monthly69_cks[i] || 0);
+        const { v68, v69 } = getMonthPair(i);
         t68 += v68; t69 += v69;
         const diff = v69 - v68;
         const pct = v68 > 0 ? Math.round((diff / v68) * 100) : (v69 > 0 ? 100 : 0);
+
+        const h68 = maxVal > 0 ? Math.max(v68 > 0 ? 4 : 0, Math.round((v68 / maxVal) * 100)) : 0;
+        const h69 = maxVal > 0 ? Math.max(v69 > 0 ? 4 : 0, Math.round((v69 / maxVal) * 100)) : 0;
+
+        chartHtml += `
+          <div class="flex-1 flex flex-col items-center h-full justify-end group">
+            <div class="w-full flex items-end justify-center gap-0.5 h-24">
+              <div style="height:${h68}%" class="w-2.5 sm:w-3 bg-amber-400 rounded-t-xs transition-all" title="ปี 68 (${m}): ${v68.toLocaleString()} ${cleanSub}"></div>
+              <div style="height:${h69}%" class="w-2.5 sm:w-3 bg-leaf-600 rounded-t-xs transition-all" title="ปี 69 (${m}): ${v69.toLocaleString()} ${cleanSub}"></div>
+            </div>
+            <div class="text-[9.5px] font-medium text-earth-700 mt-1">${m}</div>
+          </div>
+        `;
+
         html += `<tr>
           <td class="px-3 py-1.5 font-medium">${m}</td>
           <td class="px-3 py-1.5 text-right font-mono">${fmtZero(v68)}</td>
@@ -2032,17 +2145,18 @@
           <td class="px-3 py-1.5 text-right font-mono font-bold ${pct >= 0 ? 'text-leaf-700' : 'text-red-600'}">${(v68 > 0 || v69 > 0) ? `${pct >= 0 ? '+' : ''}${pct}%` : ''}</td>
         </tr>`;
       });
+
       const tDiff = t69 - t68;
-      const tPct = t68 > 0 ? Math.round((tDiff / t68) * 100) : 0;
+      const tPct = t68 > 0 ? Math.round((tDiff / t68) * 100) : (t69 > 0 ? 100 : 0);
+      document.getElementById('modalBarChartContainer').innerHTML = chartHtml;
       document.getElementById('modalMonthlyBody').innerHTML = html;
       document.getElementById('modalMonthlyFoot').innerHTML = `<tr>
-        <td class="px-3 py-2">รวมทั้งปี</td>
+        <td class="px-3 py-2">รวมทั้งปี (${tabLabels[activeMonthlyBranchTab]})</td>
         <td class="px-3 py-2 text-right font-mono">${fmtZero(t68)}</td>
         <td class="px-3 py-2 text-right font-mono">${fmtZero(t69)}</td>
         <td class="px-3 py-2 text-right font-mono">${tDiff !== 0 ? `${tDiff > 0 ? '+' : ''}${tDiff.toLocaleString()}` : ''}</td>
         <td class="px-3 py-2 text-right font-mono">${(t68 > 0 || t69 > 0) ? `${tPct >= 0 ? '+' : ''}${tPct}%` : ''}</td>
       </tr>`;
-      document.getElementById('monthlyModal').classList.remove('hidden');
     }
 
     function closeMonthlyModal() { document.getElementById('monthlyModal').classList.add('hidden'); }
