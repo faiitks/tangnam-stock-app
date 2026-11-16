@@ -71,6 +71,9 @@
           <button id="btnModePO" onclick="setViewMode('po')" class="px-3 py-1 rounded-md text-xs font-semibold text-earth-700 hover:text-earth-900">
             ขออนุมัติสั่งซื้อ
           </button>
+          <button id="btnModeSupplierSales" onclick="setViewMode('supplier_sales')" class="px-3 py-1 rounded-md text-xs font-semibold text-earth-700 hover:text-earth-900">
+            📊 ยอดขายตามคู่ค้า
+          </button>
         </div>
 
         <button id="btnCreateAPO" onclick="openCreateAPOModal()" class="hidden items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-leaf-700 hover:bg-leaf-800 text-white text-xs font-semibold shadow-sm">
@@ -157,7 +160,7 @@
   <!-- ================= FILTERS & TOOLBAR ================= -->
   <main class="flex-1 max-w-[1920px] w-full mx-auto px-4 py-3 flex flex-col gap-3">
     <div class="bg-white p-3 rounded-xl border border-cream-300 shadow-sm flex flex-col gap-2.5 no-print">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2">
+      <div id="stockFilterInputsRow" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2">
         <div class="lg:col-span-2">
           <input type="text" id="globalSearchInput" oninput="handleSearchDebounce()" placeholder="ค้นหาชื่อสินค้า, ชื่อสามัญ, คู่ค้า, หมวดหมู่..." class="w-full px-3 py-1.5 bg-cream-50 border border-cream-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-leaf-600">
         </div>
@@ -199,24 +202,24 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-4">
+          <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs text-leaf-800 font-semibold">
+            <input type="checkbox" id="mrShowForecast" checked class="rounded border-leaf-300 text-leaf-600">
+            <span>แสดงพยากรณ์ใน PDF (MR)</span>
+          </label>
           <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs text-red-700 font-semibold">
             <input type="checkbox" id="onlyNoSales3M" onchange="resetAndFilter()" class="rounded border-red-300 text-red-600">
             <span>เฉพาะไม่มีการขาย 3 เดือน (69)</span>
           </label>
           <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs text-earth-700">
-  <input type="checkbox" id="hideDiscontinued" onchange="resetAndFilter()" class="rounded border-cream-300 text-leaf-600">
-  <span>ซ่อนสินค้าเลิกขาย</span>
-</label>
-          <label class="inline-flex items-center gap-1.5 cursor-pointer text-xs text-leaf-800 font-semibold">
-  <input type="checkbox" id="mrShowForecast" checked class="rounded border-leaf-300 text-leaf-600">
-  <span>แสดงพยากรณ์ใน PDF (MR)</span>
-</label>
+            <input type="checkbox" id="hideDiscontinued" onchange="resetAndFilter()" class="rounded border-cream-300 text-leaf-600">
+            <span>ซ่อนสินค้าเลิกขาย</span>
+          </label>
         </div>
       </div>
     </div>
 
-    <!-- ================= COMPACT DATA GRID ================= -->
-    <div class="bg-white rounded-xl border border-cream-300 shadow-sm overflow-hidden flex-1 flex flex-col">
+    <!-- ================= COMPACT DATA GRID (หน้าหลักดูสต็อค / สั่งซื้อ) ================= -->
+    <div id="mainStockGridWrapper" class="bg-white rounded-xl border border-cream-300 shadow-sm overflow-hidden flex-1 flex flex-col">
       <div class="table-scroll-container flex-1">
         <table class="grid-table text-left border-collapse text-xs">
           <thead>
@@ -283,6 +286,35 @@
           <button id="btnLoadMore" onclick="loadMoreRows()" class="hidden px-3 py-1 rounded bg-leaf-700 text-white font-semibold">+ แสดงเพิ่ม 80 รายการ</button>
           <button id="btnLoadAll" onclick="loadAllRows()" class="hidden px-2.5 py-1 rounded border border-cream-300 bg-white">แสดงทั้งหมด</button>
         </div>
+      </div>
+    </div>
+
+    <!-- ================= ตารางสรุปยอดขายตามบริษัทคู่ค้า (แท็บใหม่) ================= -->
+    <div id="supplierSalesSection" class="hidden bg-white rounded-xl border border-cream-300 shadow-sm overflow-hidden flex-1 flex flex-col">
+      <div class="px-4 py-3 bg-earth-900 text-cream-50 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <div class="font-prompt font-bold text-sm">สรุปยอดขายและเปรียบเทียบ YOY แยกตามบริษัทคู่ค้า</div>
+          <div class="text-[11px] text-amber-300" id="supSalesSubHeader">มุมมอง: รวม TN+CKS | คลิกที่ชื่อบริษัทคู่ค้าเพื่อกางดูยอดขายรายสินค้า</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" id="supSalesSearchInput" oninput="renderSupplierSalesTab()" placeholder="ค้นหาชื่อบริษัทคู่ค้า หรือชื่อสินค้า..." class="px-3 py-1.5 rounded-lg bg-white text-earth-900 text-xs w-64 focus:outline-none">
+        </div>
+      </div>
+
+      <div class="overflow-x-auto flex-1">
+        <table class="w-full text-xs text-left border-collapse">
+          <thead class="bg-cream-200 text-earth-900 font-semibold border-b-2 border-cream-400">
+            <tr>
+              <th class="p-2.5 border-r border-cream-300 text-center w-10">#</th>
+              <th class="p-2.5 border-r border-cream-300">บริษัทคู่ค้า (คลิกเพื่อดูรายสินค้า)</th>
+              <th class="p-2.5 border-r border-cream-300 text-right bg-amber-50">ยอดขายปี 68<br>(เต็มปี - บาท)</th>
+              <th class="p-2.5 border-r border-cream-300 text-right bg-orange-50">ยอดขายปี 69<br>(สะสม - บาท)</th>
+              <th class="p-2.5 border-r border-cream-300 text-right">YOY เทียบทั้งปี<br>(ปี 68 vs ปี 69)</th>
+              <th class="p-2.5 text-right bg-leaf-50">YOY ช่วงเวลาเดียวกัน<br>(ม.ค. - เดือนล่าสุด)</th>
+            </tr>
+          </thead>
+          <tbody id="supplierSalesTableBody" class="divide-y divide-cream-300"></tbody>
+        </table>
       </div>
     </div>
   </main>
@@ -409,7 +441,7 @@
     </div>
   </div>
 
-  <!-- ================= MODAL 3: กราฟและตารางยอดขายรายเดือนแยกสาขา (TN(1-5) / TN(6) / CKS) ================= -->
+  <!-- ================= MODAL 3: กราฟและตารางยอดขายรายเดือนแยกสาขา ================= -->
   <div id="monthlyModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 no-print">
     <div class="bg-white rounded-2xl max-w-4xl w-full border border-cream-300 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
       <div class="px-5 py-3 bg-earth-900 text-cream-50 flex items-center justify-between">
@@ -420,7 +452,7 @@
         <button onclick="closeMonthlyModal()" class="text-cream-300 hover:text-white text-2xl font-bold leading-none">&times;</button>
       </div>
 
-      <!-- แถบปุ่มสลับกลุ่มสาขา: รวมทั้งหมด / รวม TN / TN(1-5) / TN(6) / CKS -->
+      <!-- แถบปุ่มสลับกลุ่มสาขา: รวมทั้งหมด / รวม TN(1-5)+CKS / รวม TN / TN(1-5) / TN(6) / CKS -->
       <div class="px-5 py-2.5 bg-cream-100 border-b border-cream-300 flex flex-wrap items-center justify-between gap-2">
         <div class="flex flex-wrap items-center gap-1.5">
           <span class="text-xs font-semibold text-earth-800 mr-1">แยกดูตามสาขา:</span>
@@ -438,13 +470,11 @@
       </div>
 
       <div class="p-4 overflow-y-auto flex-1 flex flex-col gap-4">
-        <!-- กราฟแท่งเปรียบเทียบรายเดือน -->
         <div class="bg-cream-50 p-3 rounded-xl border border-cream-300">
           <div class="text-[11px] font-semibold text-earth-700 mb-2" id="modalChartTitle">กราฟเปรียบเทียบยอดขายรายเดือน (หน่วยย่อย)</div>
           <div id="modalBarChartContainer" class="h-36 flex items-end justify-between gap-1.5 pt-4 pb-1 px-1 border-b border-cream-400"></div>
         </div>
 
-        <!-- ตารางตัวเลขรายเดือน -->
         <table class="w-full text-xs text-left border border-cream-300">
           <thead class="bg-cream-200 font-semibold">
             <tr>
@@ -488,6 +518,7 @@
 
     let activeMonthlyProductId = null;
     let activeMonthlyBranchTab = 'ALL';
+    let expandedSupplierRows = new Set();
 
     function fmtZero(val) {
       if (val === null || val === undefined) return '';
@@ -600,8 +631,6 @@
           }
         }
 
-        // อ่านชีท ยอดขาย68 และ ยอดขาย69 แบบแยก 3 กลุ่ม:
-        // Index 2-13 = tn_1_5 (12 เดือน), Index 14-25 = tn_6 (12 เดือน), Index 26-37 = cks (12 เดือน)
         async function parseMonthly(res) {
           const map = new Map();
           if (!res || !res.ok) return map;
@@ -760,6 +789,9 @@
         if (!document.getElementById('apoListModal').classList.contains('hidden')) {
           renderAPOList();
         }
+        if (activeViewMode === 'supplier_sales') {
+          renderSupplierSalesTab();
+        }
       } catch (err) {
         console.error(err);
         syncText.innerText = "เชื่อมต่อชีทไม่สำเร็จ";
@@ -780,16 +812,31 @@
 
     function setViewMode(mode) {
       activeViewMode = mode;
+      const isStock = mode === 'stock';
       const isPO = mode === 'po';
-      document.getElementById('btnModeStock').className = !isPO ? "px-3 py-1 rounded-md text-xs font-semibold shadow-sm bg-white text-earth-900" : "px-3 py-1 rounded-md text-xs font-semibold text-earth-700";
-      document.getElementById('btnModePO').className = isPO ? "px-3 py-1 rounded-md text-xs font-semibold shadow-sm bg-white text-earth-900" : "px-3 py-1 rounded-md text-xs font-semibold text-earth-700";
+      const isSupSales = mode === 'supplier_sales';
+
+      const activeCls = "px-3 py-1 rounded-md text-xs font-semibold shadow-sm bg-white text-earth-900";
+      const normalCls = "px-3 py-1 rounded-md text-xs font-semibold text-earth-700 hover:text-earth-900";
+
+      document.getElementById('btnModeStock').className = isStock ? activeCls : normalCls;
+      document.getElementById('btnModePO').className = isPO ? activeCls : normalCls;
+      document.getElementById('btnModeSupplierSales').className = isSupSales ? activeCls : normalCls;
       
       const btnCreate = document.getElementById('btnCreateAPO');
       if (isPO) { btnCreate.classList.remove('hidden'); btnCreate.classList.add('inline-flex'); }
       else { btnCreate.classList.add('hidden'); btnCreate.classList.remove('inline-flex'); }
 
-      document.querySelectorAll('.col-po-only').forEach(el => el.classList.toggle('hidden', !isPO));
-      renderTable();
+      document.getElementById('stockFilterInputsRow').classList.toggle('hidden', isSupSales);
+      document.getElementById('mainStockGridWrapper').classList.toggle('hidden', isSupSales);
+      document.getElementById('supplierSalesSection').classList.toggle('hidden', !isSupSales);
+
+      if (isSupSales) {
+        renderSupplierSalesTab();
+      } else {
+        document.querySelectorAll('.col-po-only').forEach(el => el.classList.toggle('hidden', !isPO));
+        renderTable();
+      }
     }
 
     function setCompanyFilter(comp) {
@@ -798,6 +845,9 @@
         document.getElementById('btnComp' + c).className = (c === comp) ? "px-3 py-1 rounded text-xs font-semibold bg-earth-900 text-white" : "px-3 py-1 rounded text-xs font-semibold text-earth-700";
       });
       resetAndFilter();
+      if (activeViewMode === 'supplier_sales') {
+        renderSupplierSalesTab();
+      }
     }
 
     let sTimer = null;
@@ -1174,6 +1224,205 @@
       document.getElementById('btnLoadAll').classList.toggle('hidden', visibleLimit >= currentFiltered.length);
     }
 
+    // ================= 2.1 ตารางยอดขายตามบริษัทคู่ค้า + ดรอปดาวน์รายสินค้า =================
+    function toggleSupplierDropdown(supKey) {
+      if (expandedSupplierRows.has(supKey)) expandedSupplierRows.delete(supKey);
+      else expandedSupplierRows.add(supKey);
+      renderSupplierSalesTab();
+    }
+
+    function renderSupplierSalesTab() {
+      const tbody = document.getElementById('supplierSalesTableBody');
+      if (!tbody) return;
+
+      const mNames = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+      const mIdx = latestMonthIndex;
+      const compLabel = activeCompanyFilter === 'ALL' ? 'รวม TN+CKS' : (activeCompanyFilter === 'TN' ? 'ตังนำ (TN)' : 'ชาวเกษตร (CKS)');
+      document.getElementById('supSalesSubHeader').innerText = `มุมมอง: ${compLabel} | ช่วงเวลาเปรียบเทียบ: ม.ค.-${mNames[mIdx]} | คลิกที่แถวคู่ค้าเพื่อกางดูรายสินค้า`;
+
+      const q = (document.getElementById('supSalesSearchInput')?.value || '').toLowerCase().trim();
+      const hideDisc = document.getElementById('hideDiscontinued')?.checked || false;
+      const supMap = new Map();
+
+      rawProducts.forEach(p => {
+        if (hideDisc && p.isDiscontinued) return;
+        const supName = p.supplier || 'ไม่ระบุบริษัทคู่ค้า';
+        
+        let val68 = 0, val69 = 0, sub68Full = 0, sub69Full = 0, sub68YTD = 0;
+        if (activeCompanyFilter === 'TN') {
+          val68 = p.sales68_val_tn; val69 = p.sales69_val_tn;
+          sub68Full = p.sales68_tn_1_5 + p.sales68_tn_6;
+          sub69Full = p.sales69_tn_1_5 + p.sales69_tn_6;
+          for (let i = 0; i <= mIdx; i++) sub68YTD += (p.monthly68_tn[i] || 0);
+        } else if (activeCompanyFilter === 'CKS') {
+          val68 = p.sales68_val_cks; val69 = p.sales69_val_cks;
+          sub68Full = p.sales68_cks;
+          sub69Full = p.sales69_cks;
+          for (let i = 0; i <= mIdx; i++) sub68YTD += (p.monthly68_cks[i] || 0);
+        } else {
+          val68 = p.sales68_val; val69 = p.sales69_val;
+          sub68Full = p.sales68_tn_1_5 + p.sales68_tn_6 + p.sales68_cks;
+          sub69Full = p.sales69_tn_1_5 + p.sales69_tn_6 + p.sales69_cks;
+          for (let i = 0; i <= mIdx; i++) sub68YTD += (p.monthly68_tn[i] || 0) + (p.monthly68_cks[i] || 0);
+        }
+
+        const avgPrice68 = sub68Full > 0 ? (val68 / sub68Full) : 0;
+        const val68YTD = sub68YTD * avgPrice68;
+
+        if (!supMap.has(supName)) {
+          supMap.set(supName, { name: supName, val68: 0, val69: 0, val68YTD: 0, items: [] });
+        }
+        const entry = supMap.get(supName);
+        entry.val68 += val68;
+        entry.val69 += val69;
+        entry.val68YTD += val68YTD;
+        entry.items.push({
+          p, val68, val69, val68YTD, sub68Full, sub69Full, sub68YTD
+        });
+      });
+
+      let supList = Array.from(supMap.values()).filter(s => {
+        if (!q) return true;
+        if (s.name.toLowerCase().includes(q)) return true;
+        return s.items.some(it => it.p.name.toLowerCase().includes(q));
+      }).sort((a, b) => b.val69 - a.val69);
+
+      if (supList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-earth-600">ไม่พบข้อมูลบริษัทคู่ค้า</td></tr>`;
+        return;
+      }
+
+      let html = '';
+      let grandVal68 = 0, grandVal69 = 0, grandVal68YTD = 0;
+
+      supList.forEach((s, idx) => {
+        grandVal68 += s.val68;
+        grandVal69 += s.val69;
+        grandVal68YTD += s.val68YTD;
+
+        const isOpen = expandedSupplierRows.has(s.name);
+        const diffFull = s.val69 - s.val68;
+        const pctFull = s.val68 > 0 ? Math.round((diffFull / s.val68) * 100) : (s.val69 > 0 ? 100 : 0);
+        const colorFull = pctFull >= 0 ? 'text-leaf-800' : 'text-red-600';
+
+        const diffYTD = s.val69 - s.val68YTD;
+        const pctYTD = s.val68YTD > 0 ? Math.round((diffYTD / s.val68YTD) * 100) : (s.val69 > 0 ? 100 : 0);
+        const colorYTD = pctYTD >= 0 ? 'text-leaf-800' : 'text-red-600';
+
+        const safeSupKey = s.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+        html += `
+          <tr onclick="toggleSupplierDropdown('${safeSupKey}')" class="cursor-pointer hover:bg-cream-100 transition ${isOpen ? 'bg-cream-200/70 font-semibold' : ''}">
+            <td class="p-2.5 text-center border-r border-cream-300">${idx + 1}</td>
+            <td class="p-2.5 border-r border-cream-300">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-bold text-earth-900 text-xs sm:text-sm">${isOpen ? '▼' : '▶'} ${s.name}</span>
+                <span class="px-2 py-0.5 rounded-full bg-cream-200 text-earth-800 text-[10px] font-medium">${s.items.length} รายการ</span>
+              </div>
+            </td>
+            <td class="p-2.5 text-right border-r border-cream-300 font-mono bg-amber-50/40 font-semibold text-amber-950">
+              ${fmtZero(Math.round(s.val68))}
+            </td>
+            <td class="p-2.5 text-right border-r border-cream-300 font-mono bg-orange-50/40 font-bold text-earth-900">
+              ${fmtZero(Math.round(s.val69))}
+            </td>
+            <td class="p-2.5 text-right border-r border-cream-300 font-mono">
+              ${(s.val68 > 0 || s.val69 > 0) ? `
+                <span class="font-bold ${colorFull}">${pctFull >= 0 ? '▲ +' : '▼ '}${pctFull}%</span>
+                <div class="text-[10px] text-earth-600">${diffFull >= 0 ? '+' : ''}${Math.round(diffFull).toLocaleString()} บ.</div>
+              ` : ''}
+            </td>
+            <td class="p-2.5 text-right font-mono bg-leaf-50/40">
+              ${(s.val68YTD > 0 || s.val69 > 0) ? `
+                <span class="font-bold ${colorYTD}">${pctYTD >= 0 ? '▲ +' : '▼ '}${pctYTD}%</span>
+                <div class="text-[10px] text-earth-600">ปี 68: ${Math.round(s.val68YTD).toLocaleString()} บ.</div>
+              ` : ''}
+            </td>
+          </tr>
+        `;
+
+        if (isOpen) {
+          const sortedItems = [...s.items].sort((a, b) => b.val69 - a.val69);
+          html += `
+            <tr class="bg-cream-50">
+              <td colspan="6" class="p-3 border-b-2 border-earth-700">
+                <div class="border border-cream-300 rounded-lg overflow-hidden bg-white shadow-inner">
+                  <table class="w-full text-[11px] text-left border-collapse">
+                    <thead class="bg-earth-800 text-cream-50">
+                      <tr>
+                        <th class="p-1.5 text-center w-8">#</th>
+                        <th class="p-1.5">รายการสินค้า</th>
+                        <th class="p-1.5 text-right">ปี 68 (จำนวน / บาท)</th>
+                        <th class="p-1.5 text-right">ปี 69 (จำนวน / บาท)</th>
+                        <th class="p-1.5 text-right">YOY (ทั้งปี)</th>
+                        <th class="p-1.5 text-right">YOY (ม.ค.-${mNames[mIdx]})</th>
+                        <th class="p-1.5 text-center w-12">กราฟ</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-cream-200">
+                      ${sortedItems.map((it, iIdx) => {
+                        const cleanSub = getCleanUnitName(it.p.unitSub);
+                        const iPctFull = it.val68 > 0 ? Math.round(((it.val69 - it.val68) / it.val68) * 100) : (it.val69 > 0 ? 100 : 0);
+                        const iPctYTD  = it.sub68YTD > 0 ? Math.round(((it.sub69Full - it.sub68YTD) / it.sub68YTD) * 100) : (it.sub69Full > 0 ? 100 : 0);
+                        return `
+                          <tr class="hover:bg-cream-100/60">
+                            <td class="p-1.5 text-center text-earth-500">${iIdx + 1}</td>
+                            <td class="p-1.5 font-medium text-earth-900">
+                              ${it.p.name}
+                              ${it.p.isDiscontinued ? `<span class="ml-1 px-1 py-0.2 rounded bg-gray-200 text-gray-700 text-[9px]">เลิกขาย</span>` : ''}
+                            </td>
+                            <td class="p-1.5 text-right font-mono">
+                              ${it.sub68Full > 0 ? `${it.sub68Full.toLocaleString()} ${cleanSub}` : ''}
+                              ${it.val68 > 0 ? `<div class="text-[10px] text-amber-900 font-semibold">${Math.round(it.val68).toLocaleString()} บ.</div>` : ''}
+                            </td>
+                            <td class="p-1.5 text-right font-mono">
+                              ${it.sub69Full > 0 ? `<b>${it.sub69Full.toLocaleString()}</b> ${cleanSub}` : ''}
+                              ${it.val69 > 0 ? `<div class="text-[10px] text-leaf-800 font-bold">${Math.round(it.val69).toLocaleString()} บ.</div>` : ''}
+                            </td>
+                            <td class="p-1.5 text-right font-mono font-bold ${iPctFull >= 0 ? 'text-leaf-700' : 'text-red-600'}">
+                              ${(it.val68 > 0 || it.val69 > 0) ? `${iPctFull >= 0 ? '+' : ''}${iPctFull}%` : ''}
+                            </td>
+                            <td class="p-1.5 text-right font-mono font-bold ${iPctYTD >= 0 ? 'text-leaf-700' : 'text-red-600'}">
+                              ${(it.sub68YTD > 0 || it.sub69Full > 0) ? `${iPctYTD >= 0 ? '+' : ''}${iPctYTD}% <span class="font-normal text-[9.5px] text-earth-500">(ปี 68: ${it.sub68YTD.toLocaleString()})</span>` : ''}
+                            </td>
+                            <td class="p-1.5 text-center">
+                              <button onclick="event.stopPropagation(); openMonthlyModal('${it.p.id}')" class="px-1.5 py-0.5 rounded bg-cream-200 hover:bg-cream-300 text-earth-800 text-[10px]">📊</button>
+                            </td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </td>
+            </tr>
+          `;
+        }
+      });
+
+      // แถวสรุปรวมทั้งหมดท้ายตารางคู่ค้า
+      const grandDiffFull = grandVal69 - grandVal68;
+      const grandPctFull = grandVal68 > 0 ? Math.round((grandDiffFull / grandVal68) * 100) : 0;
+      const grandDiffYTD = grandVal69 - grandVal68YTD;
+      const grandPctYTD = grandVal68YTD > 0 ? Math.round((grandDiffYTD / grandVal68YTD) * 100) : 0;
+
+      html += `
+        <tr class="bg-cream-200 font-bold text-earth-900 border-t-2 border-earth-800">
+          <td colspan="2" class="p-2.5 text-right border-r border-cream-300">รวมทั้งหมด (${supList.length} บริษัทคู่ค้า):</td>
+          <td class="p-2.5 text-right border-r border-cream-300 font-mono bg-amber-100/70">${fmtZero(Math.round(grandVal68))}</td>
+          <td class="p-2.5 text-right border-r border-cream-300 font-mono bg-orange-100/70">${fmtZero(Math.round(grandVal69))}</td>
+          <td class="p-2.5 text-right border-r border-cream-300 font-mono ${grandPctFull >= 0 ? 'text-leaf-800' : 'text-red-700'}">
+            ${grandPctFull >= 0 ? '▲ +' : '▼ '}${grandPctFull}%
+          </td>
+          <td class="p-2.5 text-right font-mono bg-leaf-100/70 ${grandPctYTD >= 0 ? 'text-leaf-800' : 'text-red-700'}">
+            ${grandPctYTD >= 0 ? '▲ +' : '▼ '}${grandPctYTD}%
+          </td>
+        </tr>
+      `;
+
+      tbody.innerHTML = html;
+    }
+
     // ================= MODAL ดูสต็อคแยกสาขาชาวเกษตร (CKS) =================
     function openCKSBranchModal(productId) {
       const p = rawProducts.find(x => x.id === productId);
@@ -1215,7 +1464,7 @@
       document.getElementById('cksBranchModal').classList.add('hidden');
     }
 
-    // ================= ส่วนที่ 2: ระบบส่งออก PDF ทั้ง 2 มุมมอง (แสดงผลรวมที่หัวกระดาษ) =================
+    // ================= ส่วนที่ 2: ระบบส่งออก PDF ทั้ง 2 มุมมอง =================
     function getNext2MonthsHistoryText(p) {
       const mShort = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
       const curM = latestMonthIndex;
@@ -1258,14 +1507,14 @@
       `;
     }
 
-    // 1. ส่งออก PDF สำหรับ MR (กระดาษ A4 แนวตั้ง)
+    // 1. ส่งออก PDF สำหรับ MR (กระดาษ A4 แนวตั้ง + เลือกแสดง/ซ่อนพยากรณ์ได้)
     function exportPDF_MR() {
       if (currentFiltered.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก PDF");
       const supFilter = document.getElementById('supplierFilter').value;
       const supLabel = supFilter === 'ALL' ? 'ทั้งหมด' : supFilter;
+      const showForecast = document.getElementById('mrShowForecast')?.checked ?? true;
       const now = new Date();
       const printTime = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} น.`;
-      const showForecast = document.getElementById('mrShowForecast')?.checked ?? true;
 
       let rowsHtml = '';
       let sum68Val = 0, sum69Val = 0, sumStkVal = 0;
@@ -1367,10 +1616,10 @@
               <span style="font-size:8.5px; font-weight:600;">${fmtZero(p.stock_val)}</span>
             </td>
             ${showForecast ? `
-            <td style="font-size:8.5px; line-height:1.25;">
-              ${s69Sub > 0 ? `1ด:<b>${fc1}</b> | 1.5ด:<b>${fc1_5}</b><br>2ด:<b>${fc2}</b> | 3ด:<b>${fc3}</b> (${p.unitBig})<br>` : ''}
-              <span style="color:#333;">ย้อนหลัง: ${getNext2MonthsHistoryText(p)}</span>
-            </td>
+              <td style="font-size:8.5px; line-height:1.25;">
+                ${s69Sub > 0 ? `1ด:<b>${fc1}</b> | 1.5ด:<b>${fc1_5}</b><br>2ด:<b>${fc2}</b> | 3ด:<b>${fc3}</b> (${p.unitBig})<br>` : ''}
+                <span style="color:#333;">ย้อนหลัง: ${getNext2MonthsHistoryText(p)}</span>
+              </td>
             ` : ''}
             <td style="text-align:center; font-size:8px; line-height:1.25;">
               <div style="font-weight:bold; ${discStyle}">${st.label}</div>
@@ -1406,21 +1655,20 @@
           ${headerSummaryHtml}
           <table>
             <thead>
-  <tr>
-    <th style="width:2.5%;">#</th>
-    <th style="width:${showForecast ? '16.5%' : '29%'};">รายการสินค้า / ประเภท / ชื่อสามัญ</th>
-    <th style="width:7.5%;">ขาย 68<br>(แยกสาขา)</th>
-    <th style="width:8%;">รวมขาย 68</th>
-    <th style="width:7.5%;">ขาย 69<br>(แยกสาขา)</th>
-    <th style="width:8.5%;">รวมขาย 69 & YOY</th>
-    <th style="width:7%;">YOY<br>(YTD)</th>
-    <th style="width:7%;">YOY<br>(เดือนนี้)</th>
-    <th style="width:8%;">คงเหลือ<br>แยกคลัง</th>
-    <th style="width:8%;">รวมคงเหลือ</th>
-    ${showForecast ? `<th style="width:12.5%;">พยากรณ์ & ย้อนหลัง 2 ด.</th>` : ''}
-    <th style="width:7%;">สถานะ /<br>ไม่ขาย 3 ด.</th>
-  </tr>
-</thead>
+              <tr>
+                <th style="width:2.5%;">#</th>
+                <th style="width:${showForecast ? '16.5%' : '29%'};">รายการสินค้า / ประเภท / ชื่อสามัญ</th>
+                <th style="width:7.5%;">ขาย 68<br>(แยกสาขา)</th>
+                <th style="width:8%;">รวมขาย 68</th>
+                <th style="width:7.5%;">ขาย 69<br>(แยกสาขา)</th>
+                <th style="width:8.5%;">รวมขาย 69 & YOY</th>
+                <th style="width:7%;">YOY<br>(YTD)</th>
+                <th style="width:7%;">YOY<br>(เดือนนี้)</th>
+                <th style="width:8%;">คงเหลือ<br>แยกคลัง</th>
+                <th style="width:8%;">รวมคงเหลือ</th>
+                ${showForecast ? `<th style="width:12.5%;">พยากรณ์ & ย้อนหลัง 2 ด.</th>` : ''}
+                <th style="width:7%;">สถานะ /<br>ไม่ขาย 3 ด.</th>
+              </tr>
             </thead>
             <tbody>${rowsHtml}</tbody>
           </table>
@@ -1516,7 +1764,7 @@
                 <b style="color:${curMPct >= 0 ? '#166534' : '#dc2626'};">${curMPct >= 0 ? '▲ +' : '▼ '}${curMPct}%</b>
               ` : ''}
             </td>
-            <td style="font-size:9.5px; line-height:1.25;">
+            <td style="font-size:9.5px; line-height:1.25; background:#DCFCE7;">
               ${stockCompactHtml.length > 0 ? stockCompactHtml.join('') : ''}
             </td>
             <td style="text-align:right; font-size:9.5px; line-height:1.25; background:#DCFCE7;">
@@ -2055,7 +2303,7 @@
       renderAPOList();
     }
 
-    // ================= 5. Modal ดูกราฟรายเดือนแยกสาขา (รวมทั้งหมด / รวม TN / TN(1-5) / TN(6) / CKS) =================
+    // ================= 5. Modal ดูกราฟรายเดือนแยกสาขา =================
     function openMonthlyModal(productId) {
       activeMonthlyProductId = productId;
       activeMonthlyBranchTab = 'ALL';
@@ -2076,7 +2324,6 @@
       document.getElementById('modalProductCode').innerText = `${p.category || 'สินค้าเกษตร'} ${p.supplier ? `| คู่ค้า: ${p.supplier}` : ''} | หน่วยขาย: ${cleanSub}`;
       document.getElementById('modalProductName').innerText = p.name;
 
-      // อัปเดตสถานะปุ่มเลือกสาขา
       const tabs = ['ALL', 'TN15_CKS', 'TN_ALL', 'TN_1_5', 'TN_6', 'CKS'];
       tabs.forEach(t => {
         const el = document.getElementById('mTab' + t);
@@ -2099,34 +2346,33 @@
       document.getElementById('modalChartTitle').innerText = `กราฟเปรียบเทียบยอดขายรายเดือน: ${tabLabels[activeMonthlyBranchTab]} (หน่วย: ${cleanSub})`;
 
       const getMonthPair = (i) => {
-  if (activeMonthlyBranchTab === 'TN15_CKS') {
-    return {
-      v68: (p.monthly68_tn_1_5[i] || 0) + (p.monthly68_cks[i] || 0),
-      v69: (p.monthly69_tn_1_5[i] || 0) + (p.monthly69_cks[i] || 0)
-    };
-  }
-  if (activeMonthlyBranchTab === 'TN_1_5') {
-    return { v68: p.monthly68_tn_1_5[i] || 0, v69: p.monthly69_tn_1_5[i] || 0 };
-  }
-  if (activeMonthlyBranchTab === 'TN_6') {
-    return { v68: p.monthly68_tn_6[i] || 0, v69: p.monthly69_tn_6[i] || 0 };
-  }
-  if (activeMonthlyBranchTab === 'TN_ALL') {
-    return { v68: p.monthly68_tn[i] || 0, v69: p.monthly69_tn[i] || 0 };
-  }
-  if (activeMonthlyBranchTab === 'CKS') {
-    return { v68: p.monthly68_cks[i] || 0, v69: p.monthly69_cks[i] || 0 };
-  }
-  return {
-    v68: (p.monthly68_tn[i] || 0) + (p.monthly68_cks[i] || 0),
-    v69: (p.monthly69_tn[i] || 0) + (p.monthly69_cks[i] || 0)
-  };
-};
+        if (activeMonthlyBranchTab === 'TN15_CKS') {
+          return {
+            v68: (p.monthly68_tn_1_5[i] || 0) + (p.monthly68_cks[i] || 0),
+            v69: (p.monthly69_tn_1_5[i] || 0) + (p.monthly69_cks[i] || 0)
+          };
+        }
+        if (activeMonthlyBranchTab === 'TN_1_5') {
+          return { v68: p.monthly68_tn_1_5[i] || 0, v69: p.monthly69_tn_1_5[i] || 0 };
+        }
+        if (activeMonthlyBranchTab === 'TN_6') {
+          return { v68: p.monthly68_tn_6[i] || 0, v69: p.monthly69_tn_6[i] || 0 };
+        }
+        if (activeMonthlyBranchTab === 'TN_ALL') {
+          return { v68: p.monthly68_tn[i] || 0, v69: p.monthly69_tn[i] || 0 };
+        }
+        if (activeMonthlyBranchTab === 'CKS') {
+          return { v68: p.monthly68_cks[i] || 0, v69: p.monthly69_cks[i] || 0 };
+        }
+        return {
+          v68: (p.monthly68_tn[i] || 0) + (p.monthly68_cks[i] || 0),
+          v69: (p.monthly69_tn[i] || 0) + (p.monthly69_cks[i] || 0)
+        };
+      };
 
       const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
       let html = '', chartHtml = '', t68 = 0, t69 = 0;
 
-      // หาค่าสูงสุดเพื่อคำนวณสัดส่วนความสูงแท่งกราฟ
       let maxVal = 0;
       for (let i = 0; i < 12; i++) {
         const { v68, v69 } = getMonthPair(i);
@@ -2136,61 +2382,4 @@
 
       months.forEach((m, i) => {
         const { v68, v69 } = getMonthPair(i);
-        t68 += v68; t69 += v69;
-        const diff = v69 - v68;
-        const pct = v68 > 0 ? Math.round((diff / v68) * 100) : (v69 > 0 ? 100 : 0);
-
-        const h68 = maxVal > 0 ? Math.max(v68 > 0 ? 4 : 0, Math.round((v68 / maxVal) * 100)) : 0;
-        const h69 = maxVal > 0 ? Math.max(v69 > 0 ? 4 : 0, Math.round((v69 / maxVal) * 100)) : 0;
-
-        chartHtml += `
-          <div class="flex-1 flex flex-col items-center h-full justify-end group">
-            <div class="w-full flex items-end justify-center gap-0.5 h-24">
-              <div style="height:${h68}%" class="w-2.5 sm:w-3 bg-amber-400 rounded-t-xs transition-all" title="ปี 68 (${m}): ${v68.toLocaleString()} ${cleanSub}"></div>
-              <div style="height:${h69}%" class="w-2.5 sm:w-3 bg-leaf-600 rounded-t-xs transition-all" title="ปี 69 (${m}): ${v69.toLocaleString()} ${cleanSub}"></div>
-            </div>
-            <div class="text-[9.5px] font-medium text-earth-700 mt-1">${m}</div>
-          </div>
-        `;
-
-        html += `<tr>
-          <td class="px-3 py-1.5 font-medium">${m}</td>
-          <td class="px-3 py-1.5 text-right font-mono">${fmtZero(v68)}</td>
-          <td class="px-3 py-1.5 text-right font-mono">${fmtZero(v69)}</td>
-          <td class="px-3 py-1.5 text-right font-mono ${diff >= 0 ? 'text-leaf-700' : 'text-red-600'}">${diff !== 0 ? `${diff > 0 ? '+' : ''}${diff.toLocaleString()}` : ''}</td>
-          <td class="px-3 py-1.5 text-right font-mono font-bold ${pct >= 0 ? 'text-leaf-700' : 'text-red-600'}">${(v68 > 0 || v69 > 0) ? `${pct >= 0 ? '+' : ''}${pct}%` : ''}</td>
-        </tr>`;
-      });
-
-      const tDiff = t69 - t68;
-      const tPct = t68 > 0 ? Math.round((tDiff / t68) * 100) : (t69 > 0 ? 100 : 0);
-      document.getElementById('modalBarChartContainer').innerHTML = chartHtml;
-      document.getElementById('modalMonthlyBody').innerHTML = html;
-      document.getElementById('modalMonthlyFoot').innerHTML = `<tr>
-        <td class="px-3 py-2">รวมทั้งปี (${tabLabels[activeMonthlyBranchTab]})</td>
-        <td class="px-3 py-2 text-right font-mono">${fmtZero(t68)}</td>
-        <td class="px-3 py-2 text-right font-mono">${fmtZero(t69)}</td>
-        <td class="px-3 py-2 text-right font-mono">${tDiff !== 0 ? `${tDiff > 0 ? '+' : ''}${tDiff.toLocaleString()}` : ''}</td>
-        <td class="px-3 py-2 text-right font-mono">${(t68 > 0 || t69 > 0) ? `${tPct >= 0 ? '+' : ''}${tPct}%` : ''}</td>
-      </tr>`;
-    }
-
-    function closeMonthlyModal() { document.getElementById('monthlyModal').classList.add('hidden'); }
-
-    function exportToExcel() {
-      const data = currentFiltered.map(p => ({
-        'รหัส': p.code, 'ชื่อสินค้า': p.name, 'คู่ค้า': p.supplier, 'หมวดหมู่': p.category, 'ชื่อสามัญ': p.genericName,
-        'ขาย68(ย่อย)': fmtZero(p.sales68_tn_1_5 + p.sales68_tn_6 + p.sales68_cks), 'มูลค่า68': fmtZero(p.sales68_val),
-        'ขาย69(ย่อย)': fmtZero(p.sales69_tn_1_5 + p.sales69_tn_6 + p.sales69_cks), 'มูลค่า69': fmtZero(p.sales69_val),
-        'คงเหลือ(ย่อย)': fmtZero(p.stock_pc + p.stock_kr + p.stock_cyp + p.stock_cks), 'มูลค่าคงเหลือ': fmtZero(p.stock_val),
-        'ไม่มีขาย3ด.(69)': getNoSales3MStatus(p).isNoSales3M ? 'ไม่ขาย 3 เดือน' : 'ปกติ',
-        'สถานะ': getStatusObj(p).label
-      }));
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Stock_Report");
-      XLSX.writeFile(wb, `รายงานสต็อค_ตังนำเกษตร_${new Date().toISOString().slice(0,10)}.xlsx`);
-    }
-  </script>
-</body>
-</html>
+        t68
