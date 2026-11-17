@@ -1371,8 +1371,12 @@
         entry.val68 += val68;
         entry.val69 += val69;
         entry.val68YTD += val68YTD;
+        
+        const pctFull = val68 > 0 ? Math.round(((val69 - val68) / val68) * 100) : (val69 > 0 ? 100 : -999999);
+        const pctYTD  = val68YTD > 0 ? Math.round(((val69 - val68YTD) / val68YTD) * 100) : (val69 > 0 ? 100 : -999999);
+
         entry.items.push({
-          p, qty68, big68, val68, qty69, big69, val69, val68YTD, qty68YTD, big68YTD
+          p, qty68, big68, val68, qty69, big69, val69, val68YTD, qty68YTD, big68YTD, pctFull, pctYTD
         });
       });
 
@@ -1476,9 +1480,11 @@
             return supSubSortDir === 'asc' ? diff : -diff;
           });
 
-          const subIconName = supSubSortField === 'name' ? (supSubSortDir === 'asc' ? '▲' : '▼') : '⇅';
-          const subIcon68   = supSubSortField === 'val68' ? (supSubSortDir === 'desc' ? '▼' : '▲') : '⇅';
-          const subIcon69   = supSubSortField === 'val69' ? (supSubSortDir === 'desc' ? '▼' : '▲') : '⇅';
+          const subIconName    = supSubSortField === 'name'    ? (supSubSortDir === 'asc' ? '▲' : '▼') : '⇅';
+          const subIcon68      = supSubSortField === 'val68'   ? (supSubSortDir === 'desc' ? '▼' : '▲') : '⇅';
+          const subIcon69      = supSubSortField === 'val69'   ? (supSubSortDir === 'desc' ? '▼' : '▲') : '⇅';
+          const subIconPctFull = supSubSortField === 'pctFull' ? (supSubSortDir === 'desc' ? '▼' : '▲') : '⇅';
+          const subIconPctYTD  = supSubSortField === 'pctYTD'  ? (supSubSortDir === 'desc' ? '▼' : '▲') : '⇅';
 
           html += `
             <tr class="bg-gray-200/70">
@@ -1505,6 +1511,14 @@
                         </th>
                         <th class="p-2 text-right">
                           YOY ช่วงเวลาเดียวกัน<br>
+                          <span class="font-normal text-[9.5px] text-gray-700">(ม.ค.-${mNames[mIdx]}) ปี 68 vs ปี 69</span>
+                        </th>
+                        <th onclick="event.stopPropagation(); toggleSupSubSort('pctFull')" class="p-2 text-right border-r border-gray-400/50 cursor-pointer hover:bg-gray-400/40 select-none">
+                          YOY ทั้งปี <span class="ml-1 text-[10px]">${subIconPctFull}</span><br>
+                          <span class="font-normal text-[9.5px] text-gray-700">มูลค่า / ผลต่างย่อย / หน่วยใหญ่</span>
+                        </th>
+                        <th onclick="event.stopPropagation(); toggleSupSubSort('pctYTD')" class="p-2 text-right cursor-pointer hover:bg-gray-400/40 select-none">
+                          YOY ช่วงเวลาเดียวกัน <span class="ml-1 text-[10px]">${subIconPctYTD}</span><br>
                           <span class="font-normal text-[9.5px] text-gray-700">(ม.ค.-${mNames[mIdx]}) ปี 68 vs ปี 69</span>
                         </th>
                       </tr>
