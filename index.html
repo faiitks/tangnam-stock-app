@@ -289,28 +289,36 @@
       </div>
     </div>
 
-    <!-- ================= ตารางสรุปยอดขายตามบริษัทคู่ค้า (แท็บใหม่) ================= -->
+    <!-- ================= ตารางสรุปยอดขายตามบริษัทคู่ค้า (แท็บใหม่ - ล็อกหัวตาราง, เรียงลำดับได้, พิมพ์ PDF ได้) ================= -->
     <div id="supplierSalesSection" class="hidden bg-white rounded-xl border border-cream-300 shadow-sm overflow-hidden flex-1 flex flex-col">
       <div class="px-4 py-3 bg-earth-900 text-cream-50 flex flex-wrap items-center justify-between gap-2">
         <div>
           <div class="font-prompt font-bold text-sm">สรุปยอดขายและเปรียบเทียบ YOY แยกตามบริษัทคู่ค้า</div>
           <div class="text-[11px] text-amber-300" id="supSalesSubHeader">มุมมอง: รวม TN+CKS | คลิกที่ชื่อบริษัทคู่ค้าเพื่อกางดูยอดขายรายสินค้า</div>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <input type="text" id="supSalesSearchInput" oninput="renderSupplierSalesTab()" placeholder="ค้นหาชื่อบริษัทคู่ค้า หรือชื่อสินค้า..." class="px-3 py-1.5 rounded-lg bg-white text-earth-900 text-xs w-60 focus:outline-none">
+          <button onclick="exportPDF_SupplierSummary()" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-2xs flex items-center gap-1">
+            <span>🖨️ พิมพ์ PDF สรุปคู่ค้า</span>
+          </button>
         </div>
       </div>
 
-      <div class="overflow-x-auto flex-1">
+      <!-- กล่องเลื่อนตารางพร้อมล็อกหัวตาราง (sticky top-0) -->
+      <div class="overflow-auto flex-1 max-h-[70vh] relative">
         <table class="w-full text-xs text-left border-collapse">
-          <thead class="bg-cream-200 text-earth-900 font-semibold border-b-2 border-cream-400">
+          <thead class="sticky top-0 z-30 bg-cream-200 text-earth-900 font-semibold shadow-xs">
             <tr>
-              <th class="p-2.5 border-r border-cream-300 text-center w-10">#</th>
-              <th class="p-2.5 border-r border-cream-300">บริษัทคู่ค้า (คลิกเพื่อดูรายสินค้า)</th>
-              <th class="p-2.5 border-r border-cream-300 text-right bg-amber-50">ยอดขายปี 68<br>(เต็มปี - บาท)</th>
-              <th class="p-2.5 border-r border-cream-300 text-right bg-orange-50">ยอดขายปี 69<br>(สะสม - บาท)</th>
-              <th class="p-2.5 border-r border-cream-300 text-right">YOY เทียบทั้งปี<br>(ปี 68 vs ปี 69)</th>
-              <th class="p-2.5 text-right bg-leaf-50">YOY ช่วงเวลาเดียวกัน<br>(ม.ค. - เดือนล่าสุด)</th>
+              <th class="p-2.5 border-r border-b-2 border-cream-400 text-center w-10 bg-cream-200">#</th>
+              <th class="p-2.5 border-r border-b-2 border-cream-400 bg-cream-200">บริษัทคู่ค้า (คลิกเพื่อดูรายสินค้า)</th>
+              <th onclick="toggleSupMainSort('val68')" class="p-2.5 border-r border-b-2 border-cream-400 text-right bg-amber-100 hover:bg-amber-200/80 cursor-pointer select-none" title="คลิกเพื่อจัดเรียงตามยอดขายปี 68">
+                ยอดขายปี 68 (เต็มปี) <span id="sortIcon_val68" class="inline-block ml-1 text-[10px] text-earth-500">⇅</span>
+              </th>
+              <th onclick="toggleSupMainSort('val69')" class="p-2.5 border-r border-b-2 border-cream-400 text-right bg-orange-100 hover:bg-orange-200/80 cursor-pointer select-none" title="คลิกเพื่อจัดเรียงตามยอดขายปี 69">
+                ยอดขายปี 69 (สะสม) <span id="sortIcon_val69" class="inline-block ml-1 text-[10px] text-earth-900 font-bold">▼</span>
+              </th>
+              <th class="p-2.5 border-r border-b-2 border-cream-400 text-right bg-cream-200">YOY เทียบทั้งปี<br><span class="font-normal text-[10px] text-earth-700">(ปี 68 vs ปี 69)</span></th>
+              <th class="p-2.5 border-b-2 border-cream-400 text-right bg-leaf-100">YOY ช่วงเวลาเดียวกัน<br><span class="font-normal text-[10px] text-leaf-900">(ม.ค. - เดือนล่าสุด)</span></th>
             </tr>
           </thead>
           <tbody id="supplierSalesTableBody" class="divide-y divide-cream-300"></tbody>
@@ -452,7 +460,6 @@
         <button onclick="closeMonthlyModal()" class="text-cream-300 hover:text-white text-2xl font-bold leading-none">&times;</button>
       </div>
 
-      <!-- แถบปุ่มสลับกลุ่มสาขา: รวมทั้งหมด / รวม TN(1-5)+CKS / รวม TN / TN(1-5) / TN(6) / CKS -->
       <div class="px-5 py-2.5 bg-cream-100 border-b border-cream-300 flex flex-wrap items-center justify-between gap-2">
         <div class="flex flex-wrap items-center gap-1.5">
           <span class="text-xs font-semibold text-earth-800 mr-1">แยกดูตามสาขา:</span>
@@ -501,6 +508,8 @@
     const SHEET_68         = "ยอดขาย68";
     const SHEET_69         = "ยอดขาย69";
     const SHEET_CKS_BRANCH = "คงเหลือCKSแยกสาขา";
+    const SHEET_TN68_BAHT  = "TN68(บาท)";
+    const SHEET_CKS68_BAHT = "CKS68(บาท)";
 
     let rawProducts = [];
     let currentFiltered = [];
@@ -518,7 +527,13 @@
 
     let activeMonthlyProductId = null;
     let activeMonthlyBranchTab = 'ALL';
+
+    // ตัวแปรควบคุมแท็บยอดขายตามคู่ค้า
     let expandedSupplierRows = new Set();
+    let supMainSortField = 'val69'; // 'val68' หรือ 'val69'
+    let supMainSortDir = 'desc';    // 'desc' หรือ 'asc'
+    let supSubSortField = 'val69';  // 'name', 'val68', 'val69'
+    let supSubSortDir = 'desc';     // 'desc' หรือ 'asc'
 
     function fmtZero(val) {
       if (val === null || val === undefined) return '';
@@ -565,18 +580,20 @@
       fetchGoogleSheetData();
     });
 
-    // ================= 1. ดึงข้อมูลจาก Google Sheets ทั้ง 4 ชีท =================
+    // ================= 1. ดึงข้อมูลจาก Google Sheets ทั้ง 6 ชีท =================
     async function fetchGoogleSheetData() {
       const syncText = document.getElementById('syncStatusText');
       syncText.innerText = "กำลังซิงค์ข้อมูล...";
       const ts = Date.now();
 
       try {
-        const [resMain, res68, res69, resCksBranch] = await Promise.all([
+        const [resMain, res68, res69, resCksBranch, resTn68Baht, resCks68Baht] = await Promise.all([
           fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_MAIN)}&range=A1:CZ10000&t=${ts}`, { cache: 'no-store' }),
           fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_68)}&t=${ts}`, { cache: 'no-store' }).catch(() => null),
           fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_69)}&t=${ts}`, { cache: 'no-store' }).catch(() => null),
-          fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_CKS_BRANCH)}&headers=2&t=${ts}`, { cache: 'no-store' }).catch(() => null)
+          fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_CKS_BRANCH)}&headers=2&t=${ts}`, { cache: 'no-store' }).catch(() => null),
+          fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_TN68_BAHT)}&t=${ts}`, { cache: 'no-store' }).catch(() => null),
+          fetch(`https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_CKS68_BAHT)}&t=${ts}`, { cache: 'no-store' }).catch(() => null)
         ]);
 
         const textMain = await resMain.text();
@@ -665,6 +682,35 @@
           return map;
         }
 
+        // อ่านชีท TN68(บาท) และ CKS68(บาท): คอลัมน์ A (0) = รหัส, คอลัมน์ B-M (1-12) = เดือน ม.ค.-ธ.ค., คอลัมน์ N (13) = ยอดขายรวมทั้งปี
+        async function parseMonthlyBaht68(res) {
+          const map = new Map();
+          if (!res || !res.ok) return map;
+          try {
+            const txt = await res.text();
+            const j = JSON.parse(txt.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/)[1]);
+            for (let r = 0; r < j.table.rows.length; r++) {
+              const mc = j.table.rows[r].c;
+              if (!mc) continue;
+              const codeRaw = mc[0] && mc[0].v !== null ? String(mc[0].v).trim() : '';
+              if (!codeRaw || codeRaw === 'รหัส' || codeRaw === 'รหัสสินค้า' || codeRaw.toLowerCase().includes('total') || codeRaw.includes('รวม')) continue;
+
+              const getN = (idx) => (mc[idx] && mc[idx].v !== null) ? parseFloat(String(mc[idx].v).replace(/,/g, '')) || 0 : 0;
+              const months = [];
+              for (let m = 0; m < 12; m++) {
+                months.push(getN(1 + m)); // คอลัมน์ B (Index 1) ถึง M (Index 12)
+              }
+              const totalYear = getN(13); // คอลัมน์ N (Index 13)
+              const obj = { months, totalYear };
+              map.set(codeRaw, obj);
+              map.set(normalizeCode(codeRaw), obj);
+            }
+          } catch (e) {
+            console.warn("parseMonthlyBaht68 error:", e);
+          }
+          return map;
+        }
+
         async function parseCKSBranchPivotSheet(res) {
           const map = new Map();
           if (!res || !res.ok) return map;
@@ -718,13 +764,16 @@
           return map;
         }
 
-        const [map68, map69, mapCksBranches] = await Promise.all([
+        const [map68, map69, mapCksBranches, mapTn68Baht, mapCks68Baht] = await Promise.all([
           parseMonthly(res68),
           parseMonthly(res69),
-          parseCKSBranchPivotSheet(resCksBranch)
+          parseCKSBranchPivotSheet(resCksBranch),
+          parseMonthlyBaht68(resTn68Baht),
+          parseMonthlyBaht68(resCks68Baht)
         ]);
 
         const emptyMonthly = { tn: Array(12).fill(0), tn_1_5: Array(12).fill(0), tn_6: Array(12).fill(0), cks: Array(12).fill(0) };
+        const emptyBaht68  = { months: Array(12).fill(0), totalYear: 0 };
 
         const products = [];
         for (let i = DATA_START_IDX; i < rowsMain.length; i++) {
@@ -754,6 +803,9 @@
           const d69 = map69.get(codeVal) || map69.get(normalizeCode(codeVal)) || map69.get(nameVal) || map69.get(nameVal.toLowerCase()) || emptyMonthly;
           const cksBranches = mapCksBranches.get(codeVal) || mapCksBranches.get(normalizeCode(codeVal)) || mapCksBranches.get(nameVal) || mapCksBranches.get(nameVal.toLowerCase()) || [];
 
+          const b68Tn  = mapTn68Baht.get(codeVal)  || mapTn68Baht.get(normalizeCode(codeVal))  || emptyBaht68;
+          const b68Cks = mapCks68Baht.get(codeVal) || mapCks68Baht.get(normalizeCode(codeVal)) || emptyBaht68;
+
           const sValTn = getN(37), sValCks = getN(38);
           const sValTot = getN(39) > 0 ? getN(39) : (sValTn + sValCks);
 
@@ -771,13 +823,15 @@
             unitBig: getV(4) || 'ลัง',
             unitSub: getV(7) || 'ย่อย',
             sales68_tn_1_5: getN(11), sales68_tn_6: getN(12), sales68_cks: getN(13), sales68_total_sub: getN(14),
-sales68_val_tn: getN(17), sales68_val_cks: getN(18), sales68_val: getN(19),
-sales69_tn_1_5: getN(21), sales69_tn_6: getN(22), sales69_cks: getN(23), sales69_total_sub: getN(24),
-sales69_val_tn: getN(27), sales69_val_cks: getN(28), sales69_val: getN(29),
+            sales68_val_tn: getN(17), sales68_val_cks: getN(18), sales68_val: getN(19),
+            sales69_tn_1_5: getN(21), sales69_tn_6: getN(22), sales69_cks: getN(23), sales69_total_sub: getN(24),
+            sales69_val_tn: getN(27), sales69_val_cks: getN(28), sales69_val: getN(29),
             stock_pc: getN(30), stock_kr: getN(31), stock_cyp: getN(32), stock_cks: getN(33),
             stock_val_tn: sValTn, stock_val_cks: sValCks, stock_val: sValTot,
             monthly68_tn: d68.tn, monthly68_tn_1_5: d68.tn_1_5, monthly68_tn_6: d68.tn_6, monthly68_cks: d68.cks,
             monthly69_tn: d69.tn, monthly69_tn_1_5: d69.tn_1_5, monthly69_tn_6: d69.tn_6, monthly69_cks: d69.cks,
+            baht68_tn_months: b68Tn.months, baht68_tn_total: b68Tn.totalYear,
+            baht68_cks_months: b68Cks.months, baht68_cks_total: b68Cks.totalYear,
             cksBranches: cksBranches,
             orderBigQty: 0, freeBigQty: 0, unitPriceInput: 0, orderTotalVal: 0, notes: ''
           });
@@ -1224,201 +1278,402 @@ sales69_val_tn: getN(27), sales69_val_cks: getN(28), sales69_val: getN(29),
       document.getElementById('btnLoadAll').classList.toggle('hidden', visibleLimit >= currentFiltered.length);
     }
 
-    // ================= แท็บใหม่: สรุปยอดขายตามบริษัทคู่ค้า + ดรอปดาวน์ดูรายสินค้า =================
+    // ================= แท็บใหม่: สรุปยอดขายตามบริษัทคู่ค้า + ดรอปดาวน์ดูรายสินค้า + พิมพ์ PDF =================
     function toggleSupplierDropdown(supKey) {
       if (expandedSupplierRows.has(supKey)) expandedSupplierRows.delete(supKey);
       else expandedSupplierRows.add(supKey);
       renderSupplierSalesTab();
     }
 
+    function toggleSupMainSort(field) {
+      if (supMainSortField === field) {
+        supMainSortDir = supMainSortDir === 'desc' ? 'asc' : 'desc';
+      } else {
+        supMainSortField = field;
+        supMainSortDir = 'desc';
+      }
+      renderSupplierSalesTab();
+    }
+
+    function toggleSupSubSort(field) {
+      if (supSubSortField === field) {
+        supSubSortDir = supSubSortDir === 'desc' ? 'asc' : (field === 'name' ? 'desc' : 'asc');
+      } else {
+        supSubSortField = field;
+        supSubSortDir = field === 'name' ? 'asc' : 'desc';
+      }
+      renderSupplierSalesTab();
+    }
+
+    function buildSupplierSalesData() {
+      const mIdx = latestMonthIndex;
+      const ytdMonthCount = mIdx + 1;
+      const q = (document.getElementById('supSalesSearchInput')?.value || '').toLowerCase().trim();
+      const supMap = new Map();
+
+      rawProducts.forEach(p => {
+        const supName = p.supplier || 'ไม่ระบุบริษัทคู่ค้า';
+        const mul = p.unitMultiplier || 1;
+        
+        let val68 = 0, val69 = 0, qty68 = 0, qty69 = 0, val68YTD = 0;
+
+        if (activeCompanyFilter === 'TN') {
+          qty68 = (p.sales68_tn_1_5 || 0) + (p.sales68_tn_6 || 0);
+          val68 = p.sales68_val_tn || 0;
+          qty69 = (p.sales69_tn_1_5 || 0) + (p.sales69_tn_6 || 0);
+          val69 = p.sales69_val_tn || 0;
+
+          // ดึงยอดขายปี 68 ช่วงเวลาเดียวกัน (ม.ค.-เดือนล่าสุด) จากชีท TN68(บาท)
+          let sumSheet68 = 0;
+          for (let i = 0; i <= mIdx; i++) sumSheet68 += (p.baht68_tn_months[i] || 0);
+          val68YTD = sumSheet68 > 0 ? sumSheet68 : ((val68 / 12) * ytdMonthCount);
+        } else if (activeCompanyFilter === 'CKS') {
+          qty68 = p.sales68_cks || 0;
+          val68 = p.sales68_val_cks || 0;
+          qty69 = p.sales69_cks || 0;
+          val69 = p.sales69_val_cks || 0;
+
+          // ดึงยอดขายปี 68 ช่วงเวลาเดียวกัน (ม.ค.-เดือนล่าสุด) จากชีท CKS68(บาท)
+          let sumSheet68 = 0;
+          for (let i = 0; i <= mIdx; i++) sumSheet68 += (p.baht68_cks_months[i] || 0);
+          val68YTD = sumSheet68 > 0 ? sumSheet68 : ((val68 / 12) * ytdMonthCount);
+        } else {
+          qty68 = (p.sales68_total_sub > 0) ? p.sales68_total_sub : ((p.sales68_tn_1_5 || 0) + (p.sales68_tn_6 || 0) + (p.sales68_cks || 0));
+          val68 = (p.sales68_val > 0) ? p.sales68_val : ((p.sales68_val_tn || 0) + (p.sales68_val_cks || 0));
+          qty69 = (p.sales69_total_sub > 0) ? p.sales69_total_sub : ((p.sales69_tn_1_5 || 0) + (p.sales69_tn_6 || 0) + (p.sales69_cks || 0));
+          val69 = (p.sales69_val > 0) ? p.sales69_val : ((p.sales69_val_tn || 0) + (p.sales69_val_cks || 0));
+
+          // รวม TN68(บาท) + CKS68(บาท) ช่วง ม.ค.-เดือนล่าสุด
+          let sumTn68 = 0, sumCks68 = 0;
+          for (let i = 0; i <= mIdx; i++) {
+            sumTn68 += (p.baht68_tn_months[i] || 0);
+            sumCks68 += (p.baht68_cks_months[i] || 0);
+          }
+          const sumBoth = sumTn68 + sumCks68;
+          val68YTD = sumBoth > 0 ? sumBoth : ((val68 / 12) * ytdMonthCount);
+        }
+
+        const big68 = qty68 > 0 ? Math.ceil(qty68 / mul) : 0;
+        const big69 = qty69 > 0 ? Math.ceil(qty69 / mul) : 0;
+
+        if (!supMap.has(supName)) {
+          supMap.set(supName, { name: supName, val68: 0, val69: 0, val68YTD: 0, items: [] });
+        }
+        const entry = supMap.get(supName);
+        entry.val68 += val68;
+        entry.val69 += val69;
+        entry.val68YTD += val68YTD;
+        entry.items.push({
+          p, qty68, big68, val68, qty69, big69, val69, val68YTD
+        });
+      });
+
+      let supList = Array.from(supMap.values()).filter(s => {
+        if (!q) return true;
+        if (s.name.toLowerCase().includes(q)) return true;
+        return s.items.some(it => it.p.name.toLowerCase().includes(q));
+      });
+
+      // จัดเรียงระดับบริษัทคู่ค้า (ตามปี 68 หรือ ปี 69)
+      supList.sort((a, b) => {
+        const diff = (a[supMainSortField] || 0) - (b[supMainSortField] || 0);
+        return supMainSortDir === 'asc' ? diff : -diff;
+      });
+
+      return supList;
+    }
+
     function renderSupplierSalesTab() {
-  const tbody = document.getElementById('supplierSalesTableBody');
-  if (!tbody) return;
+      const tbody = document.getElementById('supplierSalesTableBody');
+      if (!tbody) return;
 
-  const mNames = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  const mIdx = latestMonthIndex; // 0 = ม.ค., 10 = พ.ย. (11 เดือน)
-  const ytdMonthCount = mIdx + 1; // จำนวนเดือนสะสมของปี 69 (เช่น ม.ค.-พ.ย. = 11 เดือน)
-  const compLabel = activeCompanyFilter === 'ALL' ? 'รวม TN+CKS' : (activeCompanyFilter === 'TN' ? 'ตังนำ (TN)' : 'ชาวเกษตร (CKS)');
-  document.getElementById('supSalesSubHeader').innerText = `มุมมอง: ${compLabel} | ช่วงเวลาเปรียบเทียบ: ม.ค.-${mNames[mIdx]} (${ytdMonthCount} เดือน) | คลิกที่แถวคู่ค้าเพื่อกางดูรายสินค้า`;
+      const mNames = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+      const mIdx = latestMonthIndex;
+      const compLabel = activeCompanyFilter === 'ALL' ? 'รวม TN+CKS' : (activeCompanyFilter === 'TN' ? 'ตังนำ (TN)' : 'ชาวเกษตร (CKS)');
+      document.getElementById('supSalesSubHeader').innerText = `มุมมอง: ${compLabel} | ช่วงเวลาเปรียบเทียบ: ม.ค.-${mNames[mIdx]} (ดึงข้อมูลจริงจากชีท TN68(บาท) / CKS68(บาท))`;
 
-  const q = (document.getElementById('supSalesSearchInput')?.value || '').toLowerCase().trim();
-  const supMap = new Map();
+      // อัปเดตลูกศรเรียงลำดับบนหัวตารางหลัก
+      const icon68 = document.getElementById('sortIcon_val68');
+      const icon69 = document.getElementById('sortIcon_val69');
+      if (icon68) {
+        icon68.innerText = supMainSortField === 'val68' ? (supMainSortDir === 'desc' ? '▼' : '▲') : '⇅';
+        icon68.className = supMainSortField === 'val68' ? 'inline-block ml-1 text-[10px] text-earth-900 font-bold' : 'inline-block ml-1 text-[10px] text-earth-400';
+      }
+      if (icon69) {
+        icon69.innerText = supMainSortField === 'val69' ? (supMainSortDir === 'desc' ? '▼' : '▲') : '⇅';
+        icon69.className = supMainSortField === 'val69' ? 'inline-block ml-1 text-[10px] text-earth-900 font-bold' : 'inline-block ml-1 text-[10px] text-earth-400';
+      }
 
-  rawProducts.forEach(p => {
-    const supName = p.supplier || 'ไม่ระบุบริษัทคู่ค้า';
-    
-    // ดึงจำนวนขาย (หน่วย) และมูลค่าขาย (บาท) จากคอลัมน์ในชีท Forecast เท่านั้น
-    let val68 = 0, val69 = 0, qty68 = 0, qty69 = 0;
+      const supList = buildSupplierSalesData();
 
-    if (activeCompanyFilter === 'TN') {
-      // TN: จำนวนขายปี 68 = L+M (11+12), มูลค่าปี 68 = R (17) | จำนวนขายปี 69 = V+W (21+22), มูลค่าปี 69 = AB (27)
-      qty68 = (p.sales68_tn_1_5 || 0) + (p.sales68_tn_6 || 0);
-      val68 = p.sales68_val_tn || 0;
-      qty69 = (p.sales69_tn_1_5 || 0) + (p.sales69_tn_6 || 0);
-      val69 = p.sales69_val_tn || 0;
-    } else if (activeCompanyFilter === 'CKS') {
-      // CKS: จำนวนขายปี 68 = N (13), มูลค่าปี 68 = S (18) | จำนวนขายปี 69 = X (23), มูลค่าปี 69 = AC (28)
-      qty68 = p.sales68_cks || 0;
-      val68 = p.sales68_val_cks || 0;
-      qty69 = p.sales69_cks || 0;
-      val69 = p.sales69_val_cks || 0;
-    } else {
-      // รวม: จำนวนขายปี 68 = O (14) (สำรอง L+M+N), มูลค่าปี 68 = T (19) | จำนวนขายปี 69 = Y (24) (สำรอง V+W+X), มูลค่าปี 69 = AD (29)
-      qty68 = (p.sales68_total_sub > 0) ? p.sales68_total_sub : ((p.sales68_tn_1_5 || 0) + (p.sales68_tn_6 || 0) + (p.sales68_cks || 0));
-      val68 = (p.sales68_val > 0) ? p.sales68_val : ((p.sales68_val_tn || 0) + (p.sales68_val_cks || 0));
-      qty69 = (p.sales69_total_sub > 0) ? p.sales69_total_sub : ((p.sales69_tn_1_5 || 0) + (p.sales69_tn_6 || 0) + (p.sales69_cks || 0));
-      val69 = (p.sales69_val > 0) ? p.sales69_val : ((p.sales69_val_tn || 0) + (p.sales69_val_cks || 0));
-    }
+      if (supList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-earth-600">ไม่พบข้อมูลบริษัทคู่ค้า</td></tr>`;
+        return;
+      }
 
-    // คำนวณยอดปี 68 ช่วงเวลาเดียวกัน (ม.ค.-เดือนล่าสุด) จากฐานข้อมูล Forecast (เฉลี่ยตามสัดส่วนจำนวนเดือนที่ขายจริงของปี 69)
-    const qty68YTD = Math.round((qty68 / 12) * ytdMonthCount);
-    const val68YTD = (val68 / 12) * ytdMonthCount;
+      let html = '';
+      supList.forEach((s, idx) => {
+        const isOpen = expandedSupplierRows.has(s.name);
+        const diffFull = s.val69 - s.val68;
+        const pctFull = s.val68 > 0 ? Math.round((diffFull / s.val68) * 100) : (s.val69 > 0 ? 100 : 0);
+        const colorFull = pctFull >= 0 ? 'text-leaf-800' : 'text-red-600';
 
-    if (!supMap.has(supName)) {
-      supMap.set(supName, { name: supName, val68: 0, val69: 0, val68YTD: 0, items: [] });
-    }
-    const entry = supMap.get(supName);
-    entry.val68 += val68;
-    entry.val69 += val69;
-    entry.val68YTD += val68YTD;
-    entry.items.push({
-      p, qty68, val68, qty69, val69, qty68YTD, val68YTD
-    });
-  });
+        const diffYTD = s.val69 - s.val68YTD;
+        const pctYTD = s.val68YTD > 0 ? Math.round((diffYTD / s.val68YTD) * 100) : (s.val69 > 0 ? 100 : 0);
+        const colorYTD = pctYTD >= 0 ? 'text-leaf-800' : 'text-red-600';
 
-  // กรองตามคำค้นหาและเรียงตามยอดขายปี 69 สูงสุด (ถ้าปี 69 เป็น 0 ให้เรียงตามปี 68)
-  let supList = Array.from(supMap.values()).filter(s => {
-    if (!q) return true;
-    if (s.name.toLowerCase().includes(q)) return true;
-    return s.items.some(it => it.p.name.toLowerCase().includes(q));
-  }).sort((a, b) => (b.val69 - a.val69) || (b.val68 - a.val68));
+        // เพิ่มสีของบริษัทคู่ค้านั้นให้เด่นขึ้นอีกระดับ (ไม่เข้มมาก) เมื่อเปิดดรอปดาวน์
+        const rowBgClass = isOpen
+          ? 'bg-amber-100/80 border-l-4 border-l-amber-600 font-semibold shadow-2xs'
+          : 'hover:bg-cream-100';
 
-  if (supList.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-earth-600">ไม่พบข้อมูลบริษัทคู่ค้า</td></tr>`;
-    return;
-  }
+        html += `
+          <tr onclick="toggleSupplierDropdown('${s.name.replace(/'/g, "\\'")}')" class="cursor-pointer transition ${rowBgClass}">
+            <td class="p-2.5 text-center border-r border-cream-300">${idx + 1}</td>
+            <td class="p-2.5 border-r border-cream-300">
+              <div class="flex items-center justify-between">
+                <span class="font-bold ${isOpen ? 'text-amber-950' : 'text-earth-900'} text-xs sm:text-sm">${isOpen ? '▼' : '▶'} ${s.name}</span>
+                <span class="px-2 py-0.5 rounded-full ${isOpen ? 'bg-amber-200 text-amber-950 font-bold' : 'bg-cream-200 text-earth-800 font-medium'} text-[10px]">${s.items.length} รายการ</span>
+              </div>
+            </td>
+            <td class="p-2.5 text-right border-r border-cream-300 font-mono ${isOpen ? '' : 'bg-amber-50/40'} font-semibold text-amber-950">
+              ${fmtZero(Math.round(s.val68))}
+            </td>
+            <td class="p-2.5 text-right border-r border-cream-300 font-mono ${isOpen ? '' : 'bg-orange-50/40'} font-bold text-earth-900">
+              ${fmtZero(Math.round(s.val69))}
+            </td>
+            <td class="p-2.5 text-right border-r border-cream-300 font-mono">
+              ${(s.val68 > 0 || s.val69 > 0) ? `
+                <span class="font-bold ${colorFull}">${pctFull >= 0 ? '▲ +' : '▼ '}${pctFull}%</span>
+                <div class="text-[10px] text-earth-600">${diffFull !== 0 ? `${diffFull > 0 ? '+' : ''}${Math.round(diffFull).toLocaleString()}` : ''}</div>
+              ` : ''}
+            </td>
+            <td class="p-2.5 text-right font-mono ${isOpen ? '' : 'bg-leaf-50/40'}">
+              ${(s.val68YTD > 0 || s.val69 > 0) ? `
+                <span class="font-bold ${colorYTD}">${pctYTD >= 0 ? '▲ +' : '▼ '}${pctYTD}%</span>
+                <div class="text-[10px] text-earth-600">${s.val68YTD > 0 ? `ปี 68: ${Math.round(s.val68YTD).toLocaleString()}` : ''}</div>
+              ` : ''}
+            </td>
+          </tr>
+        `;
 
-  let html = '';
-  supList.forEach((s, idx) => {
-    const isOpen = expandedSupplierRows.has(s.name);
-    const diffFull = s.val69 - s.val68;
-    const pctFull = s.val68 > 0 ? Math.round((diffFull / s.val68) * 100) : (s.val69 > 0 ? 100 : 0);
-    const colorFull = pctFull >= 0 ? 'text-leaf-800' : 'text-red-600';
+        // ดรอปดาวน์ดูรายการสินค้า: โทนสีเทา (หัวตารางสีเทา, แถวสินค้าสีเทาอ่อนกว่าหัวตาราง), จัดเรียงได้, เพิ่มหน่วยใหญ่ และไม่แสดงคำว่า บ.
+        if (isOpen) {
+          const sortedItems = [...s.items].sort((a, b) => {
+            if (supSubSortField === 'name') {
+              const cmp = a.p.name.localeCompare(b.p.name, 'th');
+              return supSubSortDir === 'asc' ? cmp : -cmp;
+            }
+            const diff = (a[supSubSortField] || 0) - (b[supSubSortField] || 0);
+            return supSubSortDir === 'asc' ? diff : -diff;
+          });
 
-    const diffYTD = s.val69 - s.val68YTD;
-    const pctYTD = s.val68YTD > 0 ? Math.round((diffYTD / s.val68YTD) * 100) : (s.val69 > 0 ? 100 : 0);
-    const colorYTD = pctYTD >= 0 ? 'text-leaf-800' : 'text-red-600';
+          const subIconName = supSubSortField === 'name' ? (supSubSortDir === 'asc' ? '▲' : '▼') : '⇅';
+          const subIcon68   = supSubSortField === 'val68' ? (supSubSortDir === 'desc' ? '▼' : '▲') : '⇅';
+          const subIcon69   = supSubSortField === 'val69' ? (supSubSortDir === 'desc' ? '▼' : '▲') : '⇅';
 
-    html += `
-      <tr onclick="toggleSupplierDropdown('${s.name.replace(/'/g, "\\'")}')" class="cursor-pointer hover:bg-cream-100 transition ${isOpen ? 'bg-cream-200/70 font-semibold' : ''}">
-        <td class="p-2.5 text-center border-r border-cream-300">${idx + 1}</td>
-        <td class="p-2.5 border-r border-cream-300">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-earth-900 text-xs sm:text-sm">${isOpen ? '▼' : '▶'} ${s.name}</span>
-            <span class="px-2 py-0.5 rounded-full bg-cream-200 text-earth-800 text-[10px] font-medium">${s.items.length} รายการ</span>
-          </div>
-        </td>
-        <td class="p-2.5 text-right border-r border-cream-300 font-mono bg-amber-50/40 font-semibold text-amber-950">
-          ${fmtZero(Math.round(s.val68))}
-        </td>
-        <td class="p-2.5 text-right border-r border-cream-300 font-mono bg-orange-50/40 font-bold text-earth-900">
-          ${fmtZero(Math.round(s.val69))}
-        </td>
-        <td class="p-2.5 text-right border-r border-cream-300 font-mono">
-          ${(s.val68 > 0 || s.val69 > 0) ? `
-            <span class="font-bold ${colorFull}">${pctFull >= 0 ? '▲ +' : '▼ '}${pctFull}%</span>
-            <div class="text-[10px] text-earth-600">${diffFull >= 0 ? '+' : ''}${Math.round(diffFull).toLocaleString()} บ.</div>
-          ` : ''}
-        </td>
-        <td class="p-2.5 text-right font-mono bg-leaf-50/40">
-          ${(s.val68YTD > 0 || s.val69 > 0) ? `
-            <span class="font-bold ${colorYTD}">${pctYTD >= 0 ? '▲ +' : '▼ '}${pctYTD}%</span>
-            <div class="text-[10px] text-earth-600">ปี 68: ${Math.round(s.val68YTD).toLocaleString()} บ.</div>
-          ` : ''}
-        </td>
-      </tr>
-    `;
-
-    // ดรอปดาวน์ดูแยกรายสินค้า: แสดงจำนวน (หน่วย), มูลค่า (บาท), YOY ทั้งปี และ YOY ช่วงเวลาเดียวกัน ปี 68 / 69
-    if (isOpen) {
-      const sortedItems = [...s.items].sort((a, b) => (b.val69 - a.val69) || (b.val68 - a.val68));
-      html += `
-        <tr class="bg-cream-50">
-          <td colspan="6" class="p-3 border-b-2 border-earth-700">
-            <div class="border border-cream-300 rounded-lg overflow-hidden bg-white shadow-inner">
-              <table class="w-full text-[11px] text-left border-collapse">
-                <thead class="bg-earth-800 text-cream-50">
-                  <tr>
-                    <th class="p-1.5 text-center w-8">#</th>
-                    <th class="p-1.5">รายการสินค้า</th>
-                    <th class="p-1.5 text-right bg-amber-950/60">ปี 68 (เต็มปี)<br><span class="font-normal text-[9.5px] text-amber-200">จำนวน (หน่วย) / มูลค่า (บาท)</span></th>
-                    <th class="p-1.5 text-right bg-amber-900/60">ปี 69 (สะสม)<br><span class="font-normal text-[9.5px] text-amber-200">จำนวน (หน่วย) / มูลค่า (บาท)</span></th>
-                    <th class="p-1.5 text-right">YOY ทั้งปี<br><span class="font-normal text-[9.5px] text-cream-300">ปี 68 vs ปี 69</span></th>
-                    <th class="p-1.5 text-right bg-leaf-900/60">YOY ช่วงเวลาเดียวกัน<br><span class="font-normal text-[9.5px] text-leaf-200">(ม.ค.-${mNames[mIdx]}) ปี 68 vs ปี 69</span></th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-cream-200">
-                  ${sortedItems.map((it, iIdx) => {
-                    const cleanSub = getCleanUnitName(it.p.unitSub);
-                    
-                    // YOY ทั้งปี (เทียบมูลค่าบาท)
-                    const iDiffFull = it.val69 - it.val68;
-                    const iPctFull = it.val68 > 0 ? Math.round((iDiffFull / it.val68) * 100) : (it.val69 > 0 ? 100 : 0);
-
-                    // YOY ช่วงเวลาเดียวกัน (เทียบมูลค่าบาท)
-                    const iDiffYTD = it.val69 - it.val68YTD;
-                    const iPctYTD  = it.val68YTD > 0 ? Math.round((iDiffYTD / it.val68YTD) * 100) : (it.val69 > 0 ? 100 : 0);
-
-                    return `
-                      <tr class="hover:bg-cream-100/60">
-                        <td class="p-1.5 text-center text-earth-500 align-top">${iIdx + 1}</td>
-                        <td class="p-1.5 font-medium text-earth-900 align-top">
-                          <div>${it.p.name}</div>
-                          ${it.p.category ? `<span class="text-[9.5px] text-earth-500">[${it.p.category}]</span>` : ''}
-                        </td>
-                        
-                        <!-- ปี 68: จำนวน (หน่วย) / มูลค่า (บาท) -->
-                        <td class="p-1.5 text-right font-mono align-top bg-amber-50/30">
-                          <div>${it.qty68 > 0 ? `<b>${it.qty68.toLocaleString()}</b> <span class="font-sans text-[10px] text-earth-700">${cleanSub}</span>` : ''}</div>
-                          <div class="text-[10px] text-amber-900 font-semibold">${it.val68 > 0 ? `${Math.round(it.val68).toLocaleString()} บ.` : ''}</div>
-                        </td>
-
-                        <!-- ปี 69: จำนวน (หน่วย) / มูลค่า (บาท) -->
-                        <td class="p-1.5 text-right font-mono align-top bg-orange-50/30">
-                          <div>${it.qty69 > 0 ? `<b>${it.qty69.toLocaleString()}</b> <span class="font-sans text-[10px] text-earth-700">${cleanSub}</span>` : ''}</div>
-                          <div class="text-[10px] text-leaf-800 font-bold">${it.val69 > 0 ? `${Math.round(it.val69).toLocaleString()} บ.` : ''}</div>
-                        </td>
-
-                        <!-- YOY ทั้งปี -->
-                        <td class="p-1.5 text-right font-mono align-top">
-                          ${(it.val68 > 0 || it.val69 > 0) ? `
-                            <div class="font-bold ${iPctFull >= 0 ? 'text-leaf-700' : 'text-red-600'}">${iPctFull >= 0 ? '▲ +' : '▼ '}${iPctFull}%</div>
-                            <div class="text-[9.5px] text-earth-600">${iDiffFull >= 0 ? '+' : ''}${Math.round(iDiffFull).toLocaleString()} บ.</div>
-                          ` : ''}
-                        </td>
-
-                        <!-- YOY ช่วงเวลาเดียวกัน -->
-                        <td class="p-1.5 text-right font-mono align-top bg-leaf-50/30">
-                          ${(it.val68YTD > 0 || it.val69 > 0) ? `
-                            <div class="font-bold ${iPctYTD >= 0 ? 'text-leaf-700' : 'text-red-600'}">${iPctYTD >= 0 ? '▲ +' : '▼ '}${iPctYTD}%</div>
-                            <div class="text-[9.5px] text-earth-600">ปี 68: ${it.qty68YTD > 0 ? `${it.qty68YTD.toLocaleString()} ${cleanSub}` : ''} (${Math.round(it.val68YTD).toLocaleString()} บ.)</div>
-                            <div class="text-[9.5px] text-earth-800 font-semibold">ปี 69: ${it.qty69 > 0 ? `${it.qty69.toLocaleString()} ${cleanSub}` : ''} (${Math.round(it.val69).toLocaleString()} บ.)</div>
-                          ` : ''}
-                        </td>
+          html += `
+            <tr class="bg-gray-200/70">
+              <td colspan="6" class="p-3 border-b-2 border-gray-400">
+                <div class="border border-gray-300 rounded-lg overflow-hidden bg-gray-100 shadow-inner">
+                  <table class="w-full text-[11px] text-left border-collapse">
+                    <thead class="bg-gray-300 text-gray-900 font-semibold border-b border-gray-400">
+                      <tr>
+                        <th class="p-2 text-center w-8 border-r border-gray-400/50">#</th>
+                        <th onclick="event.stopPropagation(); toggleSupSubSort('name')" class="p-2 border-r border-gray-400/50 cursor-pointer hover:bg-gray-400/40 select-none">
+                          รายการสินค้า <span class="ml-1 text-[10px]">${subIconName}</span>
+                        </th>
+                        <th onclick="event.stopPropagation(); toggleSupSubSort('val68')" class="p-2 text-right border-r border-gray-400/50 cursor-pointer hover:bg-gray-400/40 select-none">
+                          ปี 68 (เต็มปี) <span class="ml-1 text-[10px]">${subIcon68}</span><br>
+                          <span class="font-normal text-[9.5px] text-gray-700">หน่วยใหญ่ (ย่อย) / มูลค่า</span>
+                        </th>
+                        <th onclick="event.stopPropagation(); toggleSupSubSort('val69')" class="p-2 text-right border-r border-gray-400/50 cursor-pointer hover:bg-gray-400/40 select-none">
+                          ปี 69 (สะสม) <span class="ml-1 text-[10px]">${subIcon69}</span><br>
+                          <span class="font-normal text-[9.5px] text-gray-700">หน่วยใหญ่ (ย่อย) / มูลค่า</span>
+                        </th>
+                        <th class="p-2 text-right border-r border-gray-400/50">
+                          YOY ทั้งปี<br>
+                          <span class="font-normal text-[9.5px] text-gray-700">มูลค่า / ผลต่างย่อย / หน่วยใหญ่</span>
+                        </th>
+                        <th class="p-2 text-right">
+                          YOY ช่วงเวลาเดียวกัน<br>
+                          <span class="font-normal text-[9.5px] text-gray-700">(ม.ค.-${mNames[mIdx]}) ปี 68 vs ปี 69</span>
+                        </th>
                       </tr>
-                    `;
-                  }).join('')}
-                </tbody>
-              </table>
-            </div>
-          </td>
-        </tr>
-      `;
-    }
-  });
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-gray-100">
+                      ${sortedItems.map((it, iIdx) => {
+                        const cleanSub = getCleanUnitName(it.p.unitSub);
+                        
+                        // YOY ทั้งปี: ผลต่างมูลค่า, ผลต่างหน่วยย่อย (ไม่แสดงหน่วย), ผลต่างหน่วยใหญ่ (แสดงหน่วย)
+                        const iDiffValFull = it.val69 - it.val68;
+                        const iPctFull = it.val68 > 0 ? Math.round((iDiffValFull / it.val68) * 100) : (it.val69 > 0 ? 100 : 0);
+                        const diffSubFull = it.qty69 - it.qty68;
+                        const diffBigFull = it.big69 - it.big68;
 
-  tbody.innerHTML = html;
-}
+                        // YOY ช่วงเวลาเดียวกัน (ดึงจากชีท TN68(บาท) / CKS68(บาท))
+                        const iDiffYTD = it.val69 - it.val68YTD;
+                        const iPctYTD  = it.val68YTD > 0 ? Math.round((iDiffYTD / it.val68YTD) * 100) : (it.val69 > 0 ? 100 : 0);
+
+                        return `
+                          <tr class="hover:bg-gray-200/70 transition">
+                            <td class="p-1.5 text-center text-gray-600 align-top border-r border-gray-200">${iIdx + 1}</td>
+                            <td class="p-1.5 font-medium text-gray-900 align-top border-r border-gray-200">
+                              <div>${it.p.name}</div>
+                              <div class="text-[9.5px] text-gray-600">
+                                ${it.p.category ? `[${it.p.category}] ` : ''}(1*${it.p.unitMultiplier} ${it.p.unitBig}/${cleanSub})
+                              </div>
+                            </td>
+                            
+                            <!-- ปี 68: จำนวนหน่วยใหญ่ + หน่วยย่อย / มูลค่า (ไม่ใส่คำว่า บ.) -->
+                            <td class="p-1.5 text-right font-mono align-top border-r border-gray-200">
+                              <div>${it.big68 > 0 ? `<b class="text-gray-900">${it.big68.toLocaleString()} <span class="font-sans font-normal text-[10px]">${it.p.unitBig}</span></b>` : ''}</div>
+                              <div class="text-[10px] text-gray-700">${it.qty68 > 0 ? `(${it.qty68.toLocaleString()} ${cleanSub})` : ''}</div>
+                              <div class="text-[10.5px] text-amber-900 font-semibold">${it.val68 > 0 ? Math.round(it.val68).toLocaleString() : ''}</div>
+                            </td>
+
+                            <!-- ปี 69: จำนวนหน่วยใหญ่ + หน่วยย่อย / มูลค่า (ไม่ใส่คำว่า บ.) -->
+                            <td class="p-1.5 text-right font-mono align-top border-r border-gray-200">
+                              <div>${it.big69 > 0 ? `<b class="text-gray-900">${it.big69.toLocaleString()} <span class="font-sans font-normal text-[10px]">${it.p.unitBig}</span></b>` : ''}</div>
+                              <div class="text-[10px] text-gray-700">${it.qty69 > 0 ? `(${it.qty69.toLocaleString()} ${cleanSub})` : ''}</div>
+                              <div class="text-[10.5px] text-leaf-800 font-bold">${it.val69 > 0 ? Math.round(it.val69).toLocaleString() : ''}</div>
+                            </td>
+
+                            <!-- YOY ทั้งปี: % เติบโต, ผลต่างมูลค่า, ผลต่างหน่วยย่อย(ไม่แสดงหน่วย), หน่วยใหญ่(แสดงหน่วย) -->
+                            <td class="p-1.5 text-right font-mono align-top border-r border-gray-200">
+                              ${(it.val68 > 0 || it.val69 > 0 || it.qty68 > 0 || it.qty69 > 0) ? `
+                                <div class="font-bold ${iPctFull >= 0 ? 'text-leaf-700' : 'text-red-600'}">${iPctFull >= 0 ? '▲ +' : '▼ '}${iPctFull}%</div>
+                                <div class="text-[10px] text-gray-800">${iDiffValFull !== 0 ? `${iDiffValFull > 0 ? '+' : ''}${Math.round(iDiffValFull).toLocaleString()}` : ''}</div>
+                                <div class="text-[9.5px] text-gray-700">
+                                  ${diffSubFull !== 0 ? `ย่อย: ${diffSubFull > 0 ? '+' : ''}${diffSubFull.toLocaleString()}` : ''}
+                                  ${diffBigFull !== 0 ? ` | ใหญ่: <b>${diffBigFull > 0 ? '+' : ''}${diffBigFull.toLocaleString()} ${it.p.unitBig}</b>` : ''}
+                                </div>
+                              ` : ''}
+                            </td>
+
+                            <!-- YOY ช่วงเวลาเดียวกัน (ไม่ใส่คำว่า บ.) -->
+                            <td class="p-1.5 text-right font-mono align-top">
+                              ${(it.val68YTD > 0 || it.val69 > 0) ? `
+                                <div class="font-bold ${iPctYTD >= 0 ? 'text-leaf-700' : 'text-red-600'}">${iPctYTD >= 0 ? '▲ +' : '▼ '}${iPctYTD}%</div>
+                                <div class="text-[9.5px] text-gray-700">${it.val68YTD > 0 ? `ปี 68: ${Math.round(it.val68YTD).toLocaleString()}` : ''}</div>
+                                <div class="text-[9.5px] text-gray-900 font-semibold">${it.val69 > 0 ? `ปี 69: ${Math.round(it.val69).toLocaleString()}` : ''}</div>
+                              ` : ''}
+                            </td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </td>
+            </tr>
+          `;
+        }
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    // พิมพ์ PDF ส่วนสรุปยอดขายตามบริษัทคู่ค้า (ก่อนดรอปดาวน์)
+    function exportPDF_SupplierSummary() {
+      const supList = buildSupplierSalesData();
+      if (supList.length === 0) return alert("ไม่มีข้อมูลบริษัทคู่ค้าสำหรับพิมพ์ PDF");
+
+      const mNames = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+      const mIdx = latestMonthIndex;
+      const compLabel = activeCompanyFilter === 'ALL' ? 'รวม TN+CKS' : (activeCompanyFilter === 'TN' ? 'ตังนำ (TN)' : 'ชาวเกษตร (CKS)');
+      const now = new Date();
+      const printTime = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} น.`;
+
+      let sum68 = 0, sum69 = 0, sum68YTD = 0, rowsHtml = '';
+
+      supList.forEach((s, idx) => {
+        sum68 += s.val68;
+        sum69 += s.val69;
+        sum68YTD += s.val68YTD;
+
+        const diffFull = s.val69 - s.val68;
+        const pctFull = s.val68 > 0 ? Math.round((diffFull / s.val68) * 100) : (s.val69 > 0 ? 100 : 0);
+
+        const diffYTD = s.val69 - s.val68YTD;
+        const pctYTD = s.val68YTD > 0 ? Math.round((diffYTD / s.val68YTD) * 100) : (s.val69 > 0 ? 100 : 0);
+
+        rowsHtml += `
+          <tr>
+            <td style="text-align:center;">${idx + 1}</td>
+            <td style="font-weight:bold;">${s.name} <span style="font-weight:normal; font-size:9px; color:#555;">(${s.items.length} รายการ)</span></td>
+            <td style="text-align:right; background:#FEF3C7;">${fmtZero(Math.round(s.val68))}</td>
+            <td style="text-align:right; background:#FFEDD5; font-weight:bold;">${fmtZero(Math.round(s.val69))}</td>
+            <td style="text-align:right;">
+              ${(s.val68 > 0 || s.val69 > 0) ? `
+                <b style="color:${pctFull >= 0 ? '#166534' : '#dc2626'};">${pctFull >= 0 ? '▲ +' : '▼ '}${pctFull}%</b><br>
+                <span style="font-size:8.5px; color:#444;">${diffFull !== 0 ? `${diffFull > 0 ? '+' : ''}${Math.round(diffFull).toLocaleString()}` : ''}</span>
+              ` : ''}
+            </td>
+            <td style="text-align:right; background:#DCFCE7;">
+              ${(s.val68YTD > 0 || s.val69 > 0) ? `
+                <b style="color:${pctYTD >= 0 ? '#166534' : '#dc2626'};">${pctYTD >= 0 ? '▲ +' : '▼ '}${pctYTD}%</b><br>
+                <span style="font-size:8.5px; color:#444;">${s.val68YTD > 0 ? `ปี 68: ${Math.round(s.val68YTD).toLocaleString()}` : ''}</span>
+              ` : ''}
+            </td>
+          </tr>
+        `;
+      });
+
+      const totDiffFull = sum69 - sum68;
+      const totPctFull = sum68 > 0 ? Math.round((totDiffFull / sum68) * 100) : 0;
+      const totDiffYTD = sum69 - sum68YTD;
+      const totPctYTD = sum68YTD > 0 ? Math.round((totDiffYTD / sum68YTD) * 100) : 0;
+
+      const win = window.open('', '_blank');
+      win.document.write(`
+        <html><head><title>รายงานสรุปยอดขายแยกตามบริษัทคู่ค้า</title>
+        <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+        <style>
+          @page { size: A4 portrait; margin: 6mm; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          body { font-family: 'Sarabun', sans-serif; font-size: 10px; color: #111; margin: 0; }
+          .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #4A3B32; padding-bottom: 4px; margin-bottom: 6px; }
+          table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+          th, td { border: 1px solid #bbb; padding: 3.5px 5px; vertical-align: middle; word-wrap: break-word; }
+          th { background: #E8E3D7 !important; color: #000000 !important; font-size: 9.5px; text-align: center; font-weight: 700; }
+          tr { page-break-inside: avoid; }
+        </style></head><body>
+          <div class="header">
+            <div>
+              <div style="font-size:14px; font-weight:bold; color:#4A3B32;">รายงานสรุปยอดขายและเปรียบเทียบ YOY แยกตามบริษัทคู่ค้า</div>
+              <div style="font-size:10.5px; margin-top:2px;">มุมมองบริษัท: <b>${compLabel}</b> | ข้อมูลยอดขาย: <b>${salesPeriodStr}</b> | ช่วงเวลาเทียบ: <b>ม.ค.-${mNames[mIdx]}</b></div>
+            </div>
+            <div style="text-align:right; font-size:9.5px;">พิมพ์เมื่อ: <b>${printTime}</b><br>จำนวนคู่ค้า: <b>${supList.length}</b> บริษัท</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width:5%;">#</th>
+                <th style="width:33%;">บริษัทคู่ค้า</th>
+                <th style="width:15%;">ยอดขายปี 68<br>(เต็มปี)</th>
+                <th style="width:15%;">ยอดขายปี 69<br>(สะสม)</th>
+                <th style="width:16%;">YOY เทียบทั้งปี<br>(ปี 68 vs ปี 69)</th>
+                <th style="width:16%;">YOY ช่วงเวลาเดียวกัน<br>(ม.ค.-${mNames[mIdx]})</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+            <tfoot>
+              <tr style="background:#F4F1EA; font-weight:bold;">
+                <td colspan="2" style="text-align:right;">รวมทั้งสิ้น:</td>
+                <td style="text-align:right; background:#FEF3C7;">${fmtZero(Math.round(sum68))}</td>
+                <td style="text-align:right; background:#FFEDD5;">${fmtZero(Math.round(sum69))}</td>
+                <td style="text-align:right; color:${totPctFull >= 0 ? '#166534' : '#dc2626'};">${totPctFull >= 0 ? '▲ +' : '▼ '}${totPctFull}%</td>
+                <td style="text-align:right; background:#DCFCE7; color:${totPctYTD >= 0 ? '#166534' : '#dc2626'};">${totPctYTD >= 0 ? '▲ +' : '▼ '}${totPctYTD}%</td>
+              </tr>
+            </tfoot>
+          </table>
+          <script>window.onload = function() { window.print(); };<\/script>
+        </body></html>
+      `);
+      win.document.close();
+    }
+
     // ================= MODAL ดูสต็อคแยกสาขาชาวเกษตร (CKS) =================
     function openCKSBranchModal(productId) {
       const p = rawProducts.find(x => x.id === productId);
