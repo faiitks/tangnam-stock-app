@@ -1315,7 +1315,7 @@
         const supName = p.supplier || 'ไม่ระบุบริษัทคู่ค้า';
         const mul = p.unitMultiplier || 1;
         
-        let val68 = 0, val69 = 0, qty68 = 0, qty69 = 0, val68YTD = 0;
+        let val68 = 0, val69 = 0, qty68 = 0, qty69 = 0, val68YTD = 0, qty68YTD = 0;
 
         if (activeCompanyFilter === 'TN') {
           qty68 = (p.sales68_tn_1_5 || 0) + (p.sales68_tn_6 || 0);
@@ -1323,9 +1323,12 @@
           qty69 = (p.sales69_tn_1_5 || 0) + (p.sales69_tn_6 || 0);
           val69 = p.sales69_val_tn || 0;
 
-          // ดึงยอดขายปี 68 ช่วงเวลาเดียวกัน (ม.ค.-เดือนล่าสุด) จากชีท TN68(บาท)
+          // ดึงยอดขายปี 68 ช่วงเวลาเดียวกัน (ม.ค.-เดือนล่าสุด) จากชีท TN68(บาท) และจำนวนขายจากชีท ยอดขาย68 (TN = TN1-5+TN6)
           let sumSheet68 = 0;
-          for (let i = 0; i <= mIdx; i++) sumSheet68 += (p.baht68_tn_months[i] || 0);
+          for (let i = 0; i <= mIdx; i++) {
+            sumSheet68 += (p.baht68_tn_months[i] || 0);
+            qty68YTD   += (p.monthly68_tn[i] || 0);
+          }
           val68YTD = sumSheet68 > 0 ? sumSheet68 : ((val68 / 12) * ytdMonthCount);
         } else if (activeCompanyFilter === 'CKS') {
           qty68 = p.sales68_cks || 0;
@@ -1333,9 +1336,12 @@
           qty69 = p.sales69_cks || 0;
           val69 = p.sales69_val_cks || 0;
 
-          // ดึงยอดขายปี 68 ช่วงเวลาเดียวกัน (ม.ค.-เดือนล่าสุด) จากชีท CKS68(บาท)
+          // ดึงยอดขายปี 68 ช่วงเวลาเดียวกัน (ม.ค.-เดือนล่าสุด) จากชีท CKS68(บาท) และจำนวนขายจากชีท ยอดขาย68 (CKS)
           let sumSheet68 = 0;
-          for (let i = 0; i <= mIdx; i++) sumSheet68 += (p.baht68_cks_months[i] || 0);
+          for (let i = 0; i <= mIdx; i++) {
+            sumSheet68 += (p.baht68_cks_months[i] || 0);
+            qty68YTD   += (p.monthly68_cks[i] || 0);
+          }
           val68YTD = sumSheet68 > 0 ? sumSheet68 : ((val68 / 12) * ytdMonthCount);
         } else {
           qty68 = (p.sales68_total_sub > 0) ? p.sales68_total_sub : ((p.sales68_tn_1_5 || 0) + (p.sales68_tn_6 || 0) + (p.sales68_cks || 0));
@@ -1343,18 +1349,20 @@
           qty69 = (p.sales69_total_sub > 0) ? p.sales69_total_sub : ((p.sales69_tn_1_5 || 0) + (p.sales69_tn_6 || 0) + (p.sales69_cks || 0));
           val69 = (p.sales69_val > 0) ? p.sales69_val : ((p.sales69_val_tn || 0) + (p.sales69_val_cks || 0));
 
-          // รวม TN68(บาท) + CKS68(บาท) ช่วง ม.ค.-เดือนล่าสุด
+          // รวม TN68(บาท) + CKS68(บาท) และจำนวนขายจากชีท ยอดขาย68 (TN + CKS) ช่วง ม.ค.-เดือนล่าสุด
           let sumTn68 = 0, sumCks68 = 0;
           for (let i = 0; i <= mIdx; i++) {
-            sumTn68 += (p.baht68_tn_months[i] || 0);
+            sumTn68  += (p.baht68_tn_months[i] || 0);
             sumCks68 += (p.baht68_cks_months[i] || 0);
+            qty68YTD += (p.monthly68_tn[i] || 0) + (p.monthly68_cks[i] || 0);
           }
           const sumBoth = sumTn68 + sumCks68;
           val68YTD = sumBoth > 0 ? sumBoth : ((val68 / 12) * ytdMonthCount);
         }
 
-        const big68 = qty68 > 0 ? Math.ceil(qty68 / mul) : 0;
-        const big69 = qty69 > 0 ? Math.ceil(qty69 / mul) : 0;
+        const big68    = qty68 > 0 ? Math.ceil(qty68 / mul) : 0;
+        const big69    = qty69 > 0 ? Math.ceil(qty69 / mul) : 0;
+        const big68YTD = qty68YTD > 0 ? Math.ceil(qty68YTD / mul) : 0;
 
         if (!supMap.has(supName)) {
           supMap.set(supName, { name: supName, val68: 0, val69: 0, val68YTD: 0, items: [] });
@@ -1364,7 +1372,7 @@
         entry.val69 += val69;
         entry.val68YTD += val68YTD;
         entry.items.push({
-          p, qty68, big68, val68, qty69, big69, val69, val68YTD
+          p, qty68, big68, val68, qty69, big69, val69, val68YTD, qty68YTD, big68YTD
         });
       });
 
@@ -1551,14 +1559,25 @@
                               ` : ''}
                             </td>
 
-                            <!-- YOY ช่วงเวลาเดียวกัน (ไม่ใส่คำว่า บ.) -->
-                            <td class="p-1.5 text-right font-mono align-top">
-                              ${(it.val68YTD > 0 || it.val69 > 0) ? `
-                                <div class="font-bold ${iPctYTD >= 0 ? 'text-leaf-700' : 'text-red-600'}">${iPctYTD >= 0 ? '▲ +' : '▼ '}${iPctYTD}%</div>
-                                <div class="text-[9.5px] text-gray-700">${it.val68YTD > 0 ? `ปี 68: ${Math.round(it.val68YTD).toLocaleString()}` : ''}</div>
-                                <div class="text-[9.5px] text-gray-900 font-semibold">${it.val69 > 0 ? `ปี 69: ${Math.round(it.val69).toLocaleString()}` : ''}</div>
-                              ` : ''}
-                            </td>
+                            <!-- YOY ช่วงเวลาเดียวกัน (ไม่ใส่คำว่า บ. + เพิ่มจำนวนขายจากชีท ยอดขาย68) -->
+<td class="p-1.5 text-right font-mono align-top">
+  ${(it.val68YTD > 0 || it.val69 > 0 || it.qty68YTD > 0 || it.qty69 > 0) ? (() => {
+    const diffSubYTD = it.qty69 - it.qty68YTD;
+    const diffBigYTD = it.big69 - it.big68YTD;
+    return `
+      <div class="font-bold ${iPctYTD >= 0 ? 'text-leaf-700' : 'text-red-600'}">${iPctYTD >= 0 ? '▲ +' : '▼ '}${iPctYTD}%</div>
+      <div class="text-[10px] text-gray-800">${iDiffYTD !== 0 ? `${iDiffYTD > 0 ? '+' : ''}${Math.round(iDiffYTD).toLocaleString()}` : ''}</div>
+      <div class="text-[9.5px] text-gray-700">
+        ${diffSubYTD !== 0 ? `ย่อย: ${diffSubYTD > 0 ? '+' : ''}${diffSubYTD.toLocaleString()}` : ''}
+        ${diffBigYTD !== 0 ? ` | ใหญ่: <b>${diffBigYTD > 0 ? '+' : ''}${diffBigYTD.toLocaleString()} ${it.p.unitBig}</b>` : ''}
+      </div>
+      <div class="text-[9px] text-gray-600 mt-0.5 pt-0.5 border-t border-gray-300/70">
+        68: ${it.qty68YTD > 0 ? `${it.qty68YTD.toLocaleString()} ${cleanSub}` : ''} (${it.val68YTD > 0 ? Math.round(it.val68YTD).toLocaleString() : ''})<br>
+        69: ${it.qty69 > 0 ? `${it.qty69.toLocaleString()} ${cleanSub}` : ''} (${it.val69 > 0 ? Math.round(it.val69).toLocaleString() : ''})
+      </div>
+    `;
+  })() : ''}
+</td>
                           </tr>
                         `;
                       }).join('')}
