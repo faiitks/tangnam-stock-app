@@ -289,7 +289,7 @@
       </div>
     </div>
 
-    <!-- ================= ตารางสรุปยอดขายตามบริษัทคู่ค้า (แท็บใหม่ - ล็อกหัวตาราง, เรียงลำดับได้, พิมพ์ PDF ได้) ================= -->
+    <!-- ================= ตารางสรุปยอดขายตามบริษัทคู่ค้า (ล็อกหัวตาราง, เรียงลำดับได้ทุกคอลัมน์ตัวเลข, พิมพ์ PDF ได้) ================= -->
     <div id="supplierSalesSection" class="hidden bg-white rounded-xl border border-cream-300 shadow-sm overflow-hidden flex-1 flex flex-col">
       <div class="px-4 py-3 bg-earth-900 text-cream-50 flex flex-wrap items-center justify-between gap-2">
         <div>
@@ -312,13 +312,19 @@
               <th class="p-2.5 border-r border-b-2 border-cream-400 text-center w-10 bg-cream-200">#</th>
               <th class="p-2.5 border-r border-b-2 border-cream-400 bg-cream-200">บริษัทคู่ค้า (คลิกเพื่อดูรายสินค้า)</th>
               <th onclick="toggleSupMainSort('val68')" class="p-2.5 border-r border-b-2 border-cream-400 text-right bg-amber-100 hover:bg-amber-200/80 cursor-pointer select-none" title="คลิกเพื่อจัดเรียงตามยอดขายปี 68">
-                ยอดขายปี 68 (เต็มปี) <span id="sortIcon_val68" class="inline-block ml-1 text-[10px] text-earth-500">⇅</span>
+                ยอดขายปี 68 (เต็มปี) <span id="sortIcon_val68" class="inline-block ml-1 text-[10px] text-earth-400">⇅</span>
               </th>
               <th onclick="toggleSupMainSort('val69')" class="p-2.5 border-r border-b-2 border-cream-400 text-right bg-orange-100 hover:bg-orange-200/80 cursor-pointer select-none" title="คลิกเพื่อจัดเรียงตามยอดขายปี 69">
                 ยอดขายปี 69 (สะสม) <span id="sortIcon_val69" class="inline-block ml-1 text-[10px] text-earth-900 font-bold">▼</span>
               </th>
-              <th class="p-2.5 border-r border-b-2 border-cream-400 text-right bg-cream-200">YOY เทียบทั้งปี<br><span class="font-normal text-[10px] text-earth-700">(ปี 68 vs ปี 69)</span></th>
-              <th class="p-2.5 border-b-2 border-cream-400 text-right bg-leaf-100">YOY ช่วงเวลาเดียวกัน<br><span class="font-normal text-[10px] text-leaf-900">(ม.ค. - เดือนล่าสุด)</span></th>
+              <th onclick="toggleSupMainSort('pctFull')" class="p-2.5 border-r border-b-2 border-cream-400 text-right bg-cream-200 hover:bg-cream-300/70 cursor-pointer select-none" title="คลิกเพื่อจัดเรียงตาม YOY เทียบทั้งปี">
+                YOY เทียบทั้งปี <span id="sortIcon_pctFull" class="inline-block ml-1 text-[10px] text-earth-400">⇅</span><br>
+                <span class="font-normal text-[10px] text-earth-700">(ปี 68 vs ปี 69)</span>
+              </th>
+              <th onclick="toggleSupMainSort('pctYTD')" class="p-2.5 border-b-2 border-cream-400 text-right bg-leaf-100 hover:bg-leaf-200/70 cursor-pointer select-none" title="คลิกเพื่อจัดเรียงตาม YOY ช่วงเวลาเดียวกัน">
+                YOY ช่วงเวลาเดียวกัน <span id="sortIcon_pctYTD" class="inline-block ml-1 text-[10px] text-earth-400">⇅</span><br>
+                <span class="font-normal text-[10px] text-leaf-900">(ม.ค. - เดือนล่าสุด)</span>
+              </th>
             </tr>
           </thead>
           <tbody id="supplierSalesTableBody" class="divide-y divide-cream-300"></tbody>
@@ -530,9 +536,9 @@
 
     // ตัวแปรควบคุมแท็บยอดขายตามคู่ค้า
     let expandedSupplierRows = new Set();
-    let supMainSortField = 'val69'; // 'val68' หรือ 'val69'
+    let supMainSortField = 'val69'; // 'val68', 'val69', 'pctFull', 'pctYTD'
     let supMainSortDir = 'desc';    // 'desc' หรือ 'asc'
-    let supSubSortField = 'val69';  // 'name', 'val68', 'val69'
+    let supSubSortField = 'val69';  // 'name', 'val68', 'val69', 'pctFull', 'pctYTD'
     let supSubSortDir = 'desc';     // 'desc' หรือ 'asc'
 
     function fmtZero(val) {
@@ -1323,7 +1329,7 @@
           qty69 = (p.sales69_tn_1_5 || 0) + (p.sales69_tn_6 || 0);
           val69 = p.sales69_val_tn || 0;
 
-          // ดึงยอดขายปี 68 ช่วงเวลาเดียวกัน (ม.ค.-เดือนล่าสุด) จากชีท TN68(บาท) และจำนวนขายจากชีท ยอดขาย68 (TN = TN1-5+TN6)
+          // ยอดเงินปี 68 ช่วงเวลาเดียวกันจากชีท TN68(บาท) และจำนวนขายจากชีท ยอดขาย68 (TN = TN1-5+TN6)
           let sumSheet68 = 0;
           for (let i = 0; i <= mIdx; i++) {
             sumSheet68 += (p.baht68_tn_months[i] || 0);
@@ -1336,7 +1342,7 @@
           qty69 = p.sales69_cks || 0;
           val69 = p.sales69_val_cks || 0;
 
-          // ดึงยอดขายปี 68 ช่วงเวลาเดียวกัน (ม.ค.-เดือนล่าสุด) จากชีท CKS68(บาท) และจำนวนขายจากชีท ยอดขาย68 (CKS)
+          // ยอดเงินปี 68 ช่วงเวลาเดียวกันจากชีท CKS68(บาท) และจำนวนขายจากชีท ยอดขาย68 (CKS)
           let sumSheet68 = 0;
           for (let i = 0; i <= mIdx; i++) {
             sumSheet68 += (p.baht68_cks_months[i] || 0);
@@ -1349,7 +1355,7 @@
           qty69 = (p.sales69_total_sub > 0) ? p.sales69_total_sub : ((p.sales69_tn_1_5 || 0) + (p.sales69_tn_6 || 0) + (p.sales69_cks || 0));
           val69 = (p.sales69_val > 0) ? p.sales69_val : ((p.sales69_val_tn || 0) + (p.sales69_val_cks || 0));
 
-          // รวม TN68(บาท) + CKS68(บาท) และจำนวนขายจากชีท ยอดขาย68 (TN + CKS) ช่วง ม.ค.-เดือนล่าสุด
+          // รวม TN68(บาท) + CKS68(บาท) และจำนวนขายจากชีท ยอดขาย68 (TN + CKS)
           let sumTn68 = 0, sumCks68 = 0;
           for (let i = 0; i <= mIdx; i++) {
             sumTn68  += (p.baht68_tn_months[i] || 0);
@@ -1364,6 +1370,9 @@
         const big69    = qty69 > 0 ? Math.ceil(qty69 / mul) : 0;
         const big68YTD = qty68YTD > 0 ? Math.ceil(qty68YTD / mul) : 0;
 
+        const pctFull = val68 > 0 ? Math.round(((val69 - val68) / val68) * 100) : (val69 > 0 ? 100 : -999999);
+        const pctYTD  = val68YTD > 0 ? Math.round(((val69 - val68YTD) / val68YTD) * 100) : (val69 > 0 ? 100 : -999999);
+
         if (!supMap.has(supName)) {
           supMap.set(supName, { name: supName, val68: 0, val69: 0, val68YTD: 0, items: [] });
         }
@@ -1371,10 +1380,6 @@
         entry.val68 += val68;
         entry.val69 += val69;
         entry.val68YTD += val68YTD;
-        
-        const pctFull = val68 > 0 ? Math.round(((val69 - val68) / val68) * 100) : (val69 > 0 ? 100 : -999999);
-        const pctYTD  = val68YTD > 0 ? Math.round(((val69 - val68YTD) / val68YTD) * 100) : (val69 > 0 ? 100 : -999999);
-
         entry.items.push({
           p, qty68, big68, val68, qty69, big69, val69, val68YTD, qty68YTD, big68YTD, pctFull, pctYTD
         });
@@ -1386,7 +1391,13 @@
         return s.items.some(it => it.p.name.toLowerCase().includes(q));
       });
 
-      // จัดเรียงระดับบริษัทคู่ค้า (ตามปี 68 หรือ ปี 69)
+      // คำนวณ % YOY ทั้งปี และ % YOY ช่วงเวลาเดียวกัน ของแต่ละบริษัทคู่ค้าเพื่อใช้จัดเรียง
+      supList.forEach(s => {
+        s.pctFull = s.val68 > 0 ? Math.round(((s.val69 - s.val68) / s.val68) * 100) : (s.val69 > 0 ? 100 : -999999);
+        s.pctYTD  = s.val68YTD > 0 ? Math.round(((s.val69 - s.val68YTD) / s.val68YTD) * 100) : (s.val69 > 0 ? 100 : -999999);
+      });
+
+      // จัดเรียงระดับบริษัทคู่ค้า (รองรับ val68, val69, pctFull, pctYTD)
       supList.sort((a, b) => {
         const diff = (a[supMainSortField] || 0) - (b[supMainSortField] || 0);
         return supMainSortDir === 'asc' ? diff : -diff;
@@ -1402,19 +1413,20 @@
       const mNames = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
       const mIdx = latestMonthIndex;
       const compLabel = activeCompanyFilter === 'ALL' ? 'รวม TN+CKS' : (activeCompanyFilter === 'TN' ? 'ตังนำ (TN)' : 'ชาวเกษตร (CKS)');
-      document.getElementById('supSalesSubHeader').innerText = `มุมมอง: ${compLabel} | ช่วงเวลาเปรียบเทียบ: ม.ค.-${mNames[mIdx]} (ดึงข้อมูลจริงจากชีท TN68(บาท) / CKS68(บาท))`;
+      document.getElementById('supSalesSubHeader').innerText = `มุมมอง: ${compLabel} | ช่วงเวลาเปรียบเทียบ: ม.ค.-${mNames[mIdx]} (คลิกที่หัวตารางเพื่อเรียงลำดับ หรือคลิกชื่อคู่ค้าเพื่อดูรายสินค้า)`;
 
-      // อัปเดตลูกศรเรียงลำดับบนหัวตารางหลัก
-      const icon68 = document.getElementById('sortIcon_val68');
-      const icon69 = document.getElementById('sortIcon_val69');
-      if (icon68) {
-        icon68.innerText = supMainSortField === 'val68' ? (supMainSortDir === 'desc' ? '▼' : '▲') : '⇅';
-        icon68.className = supMainSortField === 'val68' ? 'inline-block ml-1 text-[10px] text-earth-900 font-bold' : 'inline-block ml-1 text-[10px] text-earth-400';
-      }
-      if (icon69) {
-        icon69.innerText = supMainSortField === 'val69' ? (supMainSortDir === 'desc' ? '▼' : '▲') : '⇅';
-        icon69.className = supMainSortField === 'val69' ? 'inline-block ml-1 text-[10px] text-earth-900 font-bold' : 'inline-block ml-1 text-[10px] text-earth-400';
-      }
+      // อัปเดตลูกศรเรียงลำดับบนหัวตารางหลักทั้ง 4 คอลัมน์
+      ['val68', 'val69', 'pctFull', 'pctYTD'].forEach(field => {
+        const iconEl = document.getElementById('sortIcon_' + field);
+        if (!iconEl) return;
+        if (supMainSortField === field) {
+          iconEl.innerText = supMainSortDir === 'desc' ? '▼' : '▲';
+          iconEl.className = 'inline-block ml-1 text-[10px] text-earth-900 font-bold';
+        } else {
+          iconEl.innerText = '⇅';
+          iconEl.className = 'inline-block ml-1 text-[10px] text-earth-400';
+        }
+      });
 
       const supList = buildSupplierSalesData();
 
@@ -1469,7 +1481,7 @@
           </tr>
         `;
 
-        // ดรอปดาวน์ดูรายการสินค้า: โทนสีเทา (หัวตารางสีเทา, แถวสินค้าสีเทาอ่อนกว่าหัวตาราง), จัดเรียงได้, เพิ่มหน่วยใหญ่ และไม่แสดงคำว่า บ.
+        // ดรอปดาวน์ดูรายการสินค้า: โทนสีเทา, จัดเรียงได้ทุกคอลัมน์, เพิ่มหน่วยใหญ่, ไม่ใส่ บ., และเทียบจำนวนขายจากชีท ยอดขาย68
         if (isOpen) {
           const sortedItems = [...s.items].sort((a, b) => {
             if (supSubSortField === 'name') {
@@ -1513,15 +1525,6 @@
                           YOY ช่วงเวลาเดียวกัน <span class="ml-1 text-[10px]">${subIconPctYTD}</span><br>
                           <span class="font-normal text-[9.5px] text-gray-700">(ม.ค.-${mNames[mIdx]}) ปี 68 vs ปี 69</span>
                         </th>
-                        <th class="p-2 text-right border-r border-gray-400/50">
-                          YOY ทั้งปี<br>
-                          <span class="font-normal text-[9.5px] text-gray-700">มูลค่า / ผลต่างย่อย / หน่วยใหญ่</span>
-                        </th>
-                        <th class="p-2 text-right">
-                          YOY ช่วงเวลาเดียวกัน<br>
-                          <span class="font-normal text-[9.5px] text-gray-700">(ม.ค.-${mNames[mIdx]}) ปี 68 vs ปี 69</span>
-                        </th>
-
                       </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 bg-gray-100">
@@ -1534,9 +1537,11 @@
                         const diffSubFull = it.qty69 - it.qty68;
                         const diffBigFull = it.big69 - it.big68;
 
-                        // YOY ช่วงเวลาเดียวกัน (ดึงจากชีท TN68(บาท) / CKS68(บาท))
+                        // YOY ช่วงเวลาเดียวกัน: ผลต่างมูลค่า + ผลต่างจำนวนขายจากชีท ยอดขาย68
                         const iDiffYTD = it.val69 - it.val68YTD;
                         const iPctYTD  = it.val68YTD > 0 ? Math.round((iDiffYTD / it.val68YTD) * 100) : (it.val69 > 0 ? 100 : 0);
+                        const diffSubYTD = it.qty69 - it.qty68YTD;
+                        const diffBigYTD = it.big69 - it.big68YTD;
 
                         return `
                           <tr class="hover:bg-gray-200/70 transition">
@@ -1548,21 +1553,21 @@
                               </div>
                             </td>
                             
-                            <!-- ปี 68: จำนวนหน่วยใหญ่ + หน่วยย่อย / มูลค่า (ไม่ใส่คำว่า บ.) -->
+                            <!-- ปี 68: จำนวนหน่วยใหญ่ + หน่วยย่อย / มูลค่า -->
                             <td class="p-1.5 text-right font-mono align-top border-r border-gray-200">
                               <div>${it.big68 > 0 ? `<b class="text-gray-900">${it.big68.toLocaleString()} <span class="font-sans font-normal text-[10px]">${it.p.unitBig}</span></b>` : ''}</div>
                               <div class="text-[10px] text-gray-700">${it.qty68 > 0 ? `(${it.qty68.toLocaleString()} ${cleanSub})` : ''}</div>
                               <div class="text-[10.5px] text-amber-900 font-semibold">${it.val68 > 0 ? Math.round(it.val68).toLocaleString() : ''}</div>
                             </td>
 
-                            <!-- ปี 69: จำนวนหน่วยใหญ่ + หน่วยย่อย / มูลค่า (ไม่ใส่คำว่า บ.) -->
+                            <!-- ปี 69: จำนวนหน่วยใหญ่ + หน่วยย่อย / มูลค่า -->
                             <td class="p-1.5 text-right font-mono align-top border-r border-gray-200">
                               <div>${it.big69 > 0 ? `<b class="text-gray-900">${it.big69.toLocaleString()} <span class="font-sans font-normal text-[10px]">${it.p.unitBig}</span></b>` : ''}</div>
                               <div class="text-[10px] text-gray-700">${it.qty69 > 0 ? `(${it.qty69.toLocaleString()} ${cleanSub})` : ''}</div>
                               <div class="text-[10.5px] text-leaf-800 font-bold">${it.val69 > 0 ? Math.round(it.val69).toLocaleString() : ''}</div>
                             </td>
 
-                            <!-- YOY ทั้งปี: % เติบโต, ผลต่างมูลค่า, ผลต่างหน่วยย่อย(ไม่แสดงหน่วย), หน่วยใหญ่(แสดงหน่วย) -->
+                            <!-- YOY ทั้งปี -->
                             <td class="p-1.5 text-right font-mono align-top border-r border-gray-200">
                               ${(it.val68 > 0 || it.val69 > 0 || it.qty68 > 0 || it.qty69 > 0) ? `
                                 <div class="font-bold ${iPctFull >= 0 ? 'text-leaf-700' : 'text-red-600'}">${iPctFull >= 0 ? '▲ +' : '▼ '}${iPctFull}%</div>
@@ -1574,25 +1579,21 @@
                               ` : ''}
                             </td>
 
-                            <!-- YOY ช่วงเวลาเดียวกัน (ไม่ใส่คำว่า บ. + เพิ่มจำนวนขายจากชีท ยอดขาย68) -->
-<td class="p-1.5 text-right font-mono align-top">
-  ${(it.val68YTD > 0 || it.val69 > 0 || it.qty68YTD > 0 || it.qty69 > 0) ? (() => {
-    const diffSubYTD = it.qty69 - it.qty68YTD;
-    const diffBigYTD = it.big69 - it.big68YTD;
-    return `
-      <div class="font-bold ${iPctYTD >= 0 ? 'text-leaf-700' : 'text-red-600'}">${iPctYTD >= 0 ? '▲ +' : '▼ '}${iPctYTD}%</div>
-      <div class="text-[10px] text-gray-800">${iDiffYTD !== 0 ? `${iDiffYTD > 0 ? '+' : ''}${Math.round(iDiffYTD).toLocaleString()}` : ''}</div>
-      <div class="text-[9.5px] text-gray-700">
-        ${diffSubYTD !== 0 ? `ย่อย: ${diffSubYTD > 0 ? '+' : ''}${diffSubYTD.toLocaleString()}` : ''}
-        ${diffBigYTD !== 0 ? ` | ใหญ่: <b>${diffBigYTD > 0 ? '+' : ''}${diffBigYTD.toLocaleString()} ${it.p.unitBig}</b>` : ''}
-      </div>
-      <div class="text-[9px] text-gray-600 mt-0.5 pt-0.5 border-t border-gray-300/70">
-        68: ${it.qty68YTD > 0 ? `${it.qty68YTD.toLocaleString()} ${cleanSub}` : ''} (${it.val68YTD > 0 ? Math.round(it.val68YTD).toLocaleString() : ''})<br>
-        69: ${it.qty69 > 0 ? `${it.qty69.toLocaleString()} ${cleanSub}` : ''} (${it.val69 > 0 ? Math.round(it.val69).toLocaleString() : ''})
-      </div>
-    `;
-  })() : ''}
-</td>
+                            <!-- YOY ช่วงเวลาเดียวกัน (เพิ่มจำนวนขายจากชีท ยอดขาย68) -->
+                            <td class="p-1.5 text-right font-mono align-top">
+                              ${(it.val68YTD > 0 || it.val69 > 0 || it.qty68YTD > 0 || it.qty69 > 0) ? `
+                                <div class="font-bold ${iPctYTD >= 0 ? 'text-leaf-700' : 'text-red-600'}">${iPctYTD >= 0 ? '▲ +' : '▼ '}${iPctYTD}%</div>
+                                <div class="text-[10px] text-gray-800">${iDiffYTD !== 0 ? `${iDiffYTD > 0 ? '+' : ''}${Math.round(iDiffYTD).toLocaleString()}` : ''}</div>
+                                <div class="text-[9.5px] text-gray-700">
+                                  ${diffSubYTD !== 0 ? `ย่อย: ${diffSubYTD > 0 ? '+' : ''}${diffSubYTD.toLocaleString()}` : ''}
+                                  ${diffBigYTD !== 0 ? ` | ใหญ่: <b>${diffBigYTD > 0 ? '+' : ''}${diffBigYTD.toLocaleString()} ${it.p.unitBig}</b>` : ''}
+                                </div>
+                                <div class="text-[9px] text-gray-600 mt-0.5 pt-0.5 border-t border-gray-300/70">
+                                  68: ${it.qty68YTD > 0 ? `${it.qty68YTD.toLocaleString()} ${cleanSub}` : ''} (${it.val68YTD > 0 ? Math.round(it.val68YTD).toLocaleString() : ''})<br>
+                                  69: ${it.qty69 > 0 ? `${it.qty69.toLocaleString()} ${cleanSub}` : ''} (${it.val69 > 0 ? Math.round(it.val69).toLocaleString() : ''})
+                                </div>
+                              ` : ''}
+                            </td>
                           </tr>
                         `;
                       }).join('')}
@@ -2198,530 +2199,4 @@
         totalOrderValue += val;
 
         const s68Sub = p.sales68_tn_1_5 + p.sales68_tn_6 + p.sales68_cks;
-        const s69Sub = p.sales69_tn_1_5 + p.sales69_tn_6 + p.sales69_cks;
-        const stkSub = p.stock_pc + p.stock_kr + p.stock_cyp + p.stock_cks;
-
-        const s68Big = Math.ceil(s68Sub / mul);
-        const s69Big = Math.ceil(s69Sub / mul);
-        const stkBig = Math.ceil(stkSub / mul);
-
-        const yoyPct = s68Sub > 0 ? Math.round(((s69Sub - s68Sub) / s68Sub) * 100) : (s69Sub > 0 ? 100 : 0);
-
-        return {
-          code: p.code, name: p.name, category: p.category,
-          unitBig: p.unitBig, unitSub: cleanSub, mul: mul,
-          orderBigQty: p.orderBigQty, subQty: subQty, freeBigQty: p.freeBigQty || 0,
-          unitPrice: p.unitPriceInput || 0, val: val, notes: p.notes || '',
-          s68Big, s68Sub, s69Big, s69Sub, yoyPct,
-          stkBig, stkSub,
-          m68_tn: p.monthly68_tn, m68_cks: p.monthly68_cks,
-          m69_tn: p.monthly69_tn, m69_cks: p.monthly69_cks,
-          approvalStatus: 'APPROVED',
-          rejectReason: ''
-        };
-      });
-
-      const now = new Date();
-      const newDoc = {
-        docId: docId,
-        createdAt: `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} น.`,
-        supplier: supplier,
-        requester: requester,
-        approver: '',
-        approvedAt: '',
-        status: 'PENDING',
-        totalValue: totalOrderValue,
-        approvedValue: totalOrderValue,
-        items: savedItems
-      };
-
-      apoDocumentsList.unshift(newDoc);
-      persistAPODocuments();
-
-      itemsToOrder.forEach(p => { p.orderBigQty = 0; p.freeBigQty = 0; p.unitPriceInput = 0; p.orderTotalVal = 0; p.notes = ''; });
-      renderTable();
-      updateKPICards();
-      closeCreateAPOModal();
-      alert(`บันทึกใบขออนุมัติเลขที่ ${docId} (${supplier}) เรียบร้อยแล้ว!`);
-    }
-
-    // ================= 4. หน้ารวมใบ APO & การพิจารณาอนุมัติ =================
-    function loadAPODocumentsFromStorage() {
-      try {
-        const raw = localStorage.getItem('TN_APO_DOCUMENTS_V2');
-        if (raw) apoDocumentsList = JSON.parse(raw);
-      } catch (e) {}
-      updateSavedAPOCount();
-    }
-
-    function persistAPODocuments() {
-      localStorage.setItem('TN_APO_DOCUMENTS_V2', JSON.stringify(apoDocumentsList));
-      updateSavedAPOCount();
-    }
-
-    function updateSavedAPOCount() {
-      const pendingCount = apoDocumentsList.filter(d => d.status === 'PENDING').length;
-      document.getElementById('badgeSavedAPOCount').innerText = pendingCount > 0 ? `${pendingCount} รออนุมัติ` : apoDocumentsList.length;
-    }
-
-    function openAPOListModal() { renderAPOList(); document.getElementById('apoListModal').classList.remove('hidden'); }
-    function closeAPOListModal() { document.getElementById('apoListModal').classList.add('hidden'); }
-
-    function filterAPOList(st) {
-      activeAPOFilter = st;
-      ['ALL', 'PENDING', 'APPROVED'].forEach(t => {
-        document.getElementById('apoTab' + t).className = (t === st) ? "px-3 py-1 rounded-lg text-xs font-semibold bg-earth-900 text-white" : "px-3 py-1 rounded-lg text-xs font-semibold bg-white border border-cream-300 text-earth-800";
-      });
-      renderAPOList();
-    }
-
-    function toggleAPODetail(docId) { expandedAPODocId = (expandedAPODocId === docId) ? null : docId; renderAPOList(); }
-
-    function setAPOForecastMonths(m) {
-      apoForecastMonths = m;
-      renderAPOList();
-    }
-
-    function getNext2MonthsHistoryHtml(it) {
-      const mShort = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-      const curM = latestMonthIndex;
-      const mul = it.mul || 1;
-
-      let m68_tn = it.m68_tn, m68_cks = it.m68_cks, m69_tn = it.m69_tn, m69_cks = it.m69_cks;
-      if (!m68_tn && rawProducts.length > 0) {
-        const found = rawProducts.find(p => p.code === it.code || p.name === it.name);
-        if (found) {
-          m68_tn = found.monthly68_tn; m68_cks = found.monthly68_cks;
-          m69_tn = found.monthly69_tn; m69_cks = found.monthly69_cks;
-        }
-      }
-
-      if (!m68_tn) return '';
-
-      const getMonthLabelAndVal = (offset) => {
-        const targetM = (curM + offset) % 12;
-        const isNextYear = (curM + offset) >= 12;
-        const yearLabel = isNextYear ? '69' : '68';
-        const subVal = isNextYear
-          ? ((m69_tn[targetM] || 0) + (m69_cks[targetM] || 0))
-          : ((m68_tn[targetM] || 0) + (m68_cks[targetM] || 0));
-        const bigVal = Math.ceil(subVal / mul);
-        return `${mShort[targetM]}${yearLabel}: <b>${bigVal > 0 ? bigVal.toLocaleString() : ''}</b>`;
-      };
-
-      const m1Str = getMonthLabelAndVal(1);
-      const m2Str = getMonthLabelAndVal(2);
-
-      return `<div class="text-[10px] text-earth-700 mt-0.5 pt-0.5 border-t border-leaf-200/70">
-        ย้อนหลัง: ${m1Str} | ${m2Str} <span class="text-[9px] text-earth-500">${it.unitBig}</span>
-      </div>`;
-    }
-
-    function renderAPOList() {
-      const container = document.getElementById('apoListContainer');
-      const filteredDocs = apoDocumentsList.filter(d => activeAPOFilter === 'ALL' || d.status === activeAPOFilter);
-
-      if (filteredDocs.length === 0) {
-        container.innerHTML = `<div class="text-center py-10 bg-white rounded-xl border border-cream-300 text-earth-600">ยังไม่มีเอกสารใบขออนุมัติสั่งซื้อในหมวดนี้</div>`;
-        return;
-      }
-
-      let html = '';
-      filteredDocs.forEach(doc => {
-        const isExpanded = expandedAPODocId === doc.docId;
-        const isApproved = doc.status === 'APPROVED';
-        const statusBadge = isApproved
-          ? `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-leaf-100 text-leaf-800 border border-leaf-300">✓ อนุมัติแล้ว</span>`
-          : `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300 animate-pulse">⏳ รออนุมัติ</span>`;
-
-        let currentApprovedVal = 0;
-        doc.items.forEach(it => { if (it.approvalStatus !== 'REJECTED') currentApprovedVal += (it.val || 0); });
-
-        html += `
-          <div class="bg-white rounded-xl border ${isExpanded ? 'border-earth-700 shadow-md' : 'border-cream-300 shadow-xs'} overflow-hidden">
-            <div onclick="toggleAPODetail('${doc.docId}')" class="p-3.5 flex flex-wrap items-center justify-between gap-3 cursor-pointer hover:bg-cream-100/70">
-              <div class="flex flex-wrap items-center gap-3">
-                <span class="font-mono font-bold text-sm text-earth-900 bg-cream-200 px-2.5 py-1 rounded-lg">${doc.docId}</span>
-                <div>
-                  <div class="font-bold text-sm text-leaf-900">${doc.supplier}</div>
-                  <div class="text-[11px] text-earth-600">วันที่: ${doc.createdAt} | ผู้ขอ: <b>${doc.requester}</b></div>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-4">
-                <div class="text-right">
-                  <div class="text-[11px] text-earth-600">มูลค่าขอสั่ง: <span class="font-mono font-semibold">${fmtZero(doc.totalValue)}</span> บ.</div>
-                  <div class="text-xs font-bold text-leaf-800">อนุมัติสุทธิ: <span class="font-mono text-sm">${fmtZero(currentApprovedVal)}</span> บ.</div>
-                </div>
-                ${statusBadge}
-                <button class="px-2.5 py-1 rounded-lg bg-cream-200 text-earth-800 text-xs font-semibold">
-                  ${isExpanded ? '▲ ซ่อน' : '▼ ดูรายละเอียด'}
-                </button>
-              </div>
-            </div>
-
-            ${isExpanded ? `
-              <div class="p-4 bg-cream-50 border-t border-cream-300 flex flex-col gap-3">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <span class="font-bold text-earth-900 text-xs">เลือกดูพยากรณ์:</span>
-                    <div class="inline-flex bg-white p-0.5 rounded-lg border border-cream-300 text-[11px]">
-                      ${[1, 1.5, 2, 3].map(m => `
-                        <button onclick="setAPOForecastMonths(${m})" class="px-2 py-0.5 rounded font-semibold ${apoForecastMonths === m ? 'bg-leaf-700 text-white' : 'text-earth-700 hover:bg-cream-100'}">${m} ด.</button>
-                      `).join('')}
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <button onclick="approveAllInDoc('${doc.docId}')" class="px-3 py-1 rounded bg-leaf-100 hover:bg-leaf-200 text-leaf-900 border border-leaf-300 text-xs font-semibold">
-                      ✓ เลือกอนุมัติทั้งหมด
-                    </button>
-                    <button onclick="deleteAPODoc('${doc.docId}')" class="px-2.5 py-1 rounded bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs">
-                      ลบใบนี้
-                    </button>
-                  </div>
-                </div>
-
-                <div class="overflow-x-auto border border-cream-300 rounded-xl bg-white">
-                  <table class="w-full text-xs text-left border-collapse">
-                    <thead class="bg-cream-200 text-earth-900 font-semibold">
-                      <tr>
-                        <th class="p-2 border-b border-r text-center w-8">#</th>
-                        <th class="p-2 border-b border-r">รายการสินค้า</th>
-                        <th class="p-2 border-b border-r bg-amber-50/70">ยอดขาย 68 / 69 & YOY</th>
-                        <th class="p-2 border-b border-r bg-leaf-50/70">คงเหลือ & พยากรณ์ (${apoForecastMonths} ด.)</th>
-                        <th class="p-2 border-b border-r text-right">สั่ง / แถม</th>
-                        <th class="p-2 border-b border-r text-right">ราคา & มูลค่ารวม</th>
-                        <th class="p-2 border-b border-r text-center w-36">พิจารณา</th>
-                        <th class="p-2 border-b">หมายเหตุ / เหตุผล</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-cream-200">
-                      ${doc.items.map((it, idx) => {
-                        const stCode = it.approvalStatus || 'APPROVED';
-                        const isRejected = stCode === 'REJECTED';
-                        const isQtyMod = stCode === 'REDUCE' || stCode === 'INCREASE';
-
-                        let selClass = 'border-leaf-500 bg-leaf-50 text-leaf-800';
-                        if (isRejected) selClass = 'border-red-400 bg-red-100 text-red-700';
-                        else if (stCode === 'REDUCE') selClass = 'border-amber-500 bg-amber-50 text-amber-800';
-                        else if (stCode === 'INCREASE') selClass = 'border-blue-500 bg-blue-50 text-blue-800';
-
-                        const yoySign = (it.yoyPct || 0) >= 0 ? '+' : '';
-                        const yoyColor = (it.yoyPct || 0) >= 0 ? 'text-leaf-700' : 'text-red-600';
-                        const salesHtml = (it.s68Big !== undefined) ? `
-                          <div>ปี 68: <b class="text-earth-900">${it.s68Big > 0 ? `${it.s68Big.toLocaleString()} ${it.unitBig}` : ''}</b> <span class="text-[9.5px] text-earth-500">${it.s68Sub > 0 ? `(${it.s68Sub.toLocaleString()} ${it.unitSub})` : ''}</span></div>
-                          <div>ปี 69: <b class="text-earth-900">${it.s69Big > 0 ? `${it.s69Big.toLocaleString()} ${it.unitBig}` : ''}</b> <span class="text-[9.5px] text-earth-500">${it.s69Sub > 0 ? `(${it.s69Sub.toLocaleString()} ${it.unitSub})` : ''}</span></div>
-                          <div class="font-bold ${yoyColor}">YOY: ${yoySign}${it.yoyPct}%</div>
-                        ` : (it.statSalesYOY || '');
-
-                        const mul = it.mul || 1;
-                        const s69Sub = it.s69Sub || 0;
-                        const dynFcSub = Math.round((s69Sub / 10) * apoForecastMonths);
-                        const dynFcBig = Math.ceil(dynFcSub / mul);
-
-                        const stockFcHtml = (it.stkBig !== undefined) ? `
-                          <div>คงเหลือ: <b class="text-leaf-900">${it.stkBig > 0 ? `${it.stkBig.toLocaleString()} ${it.unitBig}` : ''}</b> <span class="text-[9.5px] text-earth-500">${it.stkSub > 0 ? `(${it.stkSub.toLocaleString()} ${it.unitSub})` : ''}</span></div>
-                          <div>เป้า ${apoForecastMonths} ด.: <b class="text-earth-900">${dynFcBig > 0 ? `${dynFcBig.toLocaleString()} ${it.unitBig}` : ''}</b> <span class="text-[9.5px] text-earth-500">${dynFcSub > 0 ? `(${dynFcSub.toLocaleString()} ${it.unitSub})` : ''}</span></div>
-                          ${getNext2MonthsHistoryHtml(it)}
-                        ` : (it.statStockFc || '');
-
-                        return `
-                          <tr class="${!isRejected ? '' : 'bg-red-50/60'}">
-                            <td class="p-2 text-center border-r">${idx + 1}</td>
-                            <td class="p-2 border-r font-semibold text-earth-900">${it.name}</td>
-                            
-                            <td class="p-2 border-r text-[10.5px] leading-snug bg-amber-50/20">
-                              ${salesHtml}
-                            </td>
-                            <td class="p-2 border-r text-[10.5px] leading-snug bg-leaf-50/20">
-                              ${stockFcHtml}
-                            </td>
-
-                            <td class="p-2 text-right border-r">
-                              <div class="font-bold">${it.orderBigQty} ${it.unitBig} <span class="font-normal text-[9.5px] text-earth-500">(${it.subQty} ${it.unitSub})</span></div>
-                              ${it.freeBigQty > 0 ? `<div class="text-[10.5px] text-leaf-700">+แถม ${it.freeBigQty} ${it.unitBig}</div>` : ''}
-                            </td>
-                            <td class="p-2 text-right border-r font-mono">
-                              <div class="text-[10px] text-earth-600">${it.unitPrice > 0 ? `@${it.unitPrice.toLocaleString()}` : ''}</div>
-                              <div class="font-bold ${!isRejected ? 'text-leaf-800' : 'line-through text-red-500'}">${it.val > 0 ? `${it.val.toLocaleString()} บ.` : ''}</div>
-                            </td>
-
-                            <td class="p-1.5 text-center border-r">
-                              <select onchange="setAPOItemStatus('${doc.docId}', ${idx}, this.value)" class="w-full px-1.5 py-1 rounded border text-xs font-semibold ${selClass}">
-                                <option value="APPROVED" ${stCode === 'APPROVED' ? 'selected' : ''}>✓ อนุมัติ</option>
-                                <option value="REJECTED" ${stCode === 'REJECTED' ? 'selected' : ''}>✕ ไม่อนุมัติ</option>
-                                <option value="REDUCE"   ${stCode === 'REDUCE'   ? 'selected' : ''}>▼ ลดจำนวน</option>
-                                <option value="INCREASE" ${stCode === 'INCREASE' ? 'selected' : ''}>▲ เพิ่มจำนวน</option>
-                              </select>
-                              ${isQtyMod ? `
-                                <div class="mt-1 flex items-center justify-center gap-1">
-                                  <span class="text-[9.5px] text-earth-700">ปรับเป็น:</span>
-                                  <input type="number" min="1" step="any" value="${it.orderBigQty}" onchange="modifyAPOItemQty('${doc.docId}', ${idx}, this.value)" class="w-14 px-1 py-0.5 text-right font-bold border border-earth-400 rounded bg-white text-xs">
-                                </div>
-                              ` : ''}
-                            </td>
-
-                            <td class="p-1.5">
-                              ${isRejected ? `
-                                <input type="text" value="${it.rejectReason || ''}" placeholder="ระบุเหตุผลที่ไม่อนุมัติ..." oninput="setAPOItemReason('${doc.docId}', ${idx}, this.value)" class="w-full px-2 py-1 text-[11px] border border-red-300 rounded bg-white text-red-900">
-                              ` : `
-                                <input type="text" value="${it.notes || ''}" placeholder="หมายเหตุเพิ่มเติม..." oninput="setAPOItemNotes('${doc.docId}', ${idx}, this.value)" class="w-full px-2 py-1 text-[11px] border border-cream-300 rounded bg-white text-earth-800">
-                              `}
-                            </td>
-                          </tr>
-                        `;
-                      }).join('')}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-                  <div class="flex items-center gap-2">
-                    <label class="font-semibold text-earth-800">ชื่อผู้อนุมัติ:</label>
-                    <select id="approverName_${doc.docId}" class="px-2.5 py-1.5 border border-cream-400 rounded-lg bg-white text-xs font-semibold text-earth-900 w-52">
-                      <option value="">-- เลือกผู้อนุมัติ --</option>
-                      <option value="กรพฤฒ(เฮียชู)" ${doc.approver === 'กรพฤฒ(เฮียชู)' ? 'selected' : ''}>1. กรพฤฒ(เฮียชู)</option>
-                      <option value="อัญคณา(เจ้อัญ)" ${doc.approver === 'อัญคณา(เจ้อัญ)' ? 'selected' : ''}>2. อัญคณา(เจ้อัญ)</option>
-                      <option value="เอมอร(เจ้หมวย)" ${doc.approver === 'เอมอร(เจ้หมวย)' ? 'selected' : ''}>3. เอมอร(เจ้หมวย)</option>
-                    </select>
-                    ${doc.approvedAt ? `<span class="text-[11px] text-leaf-700">อนุมัติเมื่อ: ${doc.approvedAt}</span>` : ''}
-                  </div>
-
-                  <button onclick="submitAPOApproval('${doc.docId}')" class="px-5 py-2 rounded-lg bg-leaf-700 hover:bg-leaf-800 text-white font-semibold text-xs shadow-sm">
-                    ✓ ยืนยันผลการพิจารณา & ส่งกลับชีท
-                  </button>
-                </div>
-              </div>
-            ` : ''}
-          </div>
-        `;
-      });
-
-      container.innerHTML = html;
-    }
-
-    function approveAllInDoc(docId) {
-      const doc = apoDocumentsList.find(d => d.docId === docId);
-      if (!doc) return;
-      doc.items.forEach(it => { it.approvalStatus = 'APPROVED'; it.rejectReason = ''; });
-      persistAPODocuments();
-      renderAPOList();
-    }
-
-    function setAPOItemStatus(docId, idx, status) {
-      const doc = apoDocumentsList.find(d => d.docId === docId);
-      if (!doc || !doc.items[idx]) return;
-      doc.items[idx].approvalStatus = status;
-      persistAPODocuments();
-      renderAPOList();
-    }
-
-    function modifyAPOItemQty(docId, idx, newBigQty) {
-      const doc = apoDocumentsList.find(d => d.docId === docId);
-      if (!doc || !doc.items[idx]) return;
-      const item = doc.items[idx];
-      const qty = parseFloat(newBigQty) || 0;
-      item.orderBigQty = qty;
-      item.subQty = Math.round(qty * (item.mul || 1));
-      item.val = item.subQty * (item.unitPrice || 0);
-      persistAPODocuments();
-      renderAPOList();
-    }
-
-    function setAPOItemReason(docId, idx, reason) {
-      const doc = apoDocumentsList.find(d => d.docId === docId);
-      if (!doc || !doc.items[idx]) return;
-      doc.items[idx].rejectReason = reason;
-      persistAPODocuments();
-    }
-
-    function setAPOItemNotes(docId, idx, notes) {
-      const doc = apoDocumentsList.find(d => d.docId === docId);
-      if (!doc || !doc.items[idx]) return;
-      doc.items[idx].notes = notes;
-      persistAPODocuments();
-    }
-
-    async function submitAPOApproval(docId) {
-      const doc = apoDocumentsList.find(d => d.docId === docId);
-      if (!doc) return;
-
-      const appInput = document.getElementById(`approverName_${docId}`);
-      const approverName = appInput ? appInput.value.trim() : '';
-      if (!approverName) return alert("กรุณาเลือก 'ชื่อผู้อนุมัติ' ก่อนกดยืนยัน");
-
-      const missingReason = doc.items.find(it => it.approvalStatus === 'REJECTED' && !it.rejectReason.trim());
-      if (missingReason) return alert(`กรุณาระบุเหตุผลที่ไม่อนุมัติ สำหรับรายการ: "${missingReason.name}"`);
-
-      const now = new Date();
-      doc.status = 'APPROVED';
-      doc.approver = approverName;
-      doc.approvedAt = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} น.`;
-      
-      let netVal = 0;
-      doc.items.forEach(it => { if (it.approvalStatus !== 'REJECTED') netVal += (it.val || 0); });
-      doc.approvedValue = netVal;
-
-      persistAPODocuments();
-      renderAPOList();
-
-      if (GOOGLE_SCRIPT_WEBAPP_URL) {
-        try {
-          await fetch(GOOGLE_SCRIPT_WEBAPP_URL, {
-            method: 'POST', mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(doc)
-          });
-          alert(`✓ บันทึกผลการอนุมัติใบที่ ${doc.docId} โดย ${approverName} และส่งกลับ Google Sheets เรียบร้อยแล้ว!`);
-        } catch (e) {
-          alert("บันทึกในระบบเรียบร้อย (โปรดตรวจสอบ Web App URL เพื่อส่งกลับชีทอัตโนมัติ)");
-        }
-      } else {
-        alert(`✓ ยืนยันผลการอนุมัติใบที่ ${doc.docId} โดย ${approverName} เรียบร้อยแล้ว!\nยอดอนุมัติสั่งจริงสุทธิ: ${netVal.toLocaleString()} บาท`);
-      }
-    }
-
-    function deleteAPODoc(docId) {
-      if (!confirm(`ต้องการลบเอกสาร ${docId} ออกจากรายการใช่หรือไม่?`)) return;
-      apoDocumentsList = apoDocumentsList.filter(d => d.docId !== docId);
-      persistAPODocuments();
-      renderAPOList();
-    }
-
-    // ================= 5. Modal ดูกราฟรายเดือนแยกสาขา =================
-    function openMonthlyModal(productId) {
-      activeMonthlyProductId = productId;
-      activeMonthlyBranchTab = 'ALL';
-      renderMonthlyModalContent();
-      document.getElementById('monthlyModal').classList.remove('hidden');
-    }
-
-    function setMonthlyBranchTab(tab) {
-      activeMonthlyBranchTab = tab;
-      renderMonthlyModalContent();
-    }
-
-    function renderMonthlyModalContent() {
-      const p = rawProducts.find(x => x.id === activeMonthlyProductId);
-      if (!p) return;
-
-      const cleanSub = getCleanUnitName(p.unitSub);
-      document.getElementById('modalProductCode').innerText = `${p.category || 'สินค้าเกษตร'} ${p.supplier ? `| คู่ค้า: ${p.supplier}` : ''} | หน่วยขาย: ${cleanSub}`;
-      document.getElementById('modalProductName').innerText = p.name;
-
-      const tabs = ['ALL', 'TN15_CKS', 'TN_ALL', 'TN_1_5', 'TN_6', 'CKS'];
-      tabs.forEach(t => {
-        const el = document.getElementById('mTab' + t);
-        if (!el) return;
-        if (t === activeMonthlyBranchTab) {
-          el.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-earth-900 text-white shadow-2xs";
-        } else {
-          el.className = `px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-cream-300 ${t === 'CKS' ? 'text-leaf-800' : 'text-earth-800'} hover:bg-cream-200`;
-        }
-      });
-
-      const tabLabels = {
-        'ALL': 'รวมทั้งหมด (TN + CKS)',
-        'TN15_CKS': 'รวม TN(1-5) + CKS (ไม่รวม TN 6)',
-        'TN_ALL': 'รวมตังนำเกษตร (TN 1-5 + TN 6)',
-        'TN_1_5': 'ตังนำเกษตร สาขา 1-5 (TN 1-5)',
-        'TN_6': 'ตังนำเกษตร สาขา 6 (TN 6)',
-        'CKS': 'ชาวเกษตร (CKS)'
-      };
-      document.getElementById('modalChartTitle').innerText = `กราฟเปรียบเทียบยอดขายรายเดือน: ${tabLabels[activeMonthlyBranchTab]} (หน่วย: ${cleanSub})`;
-
-      const getMonthPair = (i) => {
-        if (activeMonthlyBranchTab === 'TN15_CKS') {
-          return {
-            v68: (p.monthly68_tn_1_5[i] || 0) + (p.monthly68_cks[i] || 0),
-            v69: (p.monthly69_tn_1_5[i] || 0) + (p.monthly69_cks[i] || 0)
-          };
-        }
-        if (activeMonthlyBranchTab === 'TN_1_5') {
-          return { v68: p.monthly68_tn_1_5[i] || 0, v69: p.monthly69_tn_1_5[i] || 0 };
-        }
-        if (activeMonthlyBranchTab === 'TN_6') {
-          return { v68: p.monthly68_tn_6[i] || 0, v69: p.monthly69_tn_6[i] || 0 };
-        }
-        if (activeMonthlyBranchTab === 'TN_ALL') {
-          return { v68: p.monthly68_tn[i] || 0, v69: p.monthly69_tn[i] || 0 };
-        }
-        if (activeMonthlyBranchTab === 'CKS') {
-          return { v68: p.monthly68_cks[i] || 0, v69: p.monthly69_cks[i] || 0 };
-        }
-        return {
-          v68: (p.monthly68_tn[i] || 0) + (p.monthly68_cks[i] || 0),
-          v69: (p.monthly69_tn[i] || 0) + (p.monthly69_cks[i] || 0)
-        };
-      };
-
-      const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-      let html = '', chartHtml = '', t68 = 0, t69 = 0;
-
-      let maxVal = 0;
-      for (let i = 0; i < 12; i++) {
-        const { v68, v69 } = getMonthPair(i);
-        if (v68 > maxVal) maxVal = v68;
-        if (v69 > maxVal) maxVal = v69;
-      }
-
-      months.forEach((m, i) => {
-        const { v68, v69 } = getMonthPair(i);
-        t68 += v68; t69 += v69;
-        const diff = v69 - v68;
-        const pct = v68 > 0 ? Math.round((diff / v68) * 100) : (v69 > 0 ? 100 : 0);
-
-        const h68 = maxVal > 0 ? Math.max(v68 > 0 ? 4 : 0, Math.round((v68 / maxVal) * 100)) : 0;
-        const h69 = maxVal > 0 ? Math.max(v69 > 0 ? 4 : 0, Math.round((v69 / maxVal) * 100)) : 0;
-
-        chartHtml += `
-          <div class="flex-1 flex flex-col items-center h-full justify-end group">
-            <div class="w-full flex items-end justify-center gap-0.5 h-24">
-              <div style="height:${h68}%" class="w-2.5 sm:w-3 bg-amber-400 rounded-t-xs transition-all" title="ปี 68 (${m}): ${v68.toLocaleString()} ${cleanSub}"></div>
-              <div style="height:${h69}%" class="w-2.5 sm:w-3 bg-leaf-600 rounded-t-xs transition-all" title="ปี 69 (${m}): ${v69.toLocaleString()} ${cleanSub}"></div>
-            </div>
-            <div class="text-[9.5px] font-medium text-earth-700 mt-1">${m}</div>
-          </div>
-        `;
-
-        html += `<tr>
-          <td class="px-3 py-1.5 font-medium">${m}</td>
-          <td class="px-3 py-1.5 text-right font-mono">${fmtZero(v68)}</td>
-          <td class="px-3 py-1.5 text-right font-mono">${fmtZero(v69)}</td>
-          <td class="px-3 py-1.5 text-right font-mono ${diff >= 0 ? 'text-leaf-700' : 'text-red-600'}">${diff !== 0 ? `${diff > 0 ? '+' : ''}${diff.toLocaleString()}` : ''}</td>
-          <td class="px-3 py-1.5 text-right font-mono font-bold ${pct >= 0 ? 'text-leaf-700' : 'text-red-600'}">${(v68 > 0 || v69 > 0) ? `${pct >= 0 ? '+' : ''}${pct}%` : ''}</td>
-        </tr>`;
-      });
-
-      const tDiff = t69 - t68;
-      const tPct = t68 > 0 ? Math.round((tDiff / t68) * 100) : (t69 > 0 ? 100 : 0);
-      document.getElementById('modalBarChartContainer').innerHTML = chartHtml;
-      document.getElementById('modalMonthlyBody').innerHTML = html;
-      document.getElementById('modalMonthlyFoot').innerHTML = `<tr>
-        <td class="px-3 py-2">รวมทั้งปี (${tabLabels[activeMonthlyBranchTab]})</td>
-        <td class="px-3 py-2 text-right font-mono">${fmtZero(t68)}</td>
-        <td class="px-3 py-2 text-right font-mono">${fmtZero(t69)}</td>
-        <td class="px-3 py-2 text-right font-mono">${tDiff !== 0 ? `${tDiff > 0 ? '+' : ''}${tDiff.toLocaleString()}` : ''}</td>
-        <td class="px-3 py-2 text-right font-mono">${(t68 > 0 || t69 > 0) ? `${tPct >= 0 ? '+' : ''}${tPct}%` : ''}</td>
-      </tr>`;
-    }
-
-    function closeMonthlyModal() { document.getElementById('monthlyModal').classList.add('hidden'); }
-
-    function exportToExcel() {
-      const data = currentFiltered.map(p => ({
-        'รหัส': p.code, 'ชื่อสินค้า': p.name, 'คู่ค้า': p.supplier, 'หมวดหมู่': p.category, 'ชื่อสามัญ': p.genericName,
-        'ขาย68(ย่อย)': fmtZero(p.sales68_tn_1_5 + p.sales68_tn_6 + p.sales68_cks), 'มูลค่า68': fmtZero(p.sales68_val),
-        'ขาย69(ย่อย)': fmtZero(p.sales69_tn_1_5 + p.sales69_tn_6 + p.sales69_cks), 'มูลค่า69': fmtZero(p.sales69_val),
-        'คงเหลือ(ย่อย)': fmtZero(p.stock_pc + p.stock_kr + p.stock_cyp + p.stock_cks), 'มูลค่าคงเหลือ': fmtZero(p.stock_val),
-        'ไม่มีขาย3ด.(69)': getNoSales3MStatus(p).isNoSales3M ? 'ไม่ขาย 3 เดือน' : 'ปกติ',
-        'สถานะ': getStatusObj(p).label
-      }));
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Stock_Report");
-      XLSX.writeFile(wb, `รายงานสต็อค_ตังนำเกษตร_${new Date().toISOString().slice(0,10)}.xlsx`);
-    }
-  </script>
-</body>
-</html>
+        const s69Sub = p.sales69_tn_1_5 + p.
