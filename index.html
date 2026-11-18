@@ -1901,7 +1901,7 @@
       `;
     }
 
-    // 1. ส่งออก PDF สำหรับ MR
+    // 1. ส่งออก PDF สำหรับ MR (กระดาษ A4 แนวนอนแบบกระชับ ประหยัดกระดาษสูงสุด)
     function exportPDF_MR() {
       if (currentFiltered.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก PDF");
       const showForecast = document.getElementById('mrShowForecast')?.checked ?? true;
@@ -1931,13 +1931,14 @@
         const s68Big = Math.ceil(s68Sub / mul);
         const s69Big = Math.ceil(s69Sub / mul);
         const stkBig = Math.ceil(stkSub / mul);
+
         const cov = getSeasonalStockCoverage(p, stkSub, 'ALL');
-     const covPdfHtml = cov ? `
-       <div style="margin-top:2px; padding-top:2px; border-top:1px solid #86efac; line-height:1.15;">
-         <div style="font-size:8.5px; color:#111;">${cov.monthsText}</div>
-         <div style="font-size:7.5px; color:#444;">${cov.dateText}</div>
-       </div>
-     ` : '';
+        const covPdfHtml = cov ? `
+          <div style="margin-top:1px; padding-top:1px; border-top:1px solid #86efac; line-height:1.05;">
+            <span style="font-size:8px; color:#111;">${cov.monthsText}</span>
+            <span style="font-size:7px; color:#444; display:block;">${cov.dateText}</span>
+          </div>
+        ` : '';
 
         const yoyPct = s68Sub > 0 ? Math.round(((s69Sub - s68Sub) / s68Sub) * 100) : (s69Sub > 0 ? 100 : 0);
 
@@ -1955,77 +1956,82 @@
         const fc2 = Math.ceil((runRate * 2) / mul);
         const fc3 = Math.ceil((runRate * 3) / mul);
 
-        let b68Html = [];
-        if (p.sales68_tn_1_5 > 0) b68Html.push(`TN(1-5): <b>${p.sales68_tn_1_5.toLocaleString()}</b>`);
-        if (p.sales68_tn_6 > 0)   b68Html.push(`TN(6): <b>${p.sales68_tn_6.toLocaleString()}</b>`);
-        if (p.sales68_cks > 0)    b68Html.push(`CKS(${cksBranchCount}): <b>${p.sales68_cks.toLocaleString()}</b>`);
+        // รวมบรรทัดแยกสาขา 68 และ 69 แบบกระชับ
+        let b68Parts = [];
+        if (p.sales68_tn_1_5 > 0) b68Parts.push(`TN1-5:<b>${p.sales68_tn_1_5.toLocaleString()}</b>`);
+        if (p.sales68_tn_6 > 0)   b68Parts.push(`TN6:<b>${p.sales68_tn_6.toLocaleString()}</b>`);
+        if (p.sales68_cks > 0)    b68Parts.push(`CKS(${cksBranchCount}):<b>${p.sales68_cks.toLocaleString()}</b>`);
 
-        let b69Html = [];
-        if (p.sales69_tn_1_5 > 0) b69Html.push(`TN(1-5): <b>${p.sales69_tn_1_5.toLocaleString()}</b>`);
-        if (p.sales69_tn_6 > 0)   b69Html.push(`TN(6): <b>${p.sales69_tn_6.toLocaleString()}</b>`);
-        if (p.sales69_cks > 0)    b69Html.push(`CKS(${cksBranchCount}): <b>${p.sales69_cks.toLocaleString()}</b>`);
+        let b69Parts = [];
+        if (p.sales69_tn_1_5 > 0) b69Parts.push(`TN1-5:<b>${p.sales69_tn_1_5.toLocaleString()}</b>`);
+        if (p.sales69_tn_6 > 0)   b69Parts.push(`TN6:<b>${p.sales69_tn_6.toLocaleString()}</b>`);
+        if (p.sales69_cks > 0)    b69Parts.push(`CKS(${cksBranchCount}):<b>${p.sales69_cks.toLocaleString()}</b>`);
+
+        // รวมบรรทัดคงเหลือแยกคลัง (คั่นด้วย | เพื่อลดความสูงของแถว)
+        let stkParts = [];
+        if (p.stock_pc > 0)  stkParts.push(`ปากช่อง:<b>${p.stock_pc.toLocaleString()}</b>`);
+        if (p.stock_kr > 0)  stkParts.push(`โคราช:<b>${p.stock_kr.toLocaleString()}</b>`);
+        if (p.stock_cyp > 0) stkParts.push(`ชัยภูมิ:<b>${p.stock_cyp.toLocaleString()}</b>`);
+        if (p.stock_cks > 0) stkParts.push(`CKS(${cksBranchCount}):<b>${p.stock_cks.toLocaleString()}</b>`);
 
         const discStyle = st.code === 'DISCONTINUED'
-          ? 'background:#e5e7eb; color:#374151; padding:1px 3px; border-radius:3px; border:1px solid #9ca3af;'
+          ? 'background:#e5e7eb; color:#374151; padding:0.5px 2px; border-radius:2px; border:1px solid #9ca3af;'
           : '';
 
         rowsHtml += `
           <tr style="${st.code === 'DISCONTINUED' ? 'background:#f9fafb; color:#4b5563;' : ''}">
-            <td style="text-align:center; font-size:8.5px;">${idx + 1}</td>
-            <td>
-              <div style="font-weight:bold; font-size:9.5px;">${p.name}</div>
-              <div style="font-size:8.5px; color:#444;">
-                ${p.category ? `[${p.category}] ` : ''}${p.genericName ? `${p.genericName} | ` : ''}(1*${mul} ${p.unitBig}/${cleanSub})
+            <td style="text-align:center; font-size:8px;">${idx + 1}</td>
+            <td style="line-height:1.15;">
+              <span style="font-weight:bold; font-size:9px;">${p.name}</span>
+              <span style="font-size:7.8px; color:#444;">
+                ${p.category ? `[${p.category}]` : ''} ${p.genericName ? `| ${p.genericName}` : ''} (1*${mul} ${p.unitBig}/${cleanSub})
+              </span>
+            </td>
+            <td style="font-size:7.8px; line-height:1.15;">${b68Parts.length > 0 ? b68Parts.join(' | ') : ''}</td>
+            <td style="text-align:right; line-height:1.1; background:#FEF3C7;">
+              ${s68Big > 0 ? `<b style="font-size:8.8px;">${s68Big.toLocaleString()} ${p.unitBig}</b>` : ''}
+              ${s68Sub > 0 ? `<span style="font-size:7.8px;">(${s68Sub.toLocaleString()})</span>` : ''}
+              <div style="font-size:8px; color:#78350f; font-weight:600;">${fmtZero(p.sales68_val)}</div>
+            </td>
+            <td style="font-size:7.8px; line-height:1.15;">${b69Parts.length > 0 ? b69Parts.join(' | ') : ''}</td>
+            <td style="text-align:right; line-height:1.1; background:#FFEDD5;">
+              ${s69Big > 0 ? `<b style="font-size:8.8px;">${s69Big.toLocaleString()} ${p.unitBig}</b>` : ''}
+              ${s69Sub > 0 ? `<span style="font-size:7.8px;">(${s69Sub.toLocaleString()})</span>` : ''}
+              <div style="font-size:8px; color:#78350f; font-weight:600;">
+                ${fmtZero(p.sales69_val)}
+                ${(s68Sub > 0 || s69Sub > 0) ? `<b style="color:${yoyPct >= 0 ? '#166534' : '#dc2626'}; margin-left:2px;">(${yoyPct >= 0 ? '+' : ''}${yoyPct}%)</b>` : ''}
               </div>
             </td>
-            <td style="font-size:8.5px; line-height:1.25;">${b68Html.length > 0 ? b68Html.join('<br>') : ''}</td>
-            <td style="text-align:right; line-height:1.25; background:#FEF3C7;">
-              ${s68Big > 0 ? `<b style="font-size:9.5px;">${s68Big.toLocaleString()} ${p.unitBig}</b><br>` : ''}
-              ${s68Sub > 0 ? `<span style="font-size:8.5px;">(${s68Sub.toLocaleString()} ${cleanSub})</span><br>` : ''}
-              <span style="font-size:8.5px; color:#78350f; font-weight:600;">${fmtZero(p.sales68_val)}</span>
-            </td>
-            <td style="font-size:8.5px; line-height:1.25;">${b69Html.length > 0 ? b69Html.join('<br>') : ''}</td>
-            <td style="text-align:right; line-height:1.25; background:#FFEDD5;">
-              ${s69Big > 0 ? `<b style="font-size:9.5px;">${s69Big.toLocaleString()} ${p.unitBig}</b><br>` : ''}
-              ${s69Sub > 0 ? `<span style="font-size:8.5px;">(${s69Sub.toLocaleString()} ${cleanSub})</span><br>` : ''}
-              <span style="font-size:8.5px; color:#78350f; font-weight:600;">${fmtZero(p.sales69_val)}</span><br>
-              ${(s68Sub > 0 || s69Sub > 0) ? `<b style="font-size:8.5px; color:${yoyPct >= 0 ? '#166534' : '#dc2626'};">${yoyPct >= 0 ? '▲ +' : '▼ '}${yoyPct}% (ทั้งปี)</b>` : ''}
-            </td>
-            <td style="text-align:right; font-size:8.5px; line-height:1.25;">
+            <td style="text-align:right; font-size:7.8px; line-height:1.1;">
               ${(ytd68 > 0 || s69Sub > 0) ? `
-                ปี 68: ${ytd68 > 0 ? ytd68.toLocaleString() : ''}<br>
-                ปี 69: <b>${s69Sub > 0 ? s69Sub.toLocaleString() : ''}</b><br>
+                68:${ytd68 > 0 ? ytd68.toLocaleString() : '0'} | 69:<b>${s69Sub > 0 ? s69Sub.toLocaleString() : '0'}</b><br>
                 <b style="color:${ytdPct >= 0 ? '#166534' : '#dc2626'};">${ytdPct >= 0 ? '▲ +' : '▼ '}${ytdPct}%</b>
               ` : ''}
             </td>
-            <td style="text-align:right; font-size:8.5px; line-height:1.25;">
+            <td style="text-align:right; font-size:7.8px; line-height:1.1;">
               ${(m68 > 0 || m69 > 0) ? `
-                ปี 68: ${m68 > 0 ? m68.toLocaleString() : ''}<br>
-                ปี 69: <b>${m69 > 0 ? m69.toLocaleString() : ''}</b><br>
+                68:${m68 > 0 ? m68.toLocaleString() : '0'} | 69:<b>${m69 > 0 ? m69.toLocaleString() : '0'}</b><br>
                 <b style="color:${mPct >= 0 ? '#166534' : '#dc2626'};">${mPct >= 0 ? '▲ +' : '▼ '}${mPct}%</b>
               ` : ''}
             </td>
-            <td style="font-size:8.5px; line-height:1.25; background:#DCFCE7;">
-              ${p.stock_pc > 0 ? `ปากช่อง: <b>${p.stock_pc.toLocaleString()}</b><br>` : ''}
-              ${p.stock_kr > 0 ? `โคราช: <b>${p.stock_kr.toLocaleString()}</b><br>` : ''}
-              ${p.stock_cyp > 0 ? `ชัยภูมิ: <b>${p.stock_cyp.toLocaleString()}</b><br>` : ''}
-              ${p.stock_cks > 0 ? `CKS(${cksBranchCount}): <b>${p.stock_cks.toLocaleString()}</b>` : ''}
+            <td style="font-size:7.8px; line-height:1.15; background:#DCFCE7;">
+              ${stkParts.length > 0 ? stkParts.join(' | ') : ''}
             </td>
-            <td style="text-align:right; background:#DCFCE7; line-height:1.25;">
-              ${stkBig > 0 ? `<b style="font-size:9.5px;">${stkBig.toLocaleString()} ${p.unitBig}</b><br>` : ''}
-              ${stkSub > 0 ? `<span style="font-size:8.5px;">(${stkSub.toLocaleString()} ${cleanSub})</span><br>` : ''}
-              <span style="font-size:8.5px; font-weight:600;">${fmtZero(p.stock_val)}</span>
+            <td style="text-align:right; background:#DCFCE7; line-height:1.1;">
+              ${stkBig > 0 ? `<b style="font-size:8.8px;">${stkBig.toLocaleString()} ${p.unitBig}</b>` : ''}
+              ${stkSub > 0 ? `<span style="font-size:7.8px;">(${stkSub.toLocaleString()})</span>` : ''}
+              <span style="font-size:8px; font-weight:600; display:block;">${fmtZero(p.stock_val)}</span>
               ${covPdfHtml}
             </td>
             ${showForecast ? `
-              <td style="font-size:8.5px; line-height:1.25;">
-                ${s69Sub > 0 ? `1ด:<b>${fc1}</b> | 1.5ด:<b>${fc1_5}</b><br>2ด:<b>${fc2}</b> | 3ด:<b>${fc3}</b> (${p.unitBig})<br>` : ''}
+              <td style="font-size:7.8px; line-height:1.15;">
+                ${s69Sub > 0 ? `1ด:<b>${fc1}</b> | 1.5ด:<b>${fc1_5}</b> | 2ด:<b>${fc2}</b> | 3ด:<b>${fc3}</b> ${p.unitBig}<br>` : ''}
                 <span style="color:#333;">ย้อนหลัง: ${getNext2MonthsHistoryText(p)}</span>
               </td>
             ` : ''}
-            <td style="text-align:center; font-size:8px; line-height:1.25;">
+            <td style="text-align:center; font-size:7.5px; line-height:1.1;">
               <div style="font-weight:bold; ${discStyle}">${st.label}</div>
-              ${noSales3M.isNoSales3M ? `<div style="margin-top:2px; background:#fee2e2; color:#991b1b; padding:1px 2px; border-radius:3px; font-weight:bold;">⚠️ ไม่ขาย 3 ด.</div>` : ''}
+              ${noSales3M.isNoSales3M ? `<div style="margin-top:1px; background:#fee2e2; color:#991b1b; padding:0.5px 2px; border-radius:2px; font-weight:bold;">⚠️ ไม่ขาย 3 ด.</div>` : ''}
             </td>
           </tr>
         `;
@@ -2035,41 +2041,41 @@
 
       const win = window.open('', '_blank');
       win.document.write(`
-        <html><head><title>รายงานสต็อคสำหรับ MR</title>
+        <html><head><title>รายงานสต็อคสำหรับ MR (A4 แนวนอน)</title>
         <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
-          @page { size: A4 portrait; margin: 4mm; }
+          @page { size: A4 landscape; margin: 3mm; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          body { font-family: 'Sarabun', sans-serif; font-size: 9px; color: #111; margin: 0; }
-          .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #4A3B32; padding-bottom: 3px; }
+          body { font-family: 'Sarabun', sans-serif; font-size: 8.5px; color: #111; margin: 0; }
+          .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1.5px solid #4A3B32; padding-bottom: 2px; }
           table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-          th, td { border: 1px solid #bbb; padding: 2.5px 2.5px; vertical-align: top; word-wrap: break-word; }
-          th { background: #E8E3D7 !important; color: #000000 !important; font-size: 8.5px; text-align: center; font-weight: 700; }
+          th, td { border: 1px solid #bbb; padding: 1.5px 2.5px; vertical-align: middle; word-wrap: break-word; }
+          th { background: #E8E3D7 !important; color: #000000 !important; font-size: 8px; text-align: center; font-weight: 700; padding: 2px; }
           tr { page-break-inside: avoid; }
         </style></head><body>
           <div class="header">
             <div>
-              <div style="font-size:13px; font-weight:bold; color:#4A3B32;">รายงานบริหารสต็อคและพยากรณ์ขาย (มุมมองสำหรับ MR)</div>
-              <div style="font-size:10px; margin-top:2px;">บริษัทคู่ค้า: <b>${supLabel}</b> | ข้อมูลยอดขาย: <b>${salesPeriodStr}</b> | สต็อค ณ วันที่: <b>${stockDateStr}</b></div>
+              <span style="font-size:12px; font-weight:bold; color:#4A3B32;">รายงานบริหารสต็อคและพยากรณ์ขาย (MR)</span>
+              <span style="font-size:9.5px; margin-left:8px;">คู่ค้า: <b>${supLabel}</b> | ยอดขาย: <b>${salesPeriodStr}</b> | สต็อค ณ วันที่: <b>${stockDateStr}</b></span>
             </div>
-            <div style="text-align:right; font-size:9.5px;">พิมพ์เมื่อ: <b>${printTime}</b><br>จำนวนทั้งหมด: <b>${currentFiltered.length}</b> รายการ</div>
+            <div style="text-align:right; font-size:8.5px;">พิมพ์เมื่อ: <b>${printTime}</b> | ทั้งหมด: <b>${currentFiltered.length}</b> รายการ</div>
           </div>
           ${headerSummaryHtml}
           <table>
             <thead>
               <tr>
-                <th style="width:2.5%;">#</th>
-                <th style="width:${showForecast ? '16.5%' : '29%'};">รายการสินค้า / ประเภท / ชื่อสามัญ</th>
-                <th style="width:7.5%;">ขาย 68<br>(แยกสาขา)</th>
-                <th style="width:8%;">รวมขาย 68</th>
-                <th style="width:7.5%;">ขาย 69<br>(แยกสาขา)</th>
+                <th style="width:2.2%;">#</th>
+                <th style="width:${showForecast ? '18.3%' : '31.3%'};">รายการสินค้า / ประเภท / ชื่อสามัญ</th>
+                <th style="width:8.5%;">ขาย 68 (แยกสาขา)</th>
+                <th style="width:7.5%;">รวมขาย 68</th>
+                <th style="width:8.5%;">ขาย 69 (แยกสาขา)</th>
                 <th style="width:8.5%;">รวมขาย 69 & YOY</th>
-                <th style="width:7%;">YOY<br>(YTD)</th>
-                <th style="width:7%;">YOY<br>(เดือนนี้)</th>
-                <th style="width:8%;">คงเหลือ<br>แยกคลัง</th>
-                <th style="width:8%;">รวมคงเหลือ</th>
-                ${showForecast ? `<th style="width:12.5%;">พยากรณ์ & ย้อนหลัง 2 ด.</th>` : ''}
-                <th style="width:7%;">สถานะ /<br>ไม่ขาย 3 ด.</th>
+                <th style="width:6.5%;">YOY (YTD)</th>
+                <th style="width:6.5%;">YOY (เดือนนี้)</th>
+                <th style="width:9.5%;">คงเหลือแยกคลัง</th>
+                <th style="width:9%;">รวมคงเหลือ</th>
+                ${showForecast ? `<th style="width:13%;">พยากรณ์ & ย้อนหลัง 2 ด.</th>` : ''}
+                <th style="width:6%;">สถานะ</th>
               </tr>
             </thead>
             <tbody>${rowsHtml}</tbody>
@@ -2079,7 +2085,6 @@
       `);
       win.document.close();
     }
-
 // 2. ส่งออก PDF สำหรับเซลล์ (กระดาษ A4 แนวตั้ง + YOY ทั้งปี + คงเหลือแยกคลังสีเขียวอ่อน)
     function exportPDF_Sales() {
       if (currentFiltered.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก PDF");
