@@ -2091,20 +2091,22 @@
             <div style="text-align:right; font-size:10px;">วันที่พิมพ์: <b>${printTime}</b><br>จำนวนทั้งหมด: <b>${currentFiltered.length}</b> รายการ</div>
           </div>
           ${headerSummaryHtml}
-          <table>
-            <thead>
-              <tr>
-                <th style="width:3.5%;">#</th>
-                <th style="width:21.5%;">รายการสินค้า / ประเภท / ชื่อสามัญ</th>
-                <th style="width:8.5%;">ขายปี 68<br>(TN / CKS)</th>
-                <th style="width:8.5%;">ขายปี 69<br>(TN / CKS)</th>
-                <th style="width:8.5%;">YOY ทั้งปี<br>(68 vs 69)</th>
-                <th style="width:31.5%;">คงเหลือแยกคลัง & สาขา CKS</th>
-                <th style="width:10%;">รวมคงเหลือ<br>& มูลค่า</th>
-                <th style="width:8%;">สถานะ /<br>ไม่ขาย 3 ด.</th>
-              </tr>
-            </thead>
-            <tbody>${rowsHtml}</tbody>
+       <table>
+         <thead>
+           <tr>
+             <th style="width:3.5%;">#</th>
+             <th style="width:21.5%;">รายการสินค้า / ประเภท / ชื่อสามัญ</th>
+             <th style="width:8.5%;">ขายปี 68<br>(TN / CKS)</th>
+             <th style="width:8.5%;">ขายปี 69<br>(TN / CKS)</th>
+             <th style="width:8.5%;">YOY ทั้งปี<br>(68 vs 69)</th>
+             <th style="width:31.5%;">คงเหลือแยกคลัง & สาขา CKS</th>
+             <th style="width:10%;">รวมคงเหลือ<br>& มูลค่า</th>
+             <th style="width:8%;">สถานะ /<br>ไม่ขาย 3 ด.</th>
+           </tr>
+         </thead>
+         <tbody>${rowsHtml}</tbody>
+       </table>
+       <tbody>${rowsHtml}</tbody>
           </table>
           <script>window.onload = function() { window.print(); };<\/script>
         </body></html>
