@@ -1934,9 +1934,8 @@
 
         const cov = getSeasonalStockCoverage(p, stkSub, 'ALL');
         const covPdfHtml = cov ? `
-          <div style="margin-top:1px; padding-top:1px; border-top:1px solid #86efac; line-height:1.05;">
-            <span style="font-size:8px; color:#111;">${cov.monthsText}</span>
-            <span style="font-size:7px; color:#444; display:block;">${cov.dateText}</span>
+          <div style="margin-top:1px; padding-top:1px; border-top:1px solid #86efac; line-height:1.1; font-size:7.8px; color:#111;">
+            <b>${cov.monthsText}</b> <span style="font-size:7.2px; color:#444;">${cov.dateText}</span>
           </div>
         ` : '';
 
@@ -2017,10 +2016,12 @@
             <td style="font-size:7.8px; line-height:1.15; background:#DCFCE7;">
               ${stkParts.length > 0 ? stkParts.join(' | ') : ''}
             </td>
-            <td style="text-align:right; background:#DCFCE7; line-height:1.1;">
-              ${stkBig > 0 ? `<b style="font-size:8.8px;">${stkBig.toLocaleString()} ${p.unitBig}</b>` : ''}
-              ${stkSub > 0 ? `<span style="font-size:7.8px;">(${stkSub.toLocaleString()})</span>` : ''}
-              <span style="font-size:8px; font-weight:600; display:block;">${fmtZero(p.stock_val)}</span>
+            <td style="text-align:right; background:#DCFCE7; line-height:1.15;">
+              <div>
+                ${stkBig > 0 ? `<b style="font-size:8.8px;">${stkBig.toLocaleString()} ${p.unitBig}</b>` : ''}
+                ${stkSub > 0 ? `<span style="font-size:7.5px;">(${stkSub.toLocaleString()})</span>` : ''}
+                ${fmtZero(p.stock_val) ? `<span style="font-size:8px; font-weight:600; color:#14532d; margin-left:3px;">| ${fmtZero(p.stock_val)}</span>` : ''}
+              </div>
               ${covPdfHtml}
             </td>
             ${showForecast ? `
@@ -2065,16 +2066,16 @@
             <thead>
               <tr>
                 <th style="width:2.2%;">#</th>
-                <th style="width:${showForecast ? '18.3%' : '31.3%'};">รายการสินค้า / ประเภท / ชื่อสามัญ</th>
+                <th style="width:${showForecast ? '18.3%' : '28.3%'};">รายการสินค้า / ประเภท / ชื่อสามัญ</th>
                 <th style="width:8.5%;">ขาย 68 (แยกสาขา)</th>
                 <th style="width:7.5%;">รวมขาย 68</th>
                 <th style="width:8.5%;">ขาย 69 (แยกสาขา)</th>
                 <th style="width:8.5%;">รวมขาย 69 & YOY</th>
                 <th style="width:6.5%;">YOY (YTD)</th>
                 <th style="width:6.5%;">YOY (เดือนนี้)</th>
-                <th style="width:9.5%;">คงเหลือแยกคลัง</th>
-                <th style="width:9%;">รวมคงเหลือ</th>
-                ${showForecast ? `<th style="width:13%;">พยากรณ์ & ย้อนหลัง 2 ด.</th>` : ''}
+                <th style="width:9%;">คงเหลือแยกคลัง</th>
+                <th style="width:12.5%;">รวมคงเหลือ</th>
+                ${showForecast ? `<th style="width:10%;">พยากรณ์ & ย้อนหลัง 2 ด.</th>` : ''}
                 <th style="width:6%;">สถานะ</th>
               </tr>
             </thead>
