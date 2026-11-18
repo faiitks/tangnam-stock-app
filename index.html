@@ -263,7 +263,7 @@
               <th class="w-[110px] px-1.5 py-1 text-right border-r-2 border-cream-400 bg-amber-900">YOY (เดือนนี้)</th>
 
               <th class="w-[96px] px-1.5 py-1 text-left border-r border-earth-700 bg-leaf-900/80">แยกคลัง</th>
-              <th class="w-[95px] px-1.5 py-1 text-right border-r border-earth-700 bg-leaf-900">รวมคงเหลือ</th>
+              <th class="w-[125px] px-1.5 py-1 text-right border-r border-earth-700 bg-leaf-900">รวมคงเหลือ</th>
               <th class="w-[82px] px-1.5 py-1 text-right border-r-2 border-leaf-400 bg-sky-900 text-sky-100">ค้างรับคู่ค้า</th>
 
               <th class="w-[132px] px-1.5 py-1 text-center border-r border-earth-700 bg-earth-800">พยากรณ์ (4 ช่วง)</th>
@@ -532,6 +532,7 @@
     let visibleLimit = 80;
     let latestMonthIndex = 10; 
     let stockDateStr = "";
+    let stockDateObj = null;
     let salesPeriodStr = "";
 
     let apoDocumentsList = [];
@@ -586,6 +587,101 @@
       const r = (statusStr || '').trim();
       const n = (nameStr || '').trim();
       return r.includes('เลิก') || r.includes('ยกเลิก') || r.includes('หยุดขาย') || n.includes('เลิกขาย') || n.includes('ยกเลิก');
+    }
+
+    // 1. แปลงวันที่จากชีท เช่น "17/11/2026" เป็น Date Object
+    function parseThaiOrSlashDate(dateStr) {
+      if (!dateStr) return new Date();
+      const parts = String(dateStr).trim().split('/');
+      if (parts.length === 3) {
+        const d = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        let y = parseInt(parts[2], 10);
+        if (y > 2400) y -= 543;
+        const dt = new Date(y, m, d);
+        if (!isNaN(dt.getTime())) return dt;
+      }
+      return new Date();
+    }
+
+    // 2. คำนวณ "ขายได้อีก x.x เดือน" และ "(หมดประมาณวันที่ ...)" ด้วยสูตร Seasonal + YOY Trend
+    function getSeasonalStockCoverage(p, stkSub, compFilter = activeCompanyFilter) {
+      if (!stkSub || stkSub <= 0) return null;
+
+      const mIdx = latestMonthIndex;
+      const mThaiShort = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+      let m68Arr = [], s68YTD = 0, s69YTD = 0;
+      for (let i = 0; i < 12; i++) {
+        let v68 = 0, v69 = 0;
+        if (compFilter === 'TN') {
+          v68 = p.monthly68_tn[i] || 0;
+          v69 = p.monthly69_tn[i] || 0;
+        } else if (compFilter === 'CKS') {
+          v68 = p.monthly68_cks[i] || 0;
+          v69 = p.monthly69_cks[i] || 0;
+        } else {
+          v68 = (p.monthly68_tn[i] || 0) + (p.monthly68_cks[i] || 0);
+          v69 = (p.monthly69_tn[i] || 0) + (p.monthly69_cks[i] || 0);
+        }
+        m68Arr.push(v68);
+        if (i <= mIdx) { s68YTD += v68; s69YTD += v69; }
+      }
+
+      let yoyFactor = (s68YTD > 0 && s69YTD > 0) ? (s69YTD / s68YTD) : 1.0;
+      const total68Year = m68Arr.reduce((a, b) => a + b, 0);
+      const avgMonthlyFallback = s69YTD > 0 ? (s69YTD / (mIdx + 1)) : 0;
+
+      if (total68Year <= 0 && avgMonthlyFallback <= 0) return null;
+
+      let curDate = stockDateObj ? new Date(stockDateObj.getTime()) : new Date();
+      let remaining = stkSub;
+      let monthsCover = 0;
+
+      for (let step = 0; step < 24; step++) {
+        const y = curDate.getFullYear();
+        const m = curDate.getMonth();
+        const d = curDate.getDate();
+        const daysInMonth = new Date(y, m + 1, 0).getDate();
+        const remainingDaysInMonth = daysInMonth - d + 1;
+        const monthFraction = remainingDaysInMonth / daysInMonth;
+
+        let fullMonthDemand = total68Year > 0 ? (m68Arr[m] * yoyFactor) : avgMonthlyFallback;
+        const demandThisPeriod = fullMonthDemand * monthFraction;
+
+        if (demandThisPeriod <= 0) {
+          monthsCover += monthFraction;
+          curDate = new Date(y, m + 1, 1);
+          continue;
+        }
+
+        if (remaining >= demandThisPeriod) {
+          remaining -= demandThisPeriod;
+          monthsCover += monthFraction;
+          curDate = new Date(y, m + 1, 1);
+        } else {
+          const ratio = remaining / demandThisPeriod;
+          monthsCover += monthFraction * ratio;
+          const daysLasted = Math.max(0, Math.round(remainingDaysInMonth * ratio));
+          curDate = new Date(y, m, d + daysLasted);
+          remaining = 0;
+          break;
+        }
+      }
+
+      if (remaining > 0) {
+        return { monthsText: 'ขายได้ > 24 เดือน', dateText: '(สต็อคค้างนานกว่า 2 ปี)' };
+      }
+
+      const monthsRounded = (Math.round(monthsCover * 10) / 10).toFixed(1);
+      const outDay   = curDate.getDate();
+      const outMonth = mThaiShort[curDate.getMonth()];
+      const outYearBE2Digit = String(curDate.getFullYear() + 543).slice(-2);
+
+      return {
+        monthsText: `ขายได้อีก ${monthsRounded} เดือน`,
+        dateText: `(หมดประมาณวันที่ ${outDay} ${outMonth} ${outYearBE2Digit})`
+      };
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -645,6 +741,7 @@
         const sDate = getCellStr(0, 1);
         const sTime = getCellStr(0, 3);
         stockDateStr = sDate ? `${sDate}${sTime ? ` ${sTime} น.` : ''}` : '-';
+        stockDateObj = parseThaiOrSlashDate(sDate);
         if (sDate) document.getElementById('lblStockDateTime').innerText = `สต็อค ณ วันที่: ${stockDateStr}`;
         
         const salesPeriod = getCellStr(1, 1);
@@ -1108,6 +1205,13 @@
         const s68Big = Math.ceil(s68Sub / mul);
         const s69Big = Math.ceil(s69Sub / mul);
         const stkBig = Math.ceil(stkSub / mul);
+        const cov = getSeasonalStockCoverage(p, stkSub, activeCompanyFilter);
+     const covHtml = cov ? `
+       <div class="mt-1 pt-0.5 border-t border-leaf-300/80 leading-tight">
+         <div class="text-[10px] font-semibold text-earth-900">${cov.monthsText}</div>
+         <div class="text-[8.5px] text-earth-600">${cov.dateText}</div>
+       </div>
+     ` : '';
 
         // สินค้าค้างรับจากคู่ค้า (คอลัมน์ BH = หน่วยย่อย -> แปลงเป็นหน่วยใหญ่เป็นหลัก แล้วแสดงหน่วยย่อย)
         const pendSub = p.pendingReceiveSub || 0;
@@ -1221,10 +1325,11 @@
               ${stockLines.length > 0 ? stockLines.join('') : ''}
             </td>
             <td class="px-1.5 py-1.5 text-right align-top bg-leaf-100/60">
-              <div class="font-bold text-leaf-900 text-[11px]">${stkBig > 0 ? `${stkBig.toLocaleString()} ${p.unitBig}` : ''}</div>
-              <div class="text-[9.5px] text-leaf-800">${stkSub > 0 ? `(${stkSub.toLocaleString()} ${cleanSub})` : ''}</div>
-              <div class="text-[9.5px] font-mono font-semibold text-leaf-900 mt-0.5">${fmtZero(stkVal)}</div>
-            </td>
+           <div class="font-bold text-leaf-900 text-[11px]">${stkBig > 0 ? `${stkBig.toLocaleString()} ${p.unitBig}` : ''}</div>
+           <div class="text-[9.5px] text-leaf-800">${stkSub > 0 ? `(${stkSub.toLocaleString()} ${cleanSub})` : ''}</div>
+           <div class="text-[9.5px] font-mono font-semibold text-leaf-900 mt-0.5">${fmtZero(stkVal)}</div>
+           ${covHtml}
+         </td>
 
             <!-- สินค้าค้างรับจากคู่ค้า (คอลัมน์ BH): แสดงหน่วยใหญ่เป็นหลัก แล้วแสดงหน่วยย่อย -->
             <td class="px-1.5 py-1.5 text-right align-top bg-sky-50/70 border-r-2 border-leaf-400">
@@ -1826,6 +1931,13 @@
         const s68Big = Math.ceil(s68Sub / mul);
         const s69Big = Math.ceil(s69Sub / mul);
         const stkBig = Math.ceil(stkSub / mul);
+        const cov = getSeasonalStockCoverage(p, stkSub, 'ALL');
+     const covPdfHtml = cov ? `
+       <div style="margin-top:2px; padding-top:2px; border-top:1px solid #86efac; line-height:1.15;">
+         <div style="font-size:8.5px; color:#111;">${cov.monthsText}</div>
+         <div style="font-size:7.5px; color:#444;">${cov.dateText}</div>
+       </div>
+     ` : '';
 
         const yoyPct = s68Sub > 0 ? Math.round(((s69Sub - s68Sub) / s68Sub) * 100) : (s69Sub > 0 ? 100 : 0);
 
@@ -1903,6 +2015,7 @@
               ${stkBig > 0 ? `<b style="font-size:9.5px;">${stkBig.toLocaleString()} ${p.unitBig}</b><br>` : ''}
               ${stkSub > 0 ? `<span style="font-size:8.5px;">(${stkSub.toLocaleString()} ${cleanSub})</span><br>` : ''}
               <span style="font-size:8.5px; font-weight:600;">${fmtZero(p.stock_val)}</span>
+              ${covPdfHtml}
             </td>
             ${showForecast ? `
               <td style="font-size:8.5px; line-height:1.25;">
@@ -2018,6 +2131,13 @@
 
         const stkSub = p.stock_pc + p.stock_kr + p.stock_cyp + p.stock_cks;
         const stkBig = Math.ceil(stkSub / mul);
+        const cov = getSeasonalStockCoverage(p, stkSub, 'ALL');
+     const covPdfHtml = cov ? `
+       <div style="margin-top:2px; padding-top:2px; border-top:1px solid #86efac; line-height:1.15;">
+         <div style="font-size:9px; color:#111;">${cov.monthsText}</div>
+         <div style="font-size:8px; color:#444;">${cov.dateText}</div>
+       </div>
+     ` : '';
 
         const discStyle = st.code === 'DISCONTINUED'
           ? 'background:#e5e7eb; color:#374151; padding:1px 3px; border-radius:3px; border:1px solid #9ca3af;'
@@ -2056,6 +2176,7 @@
               ${stkBig > 0 ? `<b style="font-size:10px;">${stkBig.toLocaleString()} ${p.unitBig}</b><br>` : ''}
               ${stkSub > 0 ? `(${stkSub.toLocaleString()} ${cleanSub})<br>` : ''}
               <b>${fmtZero(p.stock_val) ? `${fmtZero(p.stock_val)} บ.` : ''}</b>
+              ${covPdfHtml}
             </td>
             <td style="text-align:center; font-size:8.5px; line-height:1.25;">
               <div style="font-weight:bold; ${discStyle}">${st.label}</div>
