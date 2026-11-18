@@ -2045,7 +2045,7 @@
               ${s69_cks > 0 ? `CKS: <b>${s69_cks.toLocaleString()}</b><br>` : ''}
               ${s69_tot > 0 ? `<span style="color:#555;">รวม: ${s69_tot.toLocaleString()}</span>` : ''}
             </td>
-            <<td style="text-align:right; font-size:9.5px; line-height:1.25;">
+            <td style="text-align:right; font-size:9.5px; line-height:1.25;">
             ${(s68_tot > 0 || s69_tot > 0) ? `
             <b style="color:${yoyFullPct >= 0 ? '#166534' : '#dc2626'}; font-size:10px;">${yoyFullPct >= 0 ? '▲ +' : '▼ '}${yoyFullPct}%</b><br>
             <span style="font-size:8.5px; color:#444;">${yoyFullDiff !== 0 ? `${yoyFullDiff > 0 ? '+' : ''}${yoyFullDiff.toLocaleString()} ${cleanSub}` : ''}</span>
