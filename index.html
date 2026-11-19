@@ -2842,8 +2842,8 @@
 
           <table>
             <thead>${finalHeaderHtml}</thead>
-            <tbody>${rowsHtml}</tbody>
-            <tfoot>
+            <tbody>
+              ${rowsHtml}
               <tr style="background:#F4F1EA; font-weight:bold;">
                 <td colspan="${colSpanTotal}" style="text-align:right;">รวมมูลค่าขอสั่งทั้งสิ้น:</td>
                 <td style="text-align:right;">${fmtZero(doc.totalValue)}</td>
@@ -2854,7 +2854,7 @@
                 <td style="text-align:right;">${fmtZero(netApprovedVal)}</td>
                 <td colspan="2">บาท</td>
               </tr>
-            </tfoot>
+            </tbody>
           </table>
 
           <div class="note-box">
