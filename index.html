@@ -2939,18 +2939,22 @@
               <div><b>สถานะเอกสาร:</b> ${doc.status === 'APPROVED' ? `✓ อนุมัติแล้ว (${doc.approver})` : '⏳ รอพิจารณาอนุมัติ'}</div>
               <div><b>วันที่อนุมัติ:</b> ${doc.approvedAt || '-'}</div>
             </div>
-            <div class="meta-summary">
-              <div style="background:#FEF3C7; border:1px solid #F59E0B; border-radius:4px; padding:2px 6px; flex:1;">
-                <span style="color:#78350f;">มูลค่าขายปี 68:</span> <b>${sumDocSales68Val > 0 ? Math.round(sumDocSales68Val).toLocaleString() : '0'}</b> บ.
+            <div style="margin-top: 5px; padding-top: 4px; border-top: 1px dashed #D5CDBF;">
+              <div style="font-size: 8.5px; color: #564438; font-weight: bold; margin-bottom: 3px;">
+                📊 ภาพรวมมูลค่าสินค้าทั้งหมดของคู่ค้า (${doc.supplier} — รวมทั้งหมด ${supTotalSkuCount.toLocaleString()} รายการสินค้า):
               </div>
-              <div style="background:#FFEDD5; border:1px solid #F97316; border-radius:4px; padding:2px 6px; flex:1;">
-                <span style="color:#7c2d12;">มูลค่าขายปี 69:</span> <b>${sumDocSales69Val > 0 ? Math.round(sumDocSales69Val).toLocaleString() : '0'}</b> บ. ${docYoyBadge}
-              </div>
-              <div style="background:#DCFCE7; border:1px solid #22C55E; border-radius:4px; padding:2px 6px; flex:1;">
-                <span style="color:#14532d;">มูลค่าสินค้าคงเหลือ:</span> <b>${sumDocStockVal > 0 ? Math.round(sumDocStockVal).toLocaleString() : '0'}</b> บ.
+              <div style="display: flex; justify-content: space-between; gap: 8px; font-size: ${isDetail ? '9px' : '10px'};">
+                <div style="background:#FEF3C7; border:1px solid #F59E0B; border-radius:4px; padding:2px 6px; flex:1;">
+                  <span style="color:#78350f;">มูลค่าขายปี 68 (ทั้งหมด):</span> <b>${sumDocSales68Val > 0 ? Math.round(sumDocSales68Val).toLocaleString() : '0'}</b> บ.
+                </div>
+                <div style="background:#FFEDD5; border:1px solid #F97316; border-radius:4px; padding:2px 6px; flex:1;">
+                  <span style="color:#7c2d12;">มูลค่าขายปี 69 (ทั้งหมด):</span> <b>${sumDocSales69Val > 0 ? Math.round(sumDocSales69Val).toLocaleString() : '0'}</b> บ. ${docYoyBadge}
+                </div>
+                <div style="background:#DCFCE7; border:1px solid #22C55E; border-radius:4px; padding:2px 6px; flex:1;">
+                  <span style="color:#14532d;">มูลค่าคงเหลือ (ทั้งหมด):</span> <b>${sumDocStockVal > 0 ? Math.round(sumDocStockVal).toLocaleString() : '0'}</b> บ.
+                </div>
               </div>
             </div>
-          </div>
 
           <table>
             <thead>${finalHeaderHtml}</thead>
