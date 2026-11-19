@@ -2688,14 +2688,12 @@
       const mShort = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 
       let netApprovedVal = 0;
-      let netApprovedVal = 0;
       let sumDocSales68Val = 0;
       let sumDocSales69Val = 0;
       let sumDocStockVal   = 0;
       let supTotalSkuCount = 0;
       let rowsHtml = '';
 
-      // คำนวณยอดขาย 68, 69 และมูลค่าคงเหลือ จาก "สินค้าทั้งหมด" ของบริษัทคู่ค้านั้นๆ
       if (rawProducts.length > 0 && doc.supplier) {
         const targetSup = doc.supplier.trim();
         rawProducts.forEach(p => {
@@ -2716,21 +2714,19 @@
         const noteText = isRejected ? `[ไม่อนุมัติ: ${it.rejectReason || '-'}]` : (it.notes || '');
         const mul = it.mul || 1;
 
-        // ค้นหาข้อมูลสินค้าต้นฉบับเพื่อดึงยอดแยกสาขา และคงเหลือแยกคลัง (PC, KR, CYP, CKS)
         const foundProd = rawProducts.length > 0
           ? rawProducts.find(p => p.code === it.code || p.name === it.name)
           : null;
 
-        // คอลัมน์รายละเอียด (ยอดขาย 68/69 & YOY และ คงเหลือแยกคลัง PC/KR/CYP/CKS & พยากรณ์ + สถานะ)
         let detailColsHtml = '';
         if (isDetail) {
           const yoySign = (it.yoyPct || 0) >= 0 ? '+' : '';
           const yoyColor = (it.yoyPct || 0) >= 0 ? '#166534' : '#dc2626';
 
-          // แยกสาขา TN1-5, TN6, CKS (ตัวหนังสือเล็ก)
           let b68SubLine = '';
           let b69SubLine = '';
           let stkWhSubLine = '';
+          let yoySubLine = '';
 
           if (foundProd) {
             const p68 = [];
@@ -2745,18 +2741,6 @@
             if (foundProd.sales69_cks > 0)    p69.push(`CKS:${foundProd.sales69_cks.toLocaleString()}`);
             if (p69.length > 0) b69SubLine = `<div style="font-size:7.2px; color:#555; line-height:1.1; margin-bottom:2px;">${p69.join(' | ')}</div>`;
 
-            // แยกคลัง PC(ปากช่อง), KR(โคราช), CYP(ชัยภูมิ), CKS(ชาวเกษตร) ภาษาอังกฤษตัวเล็ก
-            const pStk = [];
-            if (foundProd.stock_pc > 0)  pStk.push(`PC:${foundProd.stock_pc.toLocaleString()}`);
-            if (foundProd.stock_kr > 0)  pStk.push(`KR:${foundProd.stock_kr.toLocaleString()}`);
-            if (foundProd.stock_cyp > 0) pStk.push(`CYP:${foundProd.stock_cyp.toLocaleString()}`);
-            if (foundProd.stock_cks > 0) pStk.push(`CKS:${foundProd.stock_cks.toLocaleString()}`);
-            if (pStk.length > 0) stkWhSubLine = `<div style="font-size:7.2px; color:#1e3a2f; line-height:1.1; margin-bottom:2px;">${pStk.join(' | ')}</div>`;
-          }
-
-          // สร้างบรรทัด YOY แยกลูกค้า (TN1-5, TN6, CKS) ตัวบาง เล็ก สีจาง แยกเขียว/แดง
-          let yoySubLine = '';
-          if (foundProd) {
             const calcYoyTag = (label, v68, v69) => {
               if (v68 <= 0 && v69 <= 0) return '';
               const pct = v68 > 0 ? Math.round(((v69 - v68) / v68) * 100) : (v69 > 0 ? 100 : 0);
@@ -2774,6 +2758,13 @@
             if (yoyTags.length > 0) {
               yoySubLine = `<div style="font-size:7.2px; font-weight:normal; opacity:0.8; line-height:1.15; margin-top:1px;">${yoyTags.join(' | ')}</div>`;
             }
+
+            const pStk = [];
+            if (foundProd.stock_pc > 0)  pStk.push(`PC:${foundProd.stock_pc.toLocaleString()}`);
+            if (foundProd.stock_kr > 0)  pStk.push(`KR:${foundProd.stock_kr.toLocaleString()}`);
+            if (foundProd.stock_cyp > 0) pStk.push(`CYP:${foundProd.stock_cyp.toLocaleString()}`);
+            if (foundProd.stock_cks > 0) pStk.push(`CKS:${foundProd.stock_cks.toLocaleString()}`);
+            if (pStk.length > 0) stkWhSubLine = `<div style="font-size:7.2px; color:#1e3a2f; line-height:1.1; margin-bottom:2px;">${pStk.join(' | ')}</div>`;
           }
 
           const salesCol = (it.s68Big !== undefined) ? `
@@ -2810,7 +2801,6 @@
             histText = `<div style="margin-top:1.5px; padding-top:1.5px; border-top:1px dashed #bbb; font-size:7.8px; color:#333;">ย้อนหลัง: ${getM(1)} | ${getM(2)} ${it.unitBig}</div>`;
           }
 
-          // สถานะใต้ Forecast
           let stockStatusHtml = '';
           if (foundProd) {
             const stObj = getStatusObj(foundProd);
@@ -2837,7 +2827,6 @@
           `;
         }
 
-        // รวม สั่ง (ใหญ่ / ย่อย) + แถม (ใหญ่ / ย่อย) ในช่องเดียวกัน
         const freeBig = it.freeBigQty || 0;
         const freeSub = Math.round(freeBig * mul);
         const orderAndFreeHtml = `
@@ -2852,7 +2841,6 @@
           ` : ''}
         `;
 
-        // รวม @ราคาต่อหน่วย + มูลค่ารวม ในช่องเดียวกัน
         const priceAndTotalHtml = `
           ${it.unitPrice > 0 ? `<div style="font-size:8px; color:#555;">@${fmtZero(it.unitPrice)}</div>` : ''}
           <div style="font-weight:bold; font-size:${isDetail ? '9.5px' : '10.5px'};">${fmtZero(it.val)}</div>
@@ -2910,7 +2898,6 @@
           .doc-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #4A3B32; padding-bottom: 4px; margin-bottom: 6px; }
           .meta-box { background: #FAF8F5; border: 1px solid #D5CDBF; border-radius: 6px; padding: 6px 8px; margin-bottom: 6px; font-size: ${isDetail ? '9.5px' : '10.5px'}; }
           .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 12px; }
-          .meta-summary { margin-top: 5px; padding-top: 5px; border-top: 1px dashed #D5CDBF; display: flex; justify-content: space-between; gap: 8px; font-size: ${isDetail ? '9px' : '10px'}; }
           table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 6px; }
           th, td { border: 1px solid #aaa; padding: ${isDetail ? '2.5px 3.5px' : '4px 5px'}; vertical-align: top; word-wrap: break-word; font-size: ${isDetail ? '9px' : '10px'}; }
           th { background: #E8E3D7 !important; color: #000 !important; font-weight: 700; text-align: center; }
@@ -2955,6 +2942,7 @@
                 </div>
               </div>
             </div>
+          </div>
 
           <table>
             <thead>${finalHeaderHtml}</thead>
@@ -2994,6 +2982,15 @@
       `);
       win.document.close();
     }
+
+    function approveAllInDoc(docId) {
+      const doc = apoDocumentsList.find(d => d.docId === docId);
+      if (!doc) return;
+      doc.items.forEach(it => { it.approvalStatus = 'APPROVED'; it.rejectReason = ''; });
+      persistAPODocuments();
+      renderAPOList();
+    }
+    
     function deleteAPODoc(docId) {
       if (!confirm(`ต้องการลบเอกสาร ${docId} ออกจากรายการใช่หรือไม่?`)) return;
       apoDocumentsList = apoDocumentsList.filter(d => d.docId !== docId);
