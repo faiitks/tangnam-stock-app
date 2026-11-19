@@ -2505,10 +2505,14 @@
                 <button onclick="event.stopPropagation(); exportPDF_APO('${doc.docId}')" class="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-800 border border-red-300 text-xs font-semibold shadow-2xs" title="พิมพ์ใบขออนุมัติสั่งซื้อ (PDF)">
                   🖨️ พิมพ์ใบ APO
                 </button>
-                <button class="px-2.5 py-1 rounded-lg bg-cream-200 text-earth-800 text-xs font-semibold">
-                  ${isExpanded ? '▲ ซ่อน' : '▼ ดูรายละเอียด'}
-                </button>
-              </div>
+                <div class="inline-flex rounded-lg border border-red-300 bg-red-50 overflow-hidden shadow-2xs" onclick="event.stopPropagation()">
+  <button onclick="exportPDF_APO('${doc.docId}', 'summary')" class="px-2 py-1 text-red-800 hover:bg-red-100 text-[11px] font-semibold border-r border-red-200" title="พิมพ์ใบ APO แบบสรุป (แนวตั้ง)">
+    🖨️ แบบสรุป
+  </button>
+  <button onclick="exportPDF_APO('${doc.docId}', 'detail')" class="px-2 py-1 text-red-950 hover:bg-red-100 text-[11px] font-semibold" title="พิมพ์ใบ APO แสดงรายละเอียดยอดขายและพยากรณ์ (แนวนอน)">
+    📊 แสดงรายละเอียด
+  </button>
+</div>         
             </div>
 
             ${isExpanded ? `
@@ -2538,10 +2542,14 @@
                     <button onclick="exportPDF_APO('${doc.docId}')" class="px-3 py-1 rounded bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-2xs">
                       🖨️ พิมพ์ใบ APO (PDF)
                     </button>
-                    <button onclick="approveAllInDoc('${doc.docId}')" class="px-3 py-1 rounded bg-leaf-100 hover:bg-leaf-200 text-leaf-900 border border-leaf-300 text-xs font-semibold">
-                      ✓ เลือกอนุมัติทั้งหมด
-                    </button>
-                    <button onclick="deleteAPODoc('${doc.docId}')" class="px-2.5 py-1 rounded bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs">
+                    <div class="inline-flex rounded-lg overflow-hidden shadow-2xs">
+  <button onclick="exportPDF_APO('${doc.docId}', 'summary')" class="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold border-r border-red-500">
+    🖨️ พิมพ์แบบสรุป
+  </button>
+  <button onclick="exportPDF_APO('${doc.docId}', 'detail')" class="px-2.5 py-1 bg-red-800 hover:bg-red-900 text-white text-xs font-semibold">
+    📊 พิมพ์แสดงรายละเอียด
+  </button>
+</div>                    <button onclick="deleteAPODoc('${doc.docId}')" class="px-2.5 py-1 rounded bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs">
                       ลบใบนี้
                     </button>
                   </div>
@@ -2667,12 +2675,14 @@
     }
 
     // พิมพ์ใบขออนุมัติสั่งซื้อ (APO) เป็น PDF (A4 แนวตั้ง พร้อมเครดิตและหมายเหตุเอกสาร)
-    function exportPDF_APO(docId) {
+    function exportPDF_APO(docId, mode = 'summary') {
       const doc = apoDocumentsList.find(d => d.docId === docId);
       if (!doc) return alert("ไม่พบข้อมูลเอกสาร APO");
 
+      const isDetail = mode === 'detail';
       const now = new Date();
       const printTime = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} น.`;
+      const mShort = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 
       let netApprovedVal = 0;
       let rowsHtml = '';
@@ -2689,10 +2699,63 @@
 
         const noteText = isRejected ? (it.rejectReason || '') : (it.notes || '');
 
+        // สร้างคอลัมน์รายละเอียด (ยอดขาย 68/69 & YOY และ คงเหลือ & พยากรณ์) เฉพาะโหมดแสดงรายละเอียด
+        let detailColsHtml = '';
+        if (isDetail) {
+          const yoySign = (it.yoyPct || 0) >= 0 ? '+' : '';
+          const yoyColor = (it.yoyPct || 0) >= 0 ? '#166534' : '#dc2626';
+          const salesCol = (it.s68Big !== undefined) ? `
+            ปี 68: <b>${it.s68Big > 0 ? `${it.s68Big.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:8.5px; color:#555;">${it.s68Sub > 0 ? `(${it.s68Sub.toLocaleString()})` : ''}</span><br>
+            ปี 69: <b>${it.s69Big > 0 ? `${it.s69Big.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:8.5px; color:#555;">${it.s69Sub > 0 ? `(${it.s69Sub.toLocaleString()})` : ''}</span><br>
+            <b style="color:${yoyColor};">YOY: ${yoySign}${it.yoyPct}%</b>
+          ` : '-';
+
+          const mul = it.mul || 1;
+          const s69Sub = it.s69Sub || 0;
+          const dynFcSub = Math.round((s69Sub / 10) * apoForecastMonths);
+          const dynFcBig = Math.ceil(dynFcSub / mul);
+
+          // ดึงยอดขายย้อนหลัง 2 เดือนถัดไป
+          let histText = '';
+          let m68_tn = it.m68_tn, m68_cks = it.m68_cks, m69_tn = it.m69_tn, m69_cks = it.m69_cks;
+          if (!m68_tn && rawProducts.length > 0) {
+            const found = rawProducts.find(p => p.code === it.code || p.name === it.name);
+            if (found) {
+              m68_tn = found.monthly68_tn; m68_cks = found.monthly68_cks;
+              m69_tn = found.monthly69_tn; m69_cks = found.monthly69_cks;
+            }
+          }
+          if (m68_tn) {
+            const getM = (offset) => {
+              const targetM = (latestMonthIndex + offset) % 12;
+              const isNextYear = (latestMonthIndex + offset) >= 12;
+              const yr = isNextYear ? '69' : '68';
+              const subVal = isNextYear
+                ? ((m69_tn[targetM] || 0) + (m69_cks[targetM] || 0))
+                : ((m68_tn[targetM] || 0) + (m68_cks[targetM] || 0));
+              const bigVal = Math.ceil(subVal / mul);
+              return `${mShort[targetM]}${yr}: <b>${bigVal > 0 ? bigVal.toLocaleString() : '0'}</b>`;
+            };
+            histText = `<div style="margin-top:2px; padding-top:2px; border-top:1px dashed #bbb; font-size:8.5px; color:#333;">ย้อนหลัง: ${getM(1)} | ${getM(2)} ${it.unitBig}</div>`;
+          }
+
+          const stockFcCol = (it.stkBig !== undefined) ? `
+            คงเหลือ: <b>${it.stkBig > 0 ? `${it.stkBig.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:8.5px; color:#555;">${it.stkSub > 0 ? `(${it.stkSub.toLocaleString()})` : ''}</span><br>
+            เป้า ${apoForecastMonths} ด.: <b>${dynFcBig > 0 ? `${dynFcBig.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:8.5px; color:#555;">${dynFcSub > 0 ? `(${dynFcSub.toLocaleString()})` : ''}</span>
+            ${histText}
+          ` : '-';
+
+          detailColsHtml = `
+            <td style="background:#FFFBEB; font-size:9px; line-height:1.25;">${salesCol}</td>
+            <td style="background:#F0FDF4; font-size:9px; line-height:1.25;">${stockFcCol}</td>
+          `;
+        }
+
         rowsHtml += `
           <tr style="${isRejected ? 'background:#fef2f2; color:#991b1b; text-decoration:line-through;' : ''}">
             <td style="text-align:center;">${idx + 1}</td>
             <td style="font-weight:bold;">${it.name}</td>
+            ${detailColsHtml}
             <td style="text-align:right; font-weight:bold;">${it.orderBigQty} ${it.unitBig}</td>
             <td style="text-align:right;">${it.subQty.toLocaleString()} ${it.unitSub}</td>
             <td style="text-align:right;">${it.freeBigQty > 0 ? `${it.freeBigQty} ${it.unitBig}` : ''}</td>
@@ -2704,27 +2767,74 @@
         `;
       });
 
+      const tableHeaderHtml = isDetail ? `
+        <tr>
+          <th style="width:3%;">#</th>
+          <th style="width:20%;">รายการสินค้า</th>
+          <th style="width:14%; background:#FEF3C7 !important;">ยอดขาย 68 / 69 & YOY</th>
+          <th style="width:15%; background:#DCFCE7 !important;">คงเหลือ & พยากรณ์ (${apoForecastMonths} ด.)</th>
+          <th style="width:8%;">สั่ง (ใหญ่)</th>
+          <th style="width:8%;">รวม (ย่อย)</th>
+          <th style="width:7%;">แถม (ใหญ่)</th>
+          <th style="width:7%;">ราคา/หน่วย</th>
+          <th style="width:9%;">มูลค่ารวม</th>
+          <th style="width:9%;">พิจารณา / หมายเหตุ</th>
+        </tr>
+      ` : `
+        <tr>
+          <th style="width:4%;">#</th>
+          <th style="width:27%;">รายการสินค้า</th>
+          <th style="width:10%;">สั่ง (ใหญ่)</th>
+          <th style="width:10%;">รวม (ย่อย)</th>
+          <th style="width:9%;">แถม (ใหญ่)</th>
+          <th style="width:9%;">ราคา/หน่วย</th>
+          <th style="width:11%;">มูลค่ารวม</th>
+          <th style="width:9%;">ผลการพิจารณา</th>
+          <th style="width:11%;">หมายเหตุ</th>
+        </tr>
+      `;
+
+      // ปรับหัวตารางให้จำนวนคอลัมน์ตรงกับ tbody ในโหมดแสดงรายละเอียด
+      const finalHeaderHtml = isDetail ? `
+        <tr>
+          <th style="width:3%;">#</th>
+          <th style="width:19%;">รายการสินค้า</th>
+          <th style="width:13%; background:#FEF3C7 !important;">ยอดขาย 68 / 69 & YOY</th>
+          <th style="width:15%; background:#DCFCE7 !important;">คงเหลือ & พยากรณ์ (${apoForecastMonths} ด.)</th>
+          <th style="width:7%;">สั่ง (ใหญ่)</th>
+          <th style="width:8%;">รวม (ย่อย)</th>
+          <th style="width:6%;">แถม (ใหญ่)</th>
+          <th style="width:6%;">ราคา/หน่วย</th>
+          <th style="width:8%;">มูลค่ารวม</th>
+          <th style="width:7%;">พิจารณา</th>
+          <th style="width:8%;">หมายเหตุ</th>
+        </tr>
+      ` : tableHeaderHtml;
+
+      const colSpanTotal = isDetail ? 8 : 6;
+
       const win = window.open('', '_blank');
       win.document.write(`
-        <html><head><title>ใบขออนุมัติสั่งซื้อ ${doc.docId}</title>
+        <html><head><title>ใบขออนุมัติสั่งซื้อ ${doc.docId} (${isDetail ? 'แสดงรายละเอียด' : 'แบบสรุป'})</title>
         <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
-          @page { size: A4 portrait; margin: 8mm; }
+          @page { size: ${isDetail ? 'A4 landscape' : 'A4 portrait'}; margin: ${isDetail ? '5mm' : '8mm'}; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          body { font-family: 'Sarabun', sans-serif; font-size: 11px; color: #111; margin: 0; }
-          .doc-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #4A3B32; padding-bottom: 6px; margin-bottom: 8px; }
-          .meta-box { background: #FAF8F5; border: 1px solid #D5CDBF; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; font-size: 11px; }
-          table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 8px; }
-          th, td { border: 1px solid #aaa; padding: 4px 5px; vertical-align: top; word-wrap: break-word; font-size: 10px; }
+          body { font-family: 'Sarabun', sans-serif; font-size: ${isDetail ? '10px' : '11px'}; color: #111; margin: 0; }
+          .doc-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #4A3B32; padding-bottom: 5px; margin-bottom: 6px; }
+          .meta-box { background: #FAF8F5; border: 1px solid #D5CDBF; border-radius: 6px; padding: 6px 10px; margin-bottom: 6px; display: grid; grid-template-columns: ${isDetail ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 4px 14px; font-size: ${isDetail ? '10px' : '11px'}; }
+          table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 6px; }
+          th, td { border: 1px solid #aaa; padding: ${isDetail ? '3px 4px' : '4px 5px'}; vertical-align: top; word-wrap: break-word; font-size: ${isDetail ? '9.5px' : '10px'}; }
           th { background: #E8E3D7 !important; color: #000 !important; font-weight: 700; text-align: center; }
-          .note-box { border: 1px solid #bbb; background: #FFFBEB; border-radius: 5px; padding: 6px 10px; margin-bottom: 18px; font-size: 10.5px; }
-          .sign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 24px; text-align: center; font-size: 11px; }
-          .sign-line { border-bottom: 1px solid #333; width: 70%; margin: 28px auto 4px auto; }
+          tr { page-break-inside: avoid; }
+          .note-box { border: 1px solid #bbb; background: #FFFBEB; border-radius: 5px; padding: 5px 10px; margin-bottom: 12px; font-size: 10px; }
+          .sign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 16px; text-align: center; font-size: 10.5px; }
+          .sign-line { border-bottom: 1px solid #333; width: 65%; margin: 24px auto 4px auto; }
         </style></head><body>
           <div class="doc-header">
             <div>
-              <div style="font-size:16px; font-weight:bold; color:#4A3B32;">ใบขออนุมัติสั่งซื้อสินค้า (APO)</div>
-              <div style="font-size:11px; color:#555;">บริษัท ตังนำเกษตร จำกัด & บริษัท ชาวเกษตร จำกัด</div>
+              <div style="font-size:15px; font-weight:bold; color:#4A3B32;">ใบขออนุมัติสั่งซื้อสินค้า (APO) ${isDetail ? '- แบบแสดงรายละเอียดประกอบการพิจารณา' : ''}</div>
+              <div style="font-size:10.5px; color:#555;">บริษัท ตังนำเกษตร จำกัด & บริษัท ชาวเกษตร จำกัด</div>
             </div>
             <div style="text-align:right;">
               <div style="font-size:13px; font-weight:bold; color:#386641;">เลขที่: ${doc.docId}</div>
@@ -2735,35 +2845,23 @@
           <div class="meta-box">
             <div><b>บริษัทคู่ค้า:</b> ${doc.supplier}</div>
             <div><b>วันที่สร้างเอกสาร:</b> ${doc.createdAt}</div>
-            <div><b>ผู้ขออนุมัติสั่งซื้อ:</b> ${doc.requester}</div>
             <div><b>เครดิต (Credit Term):</b> ${doc.creditTerm || '-'}</div>
+            <div><b>ผู้ขออนุมัติสั่งซื้อ:</b> ${doc.requester}</div>
             <div><b>สถานะเอกสาร:</b> ${doc.status === 'APPROVED' ? `✓ อนุมัติแล้ว (${doc.approver})` : '⏳ รอพิจารณาอนุมัติ'}</div>
             <div><b>วันที่อนุมัติ:</b> ${doc.approvedAt || '-'}</div>
           </div>
 
           <table>
-            <thead>
-              <tr>
-                <th style="width:4%;">#</th>
-                <th style="width:27%;">รายการสินค้า</th>
-                <th style="width:10%;">สั่ง (ใหญ่)</th>
-                <th style="width:10%;">รวม (ย่อย)</th>
-                <th style="width:9%;">แถม (ใหญ่)</th>
-                <th style="width:9%;">ราคา/หน่วย</th>
-                <th style="width:11%;">มูลค่ารวม</th>
-                <th style="width:9%;">ผลการพิจารณา</th>
-                <th style="width:11%;">หมายเหตุ</th>
-              </tr>
-            </thead>
+            <thead>${finalHeaderHtml}</thead>
             <tbody>${rowsHtml}</tbody>
             <tfoot>
               <tr style="background:#F4F1EA; font-weight:bold;">
-                <td colspan="6" style="text-align:right;">รวมมูลค่าขอสั่งทั้งสิ้น:</td>
+                <td colspan="${colSpanTotal}" style="text-align:right;">รวมมูลค่าขอสั่งทั้งสิ้น:</td>
                 <td style="text-align:right;">${fmtZero(doc.totalValue)}</td>
                 <td colspan="2">บาท</td>
               </tr>
               <tr style="background:#DCFCE7; font-weight:bold; color:#14532d;">
-                <td colspan="6" style="text-align:right;">รวมมูลค่าอนุมัติสั่งซื้อสุทธิ:</td>
+                <td colspan="${colSpanTotal}" style="text-align:right;">รวมมูลค่าอนุมัติสั่งซื้อสุทธิ:</td>
                 <td style="text-align:right;">${fmtZero(netApprovedVal)}</td>
                 <td colspan="2">บาท</td>
               </tr>
@@ -2778,12 +2876,12 @@
             <div>
               <div class="sign-line"></div>
               <div>( ${doc.requester} )</div>
-              <div style="color:#555; font-size:10px;">ผู้ขออนุมัติสั่งซื้อ</div>
+              <div style="color:#555; font-size:9.5px;">ผู้ขออนุมัติสั่งซื้อ</div>
             </div>
             <div>
               <div class="sign-line"></div>
               <div>( ${doc.approver || '......................................................'} )</div>
-              <div style="color:#555; font-size:10px;">ผู้อนุมัติสั่งซื้อ</div>
+              <div style="color:#555; font-size:9.5px;">ผู้อนุมัติสั่งซื้อ</div>
             </div>
           </div>
           <script>window.onload = function() { window.print(); };<\/script>
