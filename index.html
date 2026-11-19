@@ -2745,12 +2745,35 @@
             if (pStk.length > 0) stkWhSubLine = `<div style="font-size:7.2px; color:#1e3a2f; line-height:1.1; margin-bottom:2px;">${pStk.join(' | ')}</div>`;
           }
 
+          // สร้างบรรทัด YOY แยกลูกค้า (TN1-5, TN6, CKS) ตัวบาง เล็ก สีจาง แยกเขียว/แดง
+          let yoySubLine = '';
+          if (foundProd) {
+            const calcYoyTag = (label, v68, v69) => {
+              if (v68 <= 0 && v69 <= 0) return '';
+              const pct = v68 > 0 ? Math.round(((v69 - v68) / v68) * 100) : (v69 > 0 ? 100 : 0);
+              const sign = pct >= 0 ? '+' : '';
+              const cColor = pct >= 0 ? '#15803d' : '#b91c1c';
+              return `<span style="color:${cColor};">${label}:${sign}${pct}%</span>`;
+            };
+
+            const yoyTags = [
+              calcYoyTag('TN1-5', foundProd.sales68_tn_1_5 || 0, foundProd.sales69_tn_1_5 || 0),
+              calcYoyTag('TN6',   foundProd.sales68_tn_6 || 0,   foundProd.sales69_tn_6 || 0),
+              calcYoyTag('CKS',   foundProd.sales68_cks || 0,    foundProd.sales69_cks || 0)
+            ].filter(Boolean);
+
+            if (yoyTags.length > 0) {
+              yoySubLine = `<div style="font-size:7.2px; font-weight:normal; opacity:0.8; line-height:1.15; margin-top:1px;">${yoyTags.join(' | ')}</div>`;
+            }
+          }
+
           const salesCol = (it.s68Big !== undefined) ? `
             <div>ปี 68: <b>${it.s68Big > 0 ? `${it.s68Big.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:7.8px; color:#555;">${it.s68Sub > 0 ? `(${it.s68Sub.toLocaleString()})` : ''}</span></div>
             ${b68SubLine}
             <div>ปี 69: <b>${it.s69Big > 0 ? `${it.s69Big.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:7.8px; color:#555;">${it.s69Sub > 0 ? `(${it.s69Sub.toLocaleString()})` : ''}</span></div>
             ${b69SubLine}
             <div style="margin-top:1px;"><b style="color:${yoyColor};">YOY: ${yoySign}${it.yoyPct}%</b></div>
+            ${yoySubLine}
           ` : '-';
 
           const s69Sub = it.s69Sub || 0;
