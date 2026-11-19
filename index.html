@@ -2744,7 +2744,7 @@
 
           const stockFcCol = (it.stkBig !== undefined) ? `
             คงเหลือ: <b>${it.stkBig > 0 ? `${it.stkBig.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:8.5px; color:#555;">${it.stkSub > 0 ? `(${it.stkSub.toLocaleString()})` : ''}</span><br>
-            เป้า ${apoForecastMonths} ด.: <b>${dynFcBig > 0 ? `${dynFcBig.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:8.5px; color:#555;">${dynFcSub > 0 ? `(${dynFcSub.toLocaleString()})` : ''}</span>
+            Forecast ${apoForecastMonths} m.: <b>${dynFcBig > 0 ? `${dynFcBig.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:8.5px; color:#555;">${dynFcSub > 0 ? `(${dynFcSub.toLocaleString()})` : ''}</span>
             ${histText}
           ` : '-';
 
