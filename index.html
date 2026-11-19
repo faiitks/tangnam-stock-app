@@ -2805,10 +2805,17 @@
           if (foundProd) {
             const stObj = getStatusObj(foundProd);
             const no3M = getNoSales3MStatus(foundProd);
+            const stkSub = (foundProd.stock_pc || 0) + (foundProd.stock_kr || 0) + (foundProd.stock_cyp || 0) + (foundProd.stock_cks || 0);
+            const cov = getSeasonalStockCoverage(foundProd, stkSub, 'ALL');
+            const covLine = cov
+              ? `<div style="font-size:7.3px; color:#1e3a2f; margin-top:1px; line-height:1.15;"><b>${cov.monthsText}</b> <span style="color:#555;">${cov.dateText}</span></div>`
+              : '';
+
             stockStatusHtml = `
               <div style="margin-top:2px; padding-top:1.5px; border-top:1px solid #bbf7d0; font-size:7.8px;">
                 <span style="font-weight:bold;">${stObj.label}</span>
                 ${no3M.isNoSales3M ? `<span style="margin-left:2px; background:#fee2e2; color:#991b1b; padding:0.5px 2px; border-radius:2px; font-weight:bold;">⚠️ ไม่ขาย 3 ด.</span>` : ''}
+                ${covLine}
               </div>
             `;
           }
