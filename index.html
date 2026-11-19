@@ -2694,6 +2694,7 @@
       let supTotalSkuCount = 0;
       let rowsHtml = '';
 
+      // คำนวณยอดขาย 68, 69 และมูลค่าคงเหลือ จาก "สินค้าทั้งหมด" ของบริษัทคู่ค้านั้นๆ
       if (rawProducts.length > 0 && doc.supplier) {
         const targetSup = doc.supplier.trim();
         rawProducts.forEach(p => {
@@ -2741,6 +2742,7 @@
             if (foundProd.sales69_cks > 0)    p69.push(`CKS:${foundProd.sales69_cks.toLocaleString()}`);
             if (p69.length > 0) b69SubLine = `<div style="font-size:7.2px; color:#555; line-height:1.1; margin-bottom:2px;">${p69.join(' | ')}</div>`;
 
+            // YOY แยกลูกค้า ตัวบาง เล็ก สีจาง แยกเขียว/แดง
             const calcYoyTag = (label, v68, v69) => {
               if (v68 <= 0 && v69 <= 0) return '';
               const pct = v68 > 0 ? Math.round(((v69 - v68) / v68) * 100) : (v69 > 0 ? 100 : 0);
@@ -2759,6 +2761,7 @@
               yoySubLine = `<div style="font-size:7.2px; font-weight:normal; opacity:0.8; line-height:1.15; margin-top:1px;">${yoyTags.join(' | ')}</div>`;
             }
 
+            // แยกคลัง PC, KR, CYP, CKS
             const pStk = [];
             if (foundProd.stock_pc > 0)  pStk.push(`PC:${foundProd.stock_pc.toLocaleString()}`);
             if (foundProd.stock_kr > 0)  pStk.push(`KR:${foundProd.stock_kr.toLocaleString()}`);
@@ -2801,12 +2804,13 @@
             histText = `<div style="margin-top:1.5px; padding-top:1.5px; border-top:1px dashed #bbb; font-size:7.8px; color:#333;">ย้อนหลัง: ${getM(1)} | ${getM(2)} ${it.unitBig}</div>`;
           }
 
+          // สถานะ + (ขายได้อีก x.x เดือน) ต่อท้ายบรรทัดเดียวกัน ตัวเล็ก บางกว่า
           let stockStatusHtml = '';
           if (foundProd) {
             const stObj = getStatusObj(foundProd);
             const no3M = getNoSales3MStatus(foundProd);
             const stkSub = (foundProd.stock_pc || 0) + (foundProd.stock_kr || 0) + (foundProd.stock_cyp || 0) + (foundProd.stock_cks || 0);
-            cconst cov = getSeasonalStockCoverage(foundProd, stkSub, 'ALL');
+            const cov = getSeasonalStockCoverage(foundProd, stkSub, 'ALL');
             const covTag = (cov && cov.monthsText)
               ? `<span style="font-size:7px; font-weight:normal; color:#374151; margin-left:3px;">(${cov.monthsText})</span>`
               : '';
@@ -2833,6 +2837,7 @@
           `;
         }
 
+        // รวม สั่ง (ใหญ่ / ย่อย) + แถม (ใหญ่ / ย่อย) ในช่องเดียวกัน
         const freeBig = it.freeBigQty || 0;
         const freeSub = Math.round(freeBig * mul);
         const orderAndFreeHtml = `
@@ -2847,6 +2852,7 @@
           ` : ''}
         `;
 
+        // รวม @ราคาต่อหน่วย + มูลค่ารวม ในช่องเดียวกัน
         const priceAndTotalHtml = `
           ${it.unitPrice > 0 ? `<div style="font-size:8px; color:#555;">@${fmtZero(it.unitPrice)}</div>` : ''}
           <div style="font-weight:bold; font-size:${isDetail ? '9.5px' : '10.5px'};">${fmtZero(it.val)}</div>
