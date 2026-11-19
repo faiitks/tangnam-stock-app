@@ -2756,8 +2756,10 @@
             <td style="text-align:center;">${idx + 1}</td>
             <td style="font-weight:bold;">${it.name}</td>
             ${detailColsHtml}
-            <td style="text-align:right; font-weight:bold;">${it.orderBigQty} ${it.unitBig}</td>
-            <td style="text-align:right;">${it.subQty.toLocaleString()} ${it.unitSub}</td>
+            <td style="text-align:right; line-height:1.2;">
+              <b style="font-size:${isDetail ? '10px' : '10.5px'};">${it.orderBigQty} ${it.unitBig}</b>
+              <div style="font-size:8.5px; color:#555;">(${it.subQty.toLocaleString()} ${it.unitSub})</div>
+            </td>
             <td style="text-align:right;">${it.freeBigQty > 0 ? `${it.freeBigQty} ${it.unitBig}` : ''}</td>
             <td style="text-align:right;">${fmtZero(it.unitPrice)}</td>
             <td style="text-align:right; font-weight:bold;">${fmtZero(it.val)}</td>
@@ -2767,51 +2769,35 @@
         `;
       });
 
-      const tableHeaderHtml = isDetail ? `
-        <tr>
-          <th style="width:3%;">#</th>
-          <th style="width:20%;">รายการสินค้า</th>
-          <th style="width:14%; background:#FEF3C7 !important;">ยอดขาย 68 / 69 & YOY</th>
-          <th style="width:15%; background:#DCFCE7 !important;">คงเหลือ & พยากรณ์ (${apoForecastMonths} ด.)</th>
-          <th style="width:8%;">สั่ง (ใหญ่)</th>
-          <th style="width:8%;">รวม (ย่อย)</th>
-          <th style="width:7%;">แถม (ใหญ่)</th>
-          <th style="width:7%;">ราคา/หน่วย</th>
-          <th style="width:9%;">มูลค่ารวม</th>
-          <th style="width:9%;">พิจารณา / หมายเหตุ</th>
-        </tr>
-      ` : `
+      const tableHeaderHtml = `
         <tr>
           <th style="width:4%;">#</th>
-          <th style="width:27%;">รายการสินค้า</th>
-          <th style="width:10%;">สั่ง (ใหญ่)</th>
-          <th style="width:10%;">รวม (ย่อย)</th>
+          <th style="width:32%;">รายการสินค้า</th>
+          <th style="width:13%;">สั่ง (ใหญ่ / ย่อย)</th>
           <th style="width:9%;">แถม (ใหญ่)</th>
           <th style="width:9%;">ราคา/หน่วย</th>
           <th style="width:11%;">มูลค่ารวม</th>
           <th style="width:9%;">ผลการพิจารณา</th>
-          <th style="width:11%;">หมายเหตุ</th>
+          <th style="width:13%;">หมายเหตุ</th>
         </tr>
       `;
 
-      // ปรับหัวตารางให้จำนวนคอลัมน์ตรงกับ tbody ในโหมดแสดงรายละเอียด
       const finalHeaderHtml = isDetail ? `
         <tr>
           <th style="width:3%;">#</th>
-          <th style="width:19%;">รายการสินค้า</th>
-          <th style="width:13%; background:#FEF3C7 !important;">ยอดขาย 68 / 69 & YOY</th>
-          <th style="width:15%; background:#DCFCE7 !important;">คงเหลือ & พยากรณ์ (${apoForecastMonths} ด.)</th>
-          <th style="width:7%;">สั่ง (ใหญ่)</th>
-          <th style="width:8%;">รวม (ย่อย)</th>
+          <th style="width:22%;">รายการสินค้า</th>
+          <th style="width:14%; background:#FEF3C7 !important;">ยอดขาย 68 / 69 & YOY</th>
+          <th style="width:16%; background:#DCFCE7 !important;">คงเหลือ & พยากรณ์ (${apoForecastMonths} ด.)</th>
+          <th style="width:9%;">สั่ง (ใหญ่ / ย่อย)</th>
           <th style="width:6%;">แถม (ใหญ่)</th>
           <th style="width:6%;">ราคา/หน่วย</th>
           <th style="width:8%;">มูลค่ารวม</th>
           <th style="width:7%;">พิจารณา</th>
-          <th style="width:8%;">หมายเหตุ</th>
+          <th style="width:9%;">หมายเหตุ</th>
         </tr>
       ` : tableHeaderHtml;
 
-      const colSpanTotal = isDetail ? 8 : 6;
+      const colSpanTotal = isDetail ? 7 : 5;
 
       const win = window.open('', '_blank');
       win.document.write(`
