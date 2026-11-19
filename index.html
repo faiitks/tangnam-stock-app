@@ -2688,10 +2688,25 @@
       const mShort = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 
       let netApprovedVal = 0;
+      let netApprovedVal = 0;
       let sumDocSales68Val = 0;
       let sumDocSales69Val = 0;
       let sumDocStockVal   = 0;
+      let supTotalSkuCount = 0;
       let rowsHtml = '';
+
+      // คำนวณยอดขาย 68, 69 และมูลค่าคงเหลือ จาก "สินค้าทั้งหมด" ของบริษัทคู่ค้านั้นๆ
+      if (rawProducts.length > 0 && doc.supplier) {
+        const targetSup = doc.supplier.trim();
+        rawProducts.forEach(p => {
+          if ((p.supplier || '').trim() === targetSup) {
+            sumDocSales68Val += (p.sales68_val || 0);
+            sumDocSales69Val += (p.sales69_val || 0);
+            sumDocStockVal   += (p.stock_val || 0);
+            supTotalSkuCount++;
+          }
+        });
+      }
 
       doc.items.forEach((it, idx) => {
         const stCode = it.approvalStatus || 'APPROVED';
@@ -2705,12 +2720,6 @@
         const foundProd = rawProducts.length > 0
           ? rawProducts.find(p => p.code === it.code || p.name === it.name)
           : null;
-
-        if (foundProd) {
-          sumDocSales68Val += (foundProd.sales68_val || 0);
-          sumDocSales69Val += (foundProd.sales69_val || 0);
-          sumDocStockVal   += (foundProd.stock_val || 0);
-        }
 
         // คอลัมน์รายละเอียด (ยอดขาย 68/69 & YOY และ คงเหลือแยกคลัง PC/KR/CYP/CKS & พยากรณ์ + สถานะ)
         let detailColsHtml = '';
