@@ -2701,33 +2701,35 @@
         else if (stCode === 'INCREASE') stLabel = '▲ ปรับเพิ่มจำนวน';
 
         const noteText = isRejected ? (it.rejectReason || '') : (it.notes || '');
+        const mul = it.mul || 1;
 
-        // สร้างคอลัมน์รายละเอียด (ยอดขาย 68/69 & YOY และ คงเหลือ & พยากรณ์) เฉพาะโหมดแสดงรายละเอียด
+        // คอลัมน์รายละเอียด (ยอดขาย 68/69 & YOY และ คงเหลือ & พยากรณ์ + สถานะใต้ Forecast)
         let detailColsHtml = '';
         if (isDetail) {
           const yoySign = (it.yoyPct || 0) >= 0 ? '+' : '';
           const yoyColor = (it.yoyPct || 0) >= 0 ? '#166534' : '#dc2626';
           const salesCol = (it.s68Big !== undefined) ? `
-            ปี 68: <b>${it.s68Big > 0 ? `${it.s68Big.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:8.5px; color:#555;">${it.s68Sub > 0 ? `(${it.s68Sub.toLocaleString()})` : ''}</span><br>
-            ปี 69: <b>${it.s69Big > 0 ? `${it.s69Big.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:8.5px; color:#555;">${it.s69Sub > 0 ? `(${it.s69Sub.toLocaleString()})` : ''}</span><br>
+            ปี 68: <b>${it.s68Big > 0 ? `${it.s68Big.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:8px; color:#555;">${it.s68Sub > 0 ? `(${it.s68Sub.toLocaleString()})` : ''}</span><br>
+            ปี 69: <b>${it.s69Big > 0 ? `${it.s69Big.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:8px; color:#555;">${it.s69Sub > 0 ? `(${it.s69Sub.toLocaleString()})` : ''}</span><br>
             <b style="color:${yoyColor};">YOY: ${yoySign}${it.yoyPct}%</b>
           ` : '-';
 
-          const mul = it.mul || 1;
           const s69Sub = it.s69Sub || 0;
           const dynFcSub = Math.round((s69Sub / 10) * apoForecastMonths);
           const dynFcBig = Math.ceil(dynFcSub / mul);
 
-          // ดึงยอดขายย้อนหลัง 2 เดือนถัดไป
-          let histText = '';
+          // ดึงข้อมูลสินค้าจาก rawProducts เพื่อหา ย้อนหลัง 2 เดือน + สถานะสต็อค
           let m68_tn = it.m68_tn, m68_cks = it.m68_cks, m69_tn = it.m69_tn, m69_cks = it.m69_cks;
-          if (!m68_tn && rawProducts.length > 0) {
-            const found = rawProducts.find(p => p.code === it.code || p.name === it.name);
-            if (found) {
-              m68_tn = found.monthly68_tn; m68_cks = found.monthly68_cks;
-              m69_tn = found.monthly69_tn; m69_cks = found.monthly69_cks;
+          let foundProd = null;
+          if (rawProducts.length > 0) {
+            foundProd = rawProducts.find(p => p.code === it.code || p.name === it.name);
+            if (!m68_tn && foundProd) {
+              m68_tn = foundProd.monthly68_tn; m68_cks = foundProd.monthly68_cks;
+              m69_tn = foundProd.monthly69_tn; m69_cks = foundProd.monthly69_cks;
             }
           }
+
+          let histText = '';
           if (m68_tn) {
             const getM = (offset) => {
               const targetM = (latestMonthIndex + offset) % 12;
@@ -2739,95 +2741,119 @@
               const bigVal = Math.ceil(subVal / mul);
               return `${mShort[targetM]}${yr}: <b>${bigVal > 0 ? bigVal.toLocaleString() : '0'}</b>`;
             };
-            histText = `<div style="margin-top:2px; padding-top:2px; border-top:1px dashed #bbb; font-size:8.5px; color:#333;">ย้อนหลัง: ${getM(1)} | ${getM(2)} ${it.unitBig}</div>`;
+            histText = `<div style="margin-top:1.5px; padding-top:1.5px; border-top:1px dashed #bbb; font-size:8px; color:#333;">ย้อนหลัง: ${getM(1)} | ${getM(2)} ${it.unitBig}</div>`;
+          }
+
+          // สถานะใต้ Forecast
+          let stockStatusHtml = '';
+          if (foundProd) {
+            const stObj = getStatusObj(foundProd);
+            const no3M = getNoSales3MStatus(foundProd);
+            stockStatusHtml = `
+              <div style="margin-top:2px; padding-top:1.5px; border-top:1px solid #bbf7d0; font-size:8px;">
+                <span style="font-weight:bold;">${stObj.label}</span>
+                ${no3M.isNoSales3M ? `<span style="margin-left:2px; background:#fee2e2; color:#991b1b; padding:0.5px 2px; border-radius:2px; font-weight:bold;">⚠️ ไม่ขาย 3 ด.</span>` : ''}
+              </div>
+            `;
           }
 
           const stockFcCol = (it.stkBig !== undefined) ? `
-            คงเหลือ: <b>${it.stkBig > 0 ? `${it.stkBig.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:8.5px; color:#555;">${it.stkSub > 0 ? `(${it.stkSub.toLocaleString()})` : ''}</span><br>
-            Forecast ${apoForecastMonths} m.: <b>${dynFcBig > 0 ? `${dynFcBig.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:8.5px; color:#555;">${dynFcSub > 0 ? `(${dynFcSub.toLocaleString()})` : ''}</span>
+            คงเหลือ: <b>${it.stkBig > 0 ? `${it.stkBig.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:8px; color:#555;">${it.stkSub > 0 ? `(${it.stkSub.toLocaleString()})` : ''}</span><br>
+            เป้า ${apoForecastMonths} ด.: <b>${dynFcBig > 0 ? `${dynFcBig.toLocaleString()} ${it.unitBig}` : '0'}</b> <span style="font-size:8px; color:#555;">${dynFcSub > 0 ? `(${dynFcSub.toLocaleString()})` : ''}</span>
             ${histText}
+            ${stockStatusHtml}
           ` : '-';
 
           detailColsHtml = `
-            <td style="background:#FFFBEB; font-size:9px; line-height:1.25;">${salesCol}</td>
-            <td style="background:#F0FDF4; font-size:9px; line-height:1.25;">${stockFcCol}</td>
+            <td style="background:#FFFBEB; font-size:8.5px; line-height:1.2;">${salesCol}</td>
+            <td style="background:#F0FDF4; font-size:8.5px; line-height:1.2;">${stockFcCol}</td>
           `;
         }
+
+        // รวม สั่ง (ใหญ่ / ย่อย) + แถม (ใหญ่ / ย่อย) ในช่องเดียวกัน
+        const freeBig = it.freeBigQty || 0;
+        const freeSub = Math.round(freeBig * mul);
+        const orderAndFreeHtml = `
+          <div>
+            <b style="font-size:${isDetail ? '9.5px' : '10.5px'};">${it.orderBigQty} ${it.unitBig}</b>
+            <span style="font-size:8px; color:#555;">(${it.subQty.toLocaleString()} ${it.unitSub})</span>
+          </div>
+          ${freeBig > 0 ? `
+            <div style="margin-top:1.5px; padding-top:1.5px; border-top:1px dashed #ccc; font-size:8.5px; color:#166534; font-weight:600;">
+              +แถม ${freeBig} ${it.unitBig} <span style="font-weight:normal; color:#555;">(${freeSub.toLocaleString()} ${it.unitSub})</span>
+            </div>
+          ` : ''}
+        `;
+
+        // รวม @ราคาต่อหน่วย + มูลค่ารวม ในช่องเดียวกัน
+        const priceAndTotalHtml = `
+          ${it.unitPrice > 0 ? `<div style="font-size:8.5px; color:#555;">@${fmtZero(it.unitPrice)}</div>` : ''}
+          <div style="font-weight:bold; font-size:${isDetail ? '9.5px' : '10.5px'};">${fmtZero(it.val)}</div>
+        `;
 
         rowsHtml += `
           <tr style="${isRejected ? 'background:#fef2f2; color:#991b1b; text-decoration:line-through;' : ''}">
             <td style="text-align:center;">${idx + 1}</td>
             <td style="font-weight:bold;">${it.name}</td>
             ${detailColsHtml}
-            <td style="text-align:right; line-height:1.2;">
-              <b style="font-size:${isDetail ? '10px' : '10.5px'};">${it.orderBigQty} ${it.unitBig}</b>
-              <div style="font-size:8.5px; color:#555;">(${it.subQty.toLocaleString()} ${it.unitSub})</div>
-            </td>
-            <td style="text-align:right;">${it.freeBigQty > 0 ? `${it.freeBigQty} ${it.unitBig}` : ''}</td>
-            <td style="text-align:right;">${fmtZero(it.unitPrice)}</td>
-            <td style="text-align:right; font-weight:bold;">${fmtZero(it.val)}</td>
-            <td style="text-align:center; font-size:9px; font-weight:bold;">${stLabel}</td>
-            <td style="font-size:9px;">${noteText}</td>
+            <td style="text-align:right; line-height:1.15;">${orderAndFreeHtml}</td>
+            <td style="text-align:right; line-height:1.15;">${priceAndTotalHtml}</td>
+            <td style="text-align:center; font-size:8.5px; font-weight:bold;">${stLabel}</td>
+            <td style="font-size:8.5px;">${noteText}</td>
           </tr>
         `;
       });
 
-      const tableHeaderHtml = `
+      const finalHeaderHtml = isDetail ? `
+        <tr>
+          <th style="width:3.5%;">#</th>
+          <th style="width:22.5%;">รายการสินค้า</th>
+          <th style="width:15%; background:#FEF3C7 !important;">ยอดขาย 68 / 69 & YOY</th>
+          <th style="width:18%; background:#DCFCE7 !important;">คงเหลือ & พยากรณ์ (${apoForecastMonths} ด.)</th>
+          <th style="width:12%;">สั่ง / แถม<br>(ใหญ่ / ย่อย)</th>
+          <th style="width:10%;">ราคา/หน่วย<br>& มูลค่ารวม</th>
+          <th style="width:8.5%;">พิจารณา</th>
+          <th style="width:10.5%;">หมายเหตุ</th>
+        </tr>
+      ` : `
         <tr>
           <th style="width:4%;">#</th>
-          <th style="width:32%;">รายการสินค้า</th>
-          <th style="width:13%;">สั่ง (ใหญ่ / ย่อย)</th>
-          <th style="width:9%;">แถม (ใหญ่)</th>
-          <th style="width:9%;">ราคา/หน่วย</th>
-          <th style="width:11%;">มูลค่ารวม</th>
-          <th style="width:9%;">ผลการพิจารณา</th>
-          <th style="width:13%;">หมายเหตุ</th>
+          <th style="width:35%;">รายการสินค้า</th>
+          <th style="width:16%;">สั่ง / แถม<br>(ใหญ่ / ย่อย)</th>
+          <th style="width:13%;">ราคา/หน่วย<br>& มูลค่ารวม</th>
+          <th style="width:10%;">พิจารณา</th>
+          <th style="width:22%;">หมายเหตุ</th>
         </tr>
       `;
 
-      const finalHeaderHtml = isDetail ? `
-        <tr>
-          <th style="width:3%;">#</th>
-          <th style="width:22%;">รายการสินค้า</th>
-          <th style="width:14%; background:#FEF3C7 !important;">ยอดขาย 68 / 69 & YOY</th>
-          <th style="width:16%; background:#DCFCE7 !important;">คงเหลือ & พยากรณ์ (${apoForecastMonths} ด.)</th>
-          <th style="width:9%;">สั่ง (ใหญ่ / ย่อย)</th>
-          <th style="width:6%;">แถม (ใหญ่)</th>
-          <th style="width:6%;">ราคา/หน่วย</th>
-          <th style="width:8%;">มูลค่ารวม</th>
-          <th style="width:7%;">พิจารณา</th>
-          <th style="width:9%;">หมายเหตุ</th>
-        </tr>
-      ` : tableHeaderHtml;
-
-      const colSpanTotal = isDetail ? 7 : 5;
+      const colSpanLabel = isDetail ? 5 : 3;
 
       const win = window.open('', '_blank');
       win.document.write(`
         <html><head><title>ใบขออนุมัติสั่งซื้อ ${doc.docId} (${isDetail ? 'แสดงรายละเอียด' : 'แบบสรุป'})</title>
         <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
-          @page { size: ${isDetail ? 'A4 landscape' : 'A4 portrait'}; margin: ${isDetail ? '5mm' : '8mm'}; }
+          @page { size: A4 portrait; margin: ${isDetail ? '5mm' : '8mm'}; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          body { font-family: 'Sarabun', sans-serif; font-size: ${isDetail ? '10px' : '11px'}; color: #111; margin: 0; }
-          .doc-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #4A3B32; padding-bottom: 5px; margin-bottom: 6px; }
-          .meta-box { background: #FAF8F5; border: 1px solid #D5CDBF; border-radius: 6px; padding: 6px 10px; margin-bottom: 6px; display: grid; grid-template-columns: ${isDetail ? '1fr 1fr 1fr' : '1fr 1fr'}; gap: 4px 14px; font-size: ${isDetail ? '10px' : '11px'}; }
+          body { font-family: 'Sarabun', sans-serif; font-size: ${isDetail ? '9.5px' : '11px'}; color: #111; margin: 0; }
+          .doc-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #4A3B32; padding-bottom: 4px; margin-bottom: 6px; }
+          .meta-box { background: #FAF8F5; border: 1px solid #D5CDBF; border-radius: 6px; padding: 6px 8px; margin-bottom: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: ${isDetail ? '9.5px' : '10.5px'}; }
           table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 6px; }
-          th, td { border: 1px solid #aaa; padding: ${isDetail ? '3px 4px' : '4px 5px'}; vertical-align: top; word-wrap: break-word; font-size: ${isDetail ? '9.5px' : '10px'}; }
+          th, td { border: 1px solid #aaa; padding: ${isDetail ? '2.5px 3.5px' : '4px 5px'}; vertical-align: top; word-wrap: break-word; font-size: ${isDetail ? '9px' : '10px'}; }
           th { background: #E8E3D7 !important; color: #000 !important; font-weight: 700; text-align: center; }
           tr { page-break-inside: avoid; }
-          .note-box { border: 1px solid #bbb; background: #FFFBEB; border-radius: 5px; padding: 5px 10px; margin-bottom: 12px; font-size: 10px; }
-          .sign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 16px; text-align: center; font-size: 10.5px; }
-          .sign-line { border-bottom: 1px solid #333; width: 65%; margin: 24px auto 4px auto; }
+          .note-box { border: 1px solid #bbb; background: #FFFBEB; border-radius: 5px; padding: 5px 8px; margin-bottom: 12px; font-size: 9.5px; }
+          .sign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 14px; text-align: center; font-size: 10px; }
+          .sign-line { border-bottom: 1px solid #333; width: 65%; margin: 22px auto 4px auto; }
         </style></head><body>
           <div class="doc-header">
             <div>
-              <div style="font-size:15px; font-weight:bold; color:#4A3B32;">ใบขออนุมัติสั่งซื้อสินค้า (APO) ${isDetail ? '- แบบแสดงรายละเอียดประกอบการพิจารณา' : ''}</div>
-              <div style="font-size:10.5px; color:#555;">บริษัท ตังนำเกษตร จำกัด & บริษัท ชาวเกษตร จำกัด</div>
+              <div style="font-size:14px; font-weight:bold; color:#4A3B32;">ใบขออนุมัติสั่งซื้อสินค้า (APO) ${isDetail ? '- แสดงรายละเอียด' : ''}</div>
+              <div style="font-size:10px; color:#555;">บริษัท ตังนำเกษตร จำกัด & บริษัท ชาวเกษตร จำกัด</div>
             </div>
             <div style="text-align:right;">
-              <div style="font-size:13px; font-weight:bold; color:#386641;">เลขที่: ${doc.docId}</div>
-              <div style="font-size:9.5px; color:#555;">พิมพ์เมื่อ: ${printTime}</div>
+              <div style="font-size:12.5px; font-weight:bold; color:#386641;">เลขที่: ${doc.docId}</div>
+              <div style="font-size:9px; color:#555;">พิมพ์เมื่อ: ${printTime}</div>
             </div>
           </div>
 
@@ -2845,12 +2871,12 @@
             <tbody>
               ${rowsHtml}
               <tr style="background:#F4F1EA; font-weight:bold;">
-                <td colspan="${colSpanTotal}" style="text-align:right;">รวมมูลค่าขอสั่งทั้งสิ้น:</td>
+                <td colspan="${colSpanLabel}" style="text-align:right;">รวมมูลค่าขอสั่งทั้งสิ้น:</td>
                 <td style="text-align:right;">${fmtZero(doc.totalValue)}</td>
                 <td colspan="2">บาท</td>
               </tr>
               <tr style="background:#DCFCE7; font-weight:bold; color:#14532d;">
-                <td colspan="${colSpanTotal}" style="text-align:right;">รวมมูลค่าอนุมัติสั่งซื้อสุทธิ:</td>
+                <td colspan="${colSpanLabel}" style="text-align:right;">รวมมูลค่าอนุมัติสั่งซื้อสุทธิ:</td>
                 <td style="text-align:right;">${fmtZero(netApprovedVal)}</td>
                 <td colspan="2">บาท</td>
               </tr>
@@ -2865,12 +2891,12 @@
             <div>
               <div class="sign-line"></div>
               <div>( ${doc.requester} )</div>
-              <div style="color:#555; font-size:9.5px;">ผู้ขออนุมัติสั่งซื้อ</div>
+              <div style="color:#555; font-size:9px;">ผู้ขออนุมัติสั่งซื้อ</div>
             </div>
             <div>
               <div class="sign-line"></div>
               <div>( ${doc.approver || '......................................................'} )</div>
-              <div style="color:#555; font-size:9.5px;">ผู้อนุมัติสั่งซื้อ</div>
+              <div style="color:#555; font-size:9px;">ผู้อนุมัติสั่งซื้อ</div>
             </div>
           </div>
           <script>window.onload = function() { window.print(); };<\/script>
@@ -2878,88 +2904,6 @@
       `);
       win.document.close();
     }
-
-    function approveAllInDoc(docId) {
-      const doc = apoDocumentsList.find(d => d.docId === docId);
-      if (!doc) return;
-      doc.items.forEach(it => { it.approvalStatus = 'APPROVED'; it.rejectReason = ''; });
-      persistAPODocuments();
-      renderAPOList();
-    }
-
-    function setAPOItemStatus(docId, idx, status) {
-      const doc = apoDocumentsList.find(d => d.docId === docId);
-      if (!doc || !doc.items[idx]) return;
-      doc.items[idx].approvalStatus = status;
-      persistAPODocuments();
-      renderAPOList();
-    }
-
-    function modifyAPOItemQty(docId, idx, newBigQty) {
-      const doc = apoDocumentsList.find(d => d.docId === docId);
-      if (!doc || !doc.items[idx]) return;
-      const item = doc.items[idx];
-      const qty = parseFloat(newBigQty) || 0;
-      item.orderBigQty = qty;
-      item.subQty = Math.round(qty * (item.mul || 1));
-      item.val = item.subQty * (item.unitPrice || 0);
-      persistAPODocuments();
-      renderAPOList();
-    }
-
-    function setAPOItemReason(docId, idx, reason) {
-      const doc = apoDocumentsList.find(d => d.docId === docId);
-      if (!doc || !doc.items[idx]) return;
-      doc.items[idx].rejectReason = reason;
-      persistAPODocuments();
-    }
-
-    function setAPOItemNotes(docId, idx, notes) {
-      const doc = apoDocumentsList.find(d => d.docId === docId);
-      if (!doc || !doc.items[idx]) return;
-      doc.items[idx].notes = notes;
-      persistAPODocuments();
-    }
-
-    async function submitAPOApproval(docId) {
-      const doc = apoDocumentsList.find(d => d.docId === docId);
-      if (!doc) return;
-
-      const appInput = document.getElementById(`approverName_${docId}`);
-      const approverName = appInput ? appInput.value.trim() : '';
-      if (!approverName) return alert("กรุณาเลือก 'ชื่อผู้อนุมัติ' ก่อนกดยืนยัน");
-
-      const missingReason = doc.items.find(it => it.approvalStatus === 'REJECTED' && !it.rejectReason.trim());
-      if (missingReason) return alert(`กรุณาระบุเหตุผลที่ไม่อนุมัติ สำหรับรายการ: "${missingReason.name}"`);
-
-      const now = new Date();
-      doc.status = 'APPROVED';
-      doc.approver = approverName;
-      doc.approvedAt = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} น.`;
-      
-      let netVal = 0;
-      doc.items.forEach(it => { if (it.approvalStatus !== 'REJECTED') netVal += (it.val || 0); });
-      doc.approvedValue = netVal;
-
-      persistAPODocuments();
-      renderAPOList();
-
-      if (GOOGLE_SCRIPT_WEBAPP_URL) {
-        try {
-          await fetch(GOOGLE_SCRIPT_WEBAPP_URL, {
-            method: 'POST', mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(doc)
-          });
-          alert(`✓ บันทึกผลการอนุมัติใบที่ ${doc.docId} โดย ${approverName} และส่งกลับ Google Sheets เรียบร้อยแล้ว!`);
-        } catch (e) {
-          alert("บันทึกในระบบเรียบร้อย (โปรดตรวจสอบ Web App URL เพื่อส่งกลับชีทอัตโนมัติ)");
-        }
-      } else {
-        alert(`✓ ยืนยันผลการอนุมัติใบที่ ${doc.docId} โดย ${approverName} เรียบร้อยแล้ว!\nยอดอนุมัติสั่งจริงสุทธิ: ${netVal.toLocaleString()} บาท`);
-      }
-    }
-
     function deleteAPODoc(docId) {
       if (!confirm(`ต้องการลบเอกสาร ${docId} ออกจากรายการใช่หรือไม่?`)) return;
       apoDocumentsList = apoDocumentsList.filter(d => d.docId !== docId);
