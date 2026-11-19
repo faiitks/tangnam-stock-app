@@ -2462,6 +2462,13 @@
       </div>`;
     }
 
+    let expandedAPODocs = new Set();
+    function toggleAPODoc(docId) {
+      if (expandedAPODocs.has(docId)) expandedAPODocs.delete(docId);
+      else expandedAPODocs.add(docId);
+      renderAPOList();
+    }
+    
     function renderAPOList() {
       const container = document.getElementById('apoListContainer');
       const countBadge = document.getElementById('apoCountBadge');
