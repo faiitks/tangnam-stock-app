@@ -2722,8 +2722,16 @@
               histHtml = `<div class="mt-1 pt-1 border-t border-dashed border-stone-300 text-[10.5px] text-stone-700">ย้อนหลัง: ${getM(1)} | ${getM(2)} ${it.unitBig}</div>`;
             }
 
+            const itemStkVal = foundProd ? (foundProd.stock_val || 0) : ((it.stkSub || 0) * (it.unitPrice || 0));
+            const itemStkValHtml = itemStkVal > 0
+              ? `<div class="font-mono text-[10px] mb-0.5 ${itemStkVal > 2000000 ? 'font-bold text-red-600' : 'font-semibold text-emerald-950'}">มูลค่า: ${itemStkVal > 2000000 ? '🚨 ' : ''}${fmtZero(itemStkVal)} บ.</div>`
+              : '';
+
             const stockFcHtml = (it.stkBig !== undefined) ? `
-              <div>คงเหลือ: <b>${it.stkBig > 0 ? `${it.stkBig.toLocaleString()}${it.unitBig}` : '0'}</b> <span class="text-[10px] text-stone-500">${it.stkSub > 0 ? `(${it.stkSub.toLocaleString()})` : ''}</span></div> ${stkWhSubLine} <div>เป้า ${apoForecastMonths} ด.: <b>${dynFcBig > 0 ? `${dynFcBig.toLocaleString()} ${it.unitBig}` : '0'}</b> <span class="text-[10px] text-stone-500">${dynFcSub > 0 ? `(${dynFcSub.toLocaleString()})` : ''}</span></div>
+              <div>คงเหลือ: <b>${it.stkBig > 0 ? `${it.stkBig.toLocaleString()} ${it.unitBig}` : '0'}</b> <span class="text-[10px] text-stone-500">${it.stkSub > 0 ? `(${it.stkSub.toLocaleString()})` : ''}</span></div>
+              ${stkWhSubLine}
+              ${itemStkValHtml}
+              <div>เป้า ${apoForecastMonths} ด.: <b>${dynFcBig > 0 ? `${dynFcBig.toLocaleString()} ${it.unitBig}` : '0'}</b> <span class="text-[10px] text-stone-500">${dynFcSub > 0 ? `(${dynFcSub.toLocaleString()})` : ''}</span></div>
               ${histHtml}
               ${stockStatusHtml}
             ` : '-';
