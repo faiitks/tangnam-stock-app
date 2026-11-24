@@ -1974,7 +1974,7 @@
         if (p.stock_pc > 0)  stkParts.push(`ปากช่อง:<b>${p.stock_pc.toLocaleString()}</b>`);
         if (p.stock_kr > 0)  stkParts.push(`โคราช:<b>${p.stock_kr.toLocaleString()}</b>`);
         if (p.stock_cyp > 0) stkParts.push(`ชัยภูมิ:<b>${p.stock_cyp.toLocaleString()}</b>`);
-        if (p.stock_cks > 0) stkParts.push(CKS: <b>${(p.stock_cks || 0).toLocaleString()}</b> (${cksCount}) 🔍);
+        if (p.stock_cks > 0) stkParts.push(`CKS(${cksBranchCount}):<b>${p.stock_cks.toLocaleString()}</b>`);
 
         const discStyle = st.code === 'DISCONTINUED'
           ? 'background:#e5e7eb; color:#374151; padding:0.5px 2px; border-radius:2px; border:1px solid #9ca3af;'
