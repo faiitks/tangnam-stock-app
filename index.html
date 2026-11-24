@@ -1327,7 +1327,7 @@
             <td class="px-1.5 py-1.5 text-right align-top bg-leaf-100/60">
            <div class="font-bold text-leaf-900 text-[11px]">${stkBig > 0 ? `${stkBig.toLocaleString()} ${p.unitBig}` : ''}</div>
            <div class="text-[9.5px] text-leaf-800">${stkSub > 0 ? `(${stkSub.toLocaleString()} ${cleanSub})` : ''}</div>
-           <div class="text-[9.5px] font-mono font-semibold text-leaf-900 mt-0.5">${fmtZero(stkVal)}</div>
+           <div class="text-[9.5px] font-mono mt-0.5 ${stkVal > 2000000 ? 'font-bold text-red-600' : 'font-semibold text-leaf-900'}">${stkVal > 2000000 ? '🚨 ' : ''}${fmtZero(stkVal)}</div>
            ${covHtml}
          </td>
 
