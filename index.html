@@ -1974,7 +1974,7 @@
         if (p.stock_pc > 0)  stkParts.push(`ปากช่อง:<b>${p.stock_pc.toLocaleString()}</b>`);
         if (p.stock_kr > 0)  stkParts.push(`โคราช:<b>${p.stock_kr.toLocaleString()}</b>`);
         if (p.stock_cyp > 0) stkParts.push(`ชัยภูมิ:<b>${p.stock_cyp.toLocaleString()}</b>`);
-        if (p.stock_cks > 0) stkParts.push(`CKS(${cksBranchCount}):<b>${p.stock_cks.toLocaleString()}</b>`);
+        if (p.stock_cks > 0) stkParts.push(CKS: <b>${(p.stock_cks || 0).toLocaleString()}</b> (${cksCount}) 🔍);
 
         const discStyle = st.code === 'DISCONTINUED'
           ? 'background:#e5e7eb; color:#374151; padding:0.5px 2px; border-radius:2px; border:1px solid #9ca3af;'
@@ -2464,10 +2464,10 @@
 
     let expandedAPODocs = new Set();
     function toggleAPODoc(docId) {
-      if (expandedAPODocs.has(docId)) expandedAPODocs.delete(docId);
-      else expandedAPODocs.add(docId);
-      renderAPOList();
-    }
+  if (expandedAPODocs.has(docId)) expandedAPODocs.delete(docId);
+  else expandedAPODocs.add(docId);
+  renderAPOList();
+}
     
     function renderAPOList() {
       const container = document.getElementById('apoListContainer');
@@ -2642,7 +2642,7 @@
             const freeSub = Math.round(freeBig * mul);
             const orderFreeHtml = `
               <div>
-                <b class="text-stone-900">${it.orderBigQty} ${it.unitBig}</b>
+                <div class="font-bold text-stone-900">${fmtZero(it.val)} บ.</div>
                 <span class="text-[10.5px] text-stone-500">(${it.subQty.toLocaleString()} ${it.unitSub})</span>
               </div>
               ${freeBig > 0 ? `
@@ -2661,7 +2661,7 @@
                 <td class="px-2.5 py-2.5 text-right text-xs align-top leading-snug">${orderFreeHtml}</td>
                 <td class="px-2.5 py-2.5 text-right text-xs align-top leading-snug border-l border-stone-200">
                   ${it.unitPrice > 0 ? `<div class="text-[10.5px] text-stone-500">@${fmtZero(it.unitPrice)}</div>` : ''}
-                  <div class="font-bold text-red-600 text-[11px] mt-0.5">🚨 ${Math.round(p.stock_val).toLocaleString()}</div>
+                  <div class="font-bold text-stone-800 ...">${Math.round(p.stock_val).toLocaleString()}</div>
                 </td>
                 <td class="px-2 py-2.5 text-center align-top border-l border-stone-200">
                   <select onchange="setAPOItemStatus('${doc.docId}', ${idx}, this.value)" class="text-xs font-bold rounded-md px-2 py-1 border ${stCode === 'REJECTED' ? 'bg-red-100 border-red-300 text-red-800' : (stCode === 'REDUCE' || stCode === 'INCREASE' ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-green-50 border-green-300 text-green-800')}">
