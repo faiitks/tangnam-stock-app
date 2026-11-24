@@ -2661,7 +2661,7 @@
                 <td class="px-2.5 py-2.5 text-right text-xs align-top leading-snug">${orderFreeHtml}</td>
                 <td class="px-2.5 py-2.5 text-right text-xs align-top leading-snug border-l border-stone-200">
                   ${it.unitPrice > 0 ? `<div class="text-[10.5px] text-stone-500">@${fmtZero(it.unitPrice)}</div>` : ''}
-                  <div class="font-bold text-stone-900">${fmtZero(it.val)} บ.</div>
+                  <div class="font-bold text-red-600 text-[11px] mt-0.5">🚨 ${Math.round(p.stock_val).toLocaleString()}</div>
                 </td>
                 <td class="px-2 py-2.5 text-center align-top border-l border-stone-200">
                   <select onchange="setAPOItemStatus('${doc.docId}', ${idx}, this.value)" class="text-xs font-bold rounded-md px-2 py-1 border ${stCode === 'REJECTED' ? 'bg-red-100 border-red-300 text-red-800' : (stCode === 'REDUCE' || stCode === 'INCREASE' ? 'bg-amber-100 border-amber-300 text-amber-800' : 'bg-green-50 border-green-300 text-green-800')}">
@@ -2748,8 +2748,8 @@
                       <div class="bg-orange-50 border border-orange-300 rounded-lg px-3 py-1.5">
                         <span class="text-orange-900">มูลค่าขายปี 69 (ทั้งหมด):</span> <b class="text-stone-900">${sumSupSales69Val > 0 ? Math.round(sumSupSales69Val).toLocaleString() : '0'}</b> บ. ${supYoyBadge}
                       </div>
-                      <div class="bg-red-50 border border-red-300 rounded-lg px-3 py-1.5">
-                        <span class="text-red-900">🚨 มูลค่าคงเหลือ (ทั้งหมด):</span> <b class="text-red-600">${sumSupStockVal > 0 ? Math.round(sumSupStockVal).toLocaleString() : '0'} บ.</b>
+                      <div class="bg-emerald-50 border border-emerald-300 rounded-lg px-3 py-1.5">
+                        <span class="text-emerald-900">มูลค่าคงเหลือ (ทั้งหมด):</span> <b class="text-stone-900">${sumSupStockVal > 0 ? Math.round(sumSupStockVal).toLocaleString() : '0'}</b> บ.
                       </div>
                     </div>
                   </div>
@@ -3095,8 +3095,8 @@
                 <div style="background:#FFEDD5; border:1px solid #F97316; border-radius:4px; padding:2px 6px; flex:1;">
                   <span style="color:#7c2d12;">มูลค่าขายปี 69 (ทั้งหมด):</span> <b>${sumDocSales69Val > 0 ? Math.round(sumDocSales69Val).toLocaleString() : '0'}</b> บ. ${docYoyBadge}
                 </div>
-                <div style="background:#FEF2F2; border:1px solid #EF4444; border-radius:4px; padding:2px 6px; flex:1;">
-                  <span style="color:#991b1b;">🚨 มูลค่าคงเหลือ (ทั้งหมด):</span> <b style="color:#dc2626;">${sumDocStockVal > 0 ? Math.round(sumDocStockVal).toLocaleString() : '0'} บ.</b>
+                <div style="background:#DCFCE7; border:1px solid #22C55E; border-radius:4px; padding:2px 6px; flex:1;">
+                  <span style="color:#14532d;">มูลค่าคงเหลือ (ทั้งหมด):</span> <b>${sumDocStockVal > 0 ? Math.round(sumDocStockVal).toLocaleString() : '0'}</b> บ.
                 </div>
               </div>
             </div>
