@@ -2090,7 +2090,7 @@
       win.document.close();
     }
     
-// 2. ส่งออก PDF สำหรับเซลล์ (กระดาษ A4 แนวตั้ง + YOY ทั้งปี + คงเหลือแยกคลังสีเขียวอ่อน)
+// 2. ส่งออก PDF สำหรับเซลล์ (กระดาษ A4 แนวตั้ง + YOY ทั้งปี + คงเหลือแยกคลังสีเขียวอ่อน + ยุบรวมสถานะ)
     function exportPDF_Sales() {
       if (currentFiltered.length === 0) return alert("ไม่มีข้อมูลสำหรับส่งออก PDF");
       const supFilter = document.getElementById('supplierFilter').value;
@@ -2129,7 +2129,7 @@
 
         let stockCompactHtml = [];
         if (tnWarehouses.length > 0) {
-          stockCompactHtml.push(`<div style="margin-bottom:1.5px;">${tnWarehouses.join(' | ')}</div>`);
+          stockCompactHtml.push(`<div style="margin-bottom:2px;">${tnWarehouses.join(' | ')}</div>`);
         }
 
         if (p.cksBranches && p.cksBranches.length > 0) {
@@ -2142,55 +2142,72 @@
         const stkSub = p.stock_pc + p.stock_kr + p.stock_cyp + p.stock_cks;
         const stkBig = Math.ceil(stkSub / mul);
         const cov = getSeasonalStockCoverage(p, stkSub, 'ALL');
-     const covPdfHtml = cov ? `
-       <div style="margin-top:2px; padding-top:2px; border-top:1px solid #86efac; line-height:1.15;">
-         <div style="font-size:9px; color:#111;">${cov.monthsText}</div>
-         <div style="font-size:8px; color:#444;">${cov.dateText}</div>
-       </div>
-     ` : '';
 
+        // แถบสถานะ + ไม่ขาย 3 ด. แบบกะทัดรัด (รวมอยู่ในช่องรวมคงเหลือ)
         const discStyle = st.code === 'DISCONTINUED'
-          ? 'background:#e5e7eb; color:#374151; padding:1px 3px; border-radius:3px; border:1px solid #9ca3af;'
+          ? 'background:#e5e7eb; color:#374151; padding:0.5px 3px; border-radius:2px; border:1px solid #9ca3af;'
           : '';
 
+        const statusBadgeHtml = `
+          <div style="margin-top:2px; padding-top:2px; border-top:1px dashed #6ee7b7; line-height:1.15; text-align:right;">
+            <span style="font-size:8.5px; font-weight:bold; ${discStyle}">${st.label}</span>
+            ${noSales3M.isNoSales3M ? `<div style="margin-top:1.5px; display:inline-block; background:#fee2e2; color:#991b1b; padding:0.5px 3px; border-radius:2px; font-size:8px; font-weight:bold;">⚠️ ไม่ขาย 3 ด.</div>` : ''}
+          </div>
+        `;
+
+        const covPdfHtml = cov ? `
+          <div style="margin-top:2px; padding-top:2px; border-top:1px solid #86efac; line-height:1.15;">
+            <div style="font-size:8.5px; font-weight:600; color:#111;">${cov.monthsText}</div>
+            <div style="font-size:7.8px; color:#444;">${cov.dateText}</div>
+          </div>
+        ` : '';
+
+        // มูลค่าคงเหลือ (ถ้าเกิน 2 ล้าน ใส่ 🚨 และเป็นสีแดงตัวหนา)
+        const stkValNum = p.stock_val || 0;
+        const stkValText = fmtZero(stkValNum);
+        const stkValHtml = stkValText ? `
+          <div style="font-weight:bold; font-size:9px; ${stkValNum > 2000000 ? 'color:#dc2626;' : 'color:#111;'}">
+            ${stkValNum > 2000000 ? '🚨 ' : ''}${stkValText} บ.
+          </div>
+        ` : '';
+
+        // สีจางเฉพาะเลิกขายที่สต็อคเป็น 0
+        const isFadeRow = (st.code === 'DISCONTINUED' && stkSub <= 0);
+
         rowsHtml += `
-          <tr style="${st.code === 'DISCONTINUED' ? 'background:#f9fafb; color:#4b5563;' : ''}">
-            <td style="text-align:center; font-size:9px;">${idx + 1}</td>
+          <tr style="${isFadeRow ? 'background:#f9fafb; color:#6b7280;' : ''}">
+            <td style="text-align:center; font-size:8.5px;">${idx + 1}</td>
             <td>
-              <div style="font-weight:bold; font-size:10px;">${p.name}</div>
-              <div style="font-size:9px; color:#444;">
+              <div style="font-weight:bold; font-size:9.8px; line-height:1.2;">${p.name}</div>
+              <div style="font-size:8.5px; color:#444; line-height:1.2;">
                 ${p.category ? `[${p.category}] ` : ''}${p.genericName ? `${p.genericName} | ` : ''}(1*${mul} ${p.unitBig}/${cleanSub})
               </div>
-              <div style="font-size:8.5px; color:#333;">ย้อนหลัง: ${getNext2MonthsHistoryText(p)}</div>
+              <div style="font-size:8.2px; color:#333; margin-top:1px;">ย้อนหลัง: ${getNext2MonthsHistoryText(p)}</div>
             </td>
-            <td style="font-size:9.5px; line-height:1.25; background:#FEF3C7;">
+            <td style="font-size:9px; line-height:1.2; background:#FEF3C7;">
               ${s68_tn > 0 ? `TN: <b>${s68_tn.toLocaleString()}</b><br>` : ''}
               ${s68_cks > 0 ? `CKS: <b>${s68_cks.toLocaleString()}</b><br>` : ''}
               ${s68_tot > 0 ? `<span style="color:#555;">รวม: ${s68_tot.toLocaleString()}</span>` : ''}
             </td>
-            <td style="font-size:9.5px; line-height:1.25; background:#FFEDD5;">
+            <td style="font-size:9px; line-height:1.2; background:#FFEDD5;">
               ${s69_tn > 0 ? `TN: <b>${s69_tn.toLocaleString()}</b><br>` : ''}
               ${s69_cks > 0 ? `CKS: <b>${s69_cks.toLocaleString()}</b><br>` : ''}
               ${s69_tot > 0 ? `<span style="color:#555;">รวม: ${s69_tot.toLocaleString()}</span>` : ''}
             </td>
-            <td style="text-align:right; font-size:9.5px; line-height:1.25;">
+            <td style="text-align:right; font-size:9px; line-height:1.2;">
               ${(s68_tot > 0 || s69_tot > 0) ? `
-                <b style="color:${yoyFullPct >= 0 ? '#166534' : '#dc2626'}; font-size:10px;">${yoyFullPct >= 0 ? '▲ +' : '▼ '}${yoyFullPct}%</b><br>
-                <span style="font-size:8.5px; color:#444;">${yoyFullDiff !== 0 ? `${yoyFullDiff > 0 ? '+' : ''}${yoyFullDiff.toLocaleString()} ${cleanSub}` : ''}</span>
+                <b style="color:${yoyFullPct >= 0 ? '#166534' : '#dc2626'}; font-size:9.5px;">${yoyFullPct >= 0 ? '▲ +' : '▼ '}${yoyFullPct}%</b><br>
+                <span style="font-size:8.2px; color:#444;">${yoyFullDiff !== 0 ? `${yoyFullDiff > 0 ? '+' : ''}${yoyFullDiff.toLocaleString()} ${cleanSub}` : ''}</span>
               ` : ''}
             </td>
-            <td style="font-size:9.5px; line-height:1.25; background:#DCFCE7;">
-              ${stockCompactHtml.length > 0 ? stockCompactHtml.join('') : ''}
+            <td style="font-size:9px; line-height:1.22; background:#DCFCE7;">
+              ${stockCompactHtml.length > 0 ? stockCompactHtml.join('') : '-'}
             </td>
-            <td style="text-align:right; font-size:9.5px; line-height:1.25; background:#DCFCE7;">
-              ${stkBig > 0 ? `<b style="font-size:10px;">${stkBig.toLocaleString()} ${p.unitBig}</b><br>` : ''}
-              ${stkSub > 0 ? `(${stkSub.toLocaleString()} ${cleanSub})<br>` : ''}
-              <b>${fmtZero(p.stock_val) ? `${fmtZero(p.stock_val)} บ.` : ''}</b>
+            <td style="text-align:right; font-size:9px; line-height:1.2; background:#DCFCE7;">
+              ${stkBig > 0 ? `<b style="font-size:9.8px;">${stkBig.toLocaleString()} ${p.unitBig}</b> <span style="font-size:8.2px; color:#444;">(${stkSub.toLocaleString()} ${cleanSub})</span>` : (stkSub > 0 ? `<b>${stkSub.toLocaleString()} ${cleanSub}</b>` : '0')}
+              ${stkValHtml}
               ${covPdfHtml}
-            </td>
-            <td style="text-align:center; font-size:8.5px; line-height:1.25;">
-              <div style="font-weight:bold; ${discStyle}">${st.label}</div>
-              ${noSales3M.isNoSales3M ? `<div style="margin-top:2px; background:#fee2e2; color:#991b1b; padding:1px 2px; border-radius:3px; font-weight:bold;">⚠️ ไม่ขาย 3 ด.</div>` : ''}
+              ${statusBadgeHtml}
             </td>
           </tr>
         `;
@@ -2203,34 +2220,33 @@
         <html><head><title>รายงานสต็อคสำหรับฝ่ายขาย (เซลล์)</title>
         <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
-          @page { size: A4 portrait; margin: 7mm 7mm; }
+          @page { size: A4 portrait; margin: 5mm 6mm; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          body { font-family: 'Sarabun', sans-serif; font-size: 10px; color: #111; margin: 0; }
+          body { font-family: 'Sarabun', sans-serif; font-size: 9.5px; color: #111; margin: 0; }
           .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #386641; padding-bottom: 3px; }
           table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-          th, td { border: 1px solid #bbb; padding: 2.5px 4px; vertical-align: top; word-wrap: break-word; }
-          th { background: #D4E7C5 !important; color: #000000 !important; font-size: 9.5px; text-align: center; font-weight: 700; }
+          th, td { border: 1px solid #bbb; padding: 2px 3.5px; vertical-align: top; word-wrap: break-word; }
+          th { background: #D4E7C5 !important; color: #000000 !important; font-size: 9px; text-align: center; font-weight: 700; }
           tr { page-break-inside: avoid; }
         </style></head><body>
           <div class="header">
             <div>
-              <div style="font-size:14px; font-weight:bold; color:#386641;">รายงานสต็อคสินค้าคงเหลือแยกคลัง & สาขา (สำหรับฝ่ายขาย)</div>
-              <div style="font-size:10.5px; margin-top:2px;">บริษัทคู่ค้า: <b>${supLabel}</b> | ข้อมูลยอดขาย: <b>${salesPeriodStr}</b> | สต็อค ณ วันที่: <b>${stockDateStr}</b></div>
+              <div style="font-size:13.5px; font-weight:bold; color:#386641;">รายงานสต็อคสินค้าคงเหลือแยกคลัง & สาขา (สำหรับฝ่ายขาย)</div>
+              <div style="font-size:10px; margin-top:1.5px;">บริษัทคู่ค้า: <b>${supLabel}</b> | ข้อมูลยอดขาย: <b>${salesPeriodStr}</b> | สต็อค ณ วันที่: <b>${stockDateStr}</b></div>
             </div>
-            <div style="text-align:right; font-size:10px;">วันที่พิมพ์: <b>${printTime}</b><br>จำนวนทั้งหมด: <b>${currentFiltered.length}</b> รายการ</div>
+            <div style="text-align:right; font-size:9.5px;">วันที่พิมพ์: <b>${printTime}</b><br>จำนวนทั้งหมด: <b>${currentFiltered.length}</b> รายการ</div>
           </div>
           ${headerSummaryHtml}
           <table>
             <thead>
               <tr>
-                <th style="width:3.5%;">#</th>
-                <th style="width:21.5%;">รายการสินค้า / ประเภท / ชื่อสามัญ</th>
-                <th style="width:8.5%;">ขายปี 68<br>(TN / CKS)</th>
-                <th style="width:8.5%;">ขายปี 69<br>(TN / CKS)</th>
-                <th style="width:8.5%;">YOY ทั้งปี<br>(68 vs 69)</th>
-                <th style="width:31.5%;">คงเหลือแยกคลัง & สาขา CKS</th>
-                <th style="width:10%;">รวมคงเหลือ<br>& มูลค่า</th>
-                <th style="width:8%;">สถานะ /<br>ไม่ขาย 3 ด.</th>
+                <th style="width:3%;">#</th>
+                <th style="width:22%;">รายการสินค้า / ประเภท / ชื่อสามัญ</th>
+                <th style="width:8%;">ขายปี 68<br>(TN / CKS)</th>
+                <th style="width:8%;">ขายปี 69<br>(TN / CKS)</th>
+                <th style="width:8%;">YOY ทั้งปี<br>(68 vs 69)</th>
+                <th style="width:38%;">คงเหลือแยกคลัง & สาขา CKS</th>
+                <th style="width:13%;">รวมคงเหลือ /<br>มูลค่า & สถานะ</th>
               </tr>
             </thead>
             <tbody>${rowsHtml}</tbody>
@@ -2239,28 +2255,6 @@
         </body></html>
       `);
       win.document.close();
-    }
-
-    function onPOInput(id, field, val) {
-      const p = rawProducts.find(x => x.id === id);
-      if (!p) return;
-      if (field === 'order') p.orderBigQty = parseFloat(val) || 0;
-      else if (field === 'free') p.freeBigQty = parseFloat(val) || 0;
-      else if (field === 'price') p.unitPriceInput = parseFloat(val) || 0;
-      else if (field === 'notes') p.notes = val;
-
-      const mul = p.unitMultiplier || 1;
-      const subQty = Math.round((p.orderBigQty || 0) * mul);
-      const freeSubQty = Math.round((p.freeBigQty || 0) * mul);
-      p.orderTotalVal = subQty * (p.unitPriceInput || 0);
-
-      const subEl = document.getElementById(`subTotal_${id}`);
-      if (subEl) subEl.innerText = formatSubUnitSummary(subQty, freeSubQty, getCleanUnitName(p.unitSub));
-
-      const valEl = document.getElementById(`totalVal_${id}`);
-      if (valEl) valEl.innerText = p.orderTotalVal > 0 ? `${p.orderTotalVal.toLocaleString()} บ.` : '';
-
-      updateKPICards();
     }
 
     // ================= 3. ระบบสร้างใบ APO (เพิ่มช่องเครดิต & หมายเหตุเอกสาร) =================
