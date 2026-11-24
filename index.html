@@ -2829,11 +2829,11 @@
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                       <label class="block text-[11px] font-bold text-stone-600 mb-1">เครดิต (Credit Term):</label>
-                      <input type="text" value="${(doc.creditTerm \vert{}\vert{} '').replace(/"/g, '&quot;')}" onchange="updateAPODocField('${doc.docId}', 'creditTerm', this.value)" class="w-full text-xs border border-stone-300 rounded-lg px-2.5 py-1.5 bg-white">
+                      <input type="text" value="${(doc.creditTerm || '').replace(/"/g, '&quot;')}" onchange="updateAPODocField('${doc.docId}', 'creditTerm', this.value)" class="w-full text-xs border border-stone-300 rounded-lg px-2.5 py-1.5 bg-white">
                     </div>
                     <div>
                       <label class="block text-[11px] font-bold text-stone-600 mb-1">หมายเหตุเอกสาร (ทั้งฉบับ):</label>
-                      <input type="text" value="${(doc.docNote \vert{}\vert{} '').replace(/"/g, '&quot;')}" onchange="updateAPODocField('${doc.docId}', 'docNote', this.value)" placeholder="ระบุหมายเหตุเอกสาร..." class="w-full text-xs border border-stone-300 rounded-lg px-2.5 py-1.5 bg-white">
+                      <input type="text" value="${(doc.docNote || '').replace(/"/g, '&quot;')}" onchange="updateAPODocField('${doc.docId}', 'docNote', this.value)" placeholder="ระบุหมายเหตุเอกสาร..." class="w-full text-xs border border-stone-300 rounded-lg px-2.5 py-1.5 bg-white">
                     </div>
                   </div>
 
