@@ -2220,7 +2220,16 @@
         <html><head><title>รายงานสต็อคสำหรับฝ่ายขาย (เซลล์)</title>
         <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
         <style>
-          @page { size: A4 portrait; margin: 5mm 6mm; }
+          @page {
+  size: A4 portrait;
+  margin: 5mm 6mm 9mm 6mm; /* เผื่อขอบล่าง 9mm ให้เลขหน้าไม่ทับเส้นตาราง */
+  @bottom-right {
+    content: "หน้า " counter(page) " / " counter(pages);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 9px;
+    color: #444;
+  }
+}
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           body { font-family: 'Sarabun', sans-serif; font-size: 9.5px; color: #111; margin: 0; }
           .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #386641; padding-bottom: 3px; }
