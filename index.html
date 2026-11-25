@@ -2265,6 +2265,28 @@
       `);
       win.document.close();
     }
+    
+    function onPOInput(id, field, val) {
+      const p = rawProducts.find(x => x.id === id);
+      if (!p) return;
+      if (field === 'order') p.orderBigQty = parseFloat(val) || 0;
+      else if (field === 'free') p.freeBigQty = parseFloat(val) || 0;
+      else if (field === 'price') p.unitPriceInput = parseFloat(val) || 0;
+      else if (field === 'notes') p.notes = val;
+
+      const mul = p.unitMultiplier || 1;
+      const subQty = Math.round((p.orderBigQty || 0) * mul);
+      const freeSubQty = Math.round((p.freeBigQty || 0) * mul);
+      p.orderTotalVal = subQty * (p.unitPriceInput || 0);
+
+      const subEl = document.getElementById(`subTotal_${id}`);
+      if (subEl) subEl.innerText = formatSubUnitSummary(subQty, freeSubQty, getCleanUnitName(p.unitSub));
+
+      const valEl = document.getElementById(`totalVal_${id}`);
+      if (valEl) valEl.innerText = p.orderTotalVal > 0 ? `${p.orderTotalVal.toLocaleString()} บ.` : '';
+
+      updateKPICards();
+    }
 
     // ================= 3. ระบบสร้างใบ APO (เพิ่มช่องเครดิต & หมายเหตุเอกสาร) =================
     function openCreateAPOModal() {
