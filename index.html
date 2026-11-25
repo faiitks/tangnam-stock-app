@@ -2387,18 +2387,44 @@
     }
 
     // ================= 4. หน้ารวมใบ APO, การพิจารณาอนุมัติ และพิมพ์ใบ APO (PDF) =================
-    function loadAPODocumentsFromStorage() {
+    // ซิงค์ข้อมูล APO จาก Google Sheets และเก็บสำรองใน localStorage
+    async function loadAPODocumentsFromStorage() {
       try {
         const raw = localStorage.getItem('TN_APO_DOCUMENTS_V2');
         if (raw) apoDocumentsList = JSON.parse(raw);
       } catch (e) {}
       updateSavedAPOCount();
+
+      try {
+        // เปลี่ยน GAS_URL เป็นชื่อตัวแปร URL ของ Google Apps Script ในไฟล์ของคุณ
+        const res = await fetch(`${GAS_URL}?action=getAPO`);
+        const json = await res.json();
+        if (json.status === 'ok' && Array.isArray(json.data)) {
+          apoDocumentsList = json.data;
+          localStorage.setItem('TN_APO_DOCUMENTS_V2', JSON.stringify(apoDocumentsList));
+          updateSavedAPOCount();
+          if (!document.getElementById('apoListModal').classList.contains('hidden')) {
+            renderAPOList();
+          }
+        }
+      } catch (err) {
+        console.warn('ซิงค์ APO จากคลาวด์ไม่สำเร็จ ใช้ข้อมูลในเครื่องชั่วคราว:', err);
+      }
     }
 
     function persistAPODocuments() {
       localStorage.setItem('TN_APO_DOCUMENTS_V2', JSON.stringify(apoDocumentsList));
       updateSavedAPOCount();
+
+      // ส่งขึ้น Google Sheets อัตโนมัติทุกครั้งที่มีการสร้าง แก้ไข หรืออนุมัติ
+      fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'saveAPO', data: apoDocumentsList })
+      }).catch(err => console.error('บันทึก APO ขึ้นคลาวด์ผิดพลาด:', err));
     }
+
+    // ผูกชื่อฟังก์ชัน saveAPODocuments ให้เรียก persistAPODocuments ตรงกันทั้งหมด
+    const saveAPODocuments = persistAPODocuments;
 
     function updateSavedAPOCount() {
       const pendingCount = apoDocumentsList.filter(d => d.status === 'PENDING').length;
